@@ -3,13 +3,43 @@ from __future__ import annotations
 import asyncio
 import json
 from dataclasses import dataclass
+from typing import Any
 
-import websockets
+
+BINANCE_WS_BASE = "wss://stream.binance.com:9443/stream"
+BINANCE_REST_BASE = "https://api.binance.com"
+DEFAULT_DEPTH_LEVEL = 1000
+
+
+def build_public_streams(symbols: list[str], use_agg_trade: bool = True) -> list[str]:
+    streams: list[str] = []
+    trade_stream = "aggTrade" if use_agg_trade else "trade"
+    kline_intervals = ["1m", "15m", "1h", "4h"]
+
+    for symbol in symbols:
+        symbol_l = symbol.lower()
+        streams.append(f"{symbol_l}@{trade_stream}")
+        streams.append(f"{symbol_l}@bookTicker")
+        streams.append(f"{symbol_l}@depth@100ms")
+        for interval in kline_intervals:
+            streams.append(f"{symbol_l}@kline_{interval}")
+    return streams
+
+
+def fetch_depth_snapshot(symbol: str, limit: int = DEFAULT_DEPTH_LEVEL, rest_base: str = BINANCE_REST_BASE) -> dict[str, Any]:
+    url = f"{rest_base}/api/v3/depth"
+    import requests
+
+    response = requests.get(url, params={"symbol": symbol.upper(), "limit": limit}, timeout=10)
+    response.raise_for_status()
+    return response.json()
+
 
 @dataclass(slots=True)
 class BinancePublicCollector:
-    ws_base: str
     streams: list[str]
+    ws_base: str = BINANCE_WS_BASE
+    reconnect_sleep_seconds: float = 3.0
 
     @property
     def url(self) -> str:
@@ -19,8 +49,11 @@ class BinancePublicCollector:
     async def stream_forever(self):
         while True:
             try:
+                import websockets
+
                 async with websockets.connect(self.url, ping_interval=20, ping_timeout=20) as ws:
                     async for raw in ws:
-                        yield json.loads(raw)
+                        envelope = json.loads(raw)
+                        yield envelope
             except Exception:
-                await asyncio.sleep(3)
+                await asyncio.sleep(self.reconnect_sleep_seconds)

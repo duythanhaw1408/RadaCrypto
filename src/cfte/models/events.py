@@ -6,6 +6,7 @@ from typing import Literal
 TakerSide = Literal["BUY", "SELL"]
 Stage = Literal["DETECTED", "WATCHLIST", "CONFIRMED", "ACTIONABLE", "INVALIDATED", "RESOLVED"]
 
+
 @dataclass(slots=True)
 class NormalizedTrade:
     event_id: str
@@ -17,6 +18,7 @@ class NormalizedTrade:
     taker_side: TakerSide
     venue_ts: int
 
+
 @dataclass(slots=True)
 class NormalizedBookTop:
     event_id: str
@@ -27,6 +29,37 @@ class NormalizedBookTop:
     ask_px: float
     ask_qty: float
     venue_ts: int
+
+
+@dataclass(slots=True)
+class NormalizedDepthDiff:
+    event_id: str
+    venue: str
+    instrument_key: str
+    first_update_id: int
+    final_update_id: int
+    bid_updates: list[tuple[float, float]]
+    ask_updates: list[tuple[float, float]]
+    venue_ts: int
+
+
+@dataclass(slots=True)
+class NormalizedKline:
+    event_id: str
+    venue: str
+    instrument_key: str
+    interval: str
+    open_px: float
+    high_px: float
+    low_px: float
+    close_px: float
+    base_volume: float
+    quote_volume: float
+    open_ts: int
+    close_ts: int
+    is_closed: bool
+    venue_ts: int
+
 
 @dataclass(slots=True)
 class TapeSnapshot:
@@ -46,6 +79,7 @@ class TapeSnapshot:
     last_trade_px: float
     trade_count: int
     metadata: dict = field(default_factory=dict)
+
 
 @dataclass(slots=True)
 class ThesisSignal:
