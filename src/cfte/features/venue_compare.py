@@ -39,10 +39,11 @@ def compare_trade_flows(trades: list[NormalizedTrade]) -> VenueComparisonResult:
     flows: list[VenueFlow] = []
     for venue, venue_trades in buckets.items():
         total_quote = sum(t.quote_qty for t in venue_trades)
-        if total_quote <= 0:
+        total_qty = sum(t.qty for t in venue_trades)
+        if total_quote <= 0 or total_qty <= 0:
             vwap = 0.0
         else:
-            vwap = sum(t.price * t.quote_qty for t in venue_trades) / total_quote
+            vwap = total_quote / total_qty
         flows.append(VenueFlow(venue=venue, trade_count=len(venue_trades), total_quote=total_quote, vwap=vwap))
 
     if len(flows) < 2:

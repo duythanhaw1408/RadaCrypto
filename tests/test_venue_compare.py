@@ -46,3 +46,34 @@ def test_render_venue_comparison_vi_is_vietnamese_user_facing():
 def test_compare_trade_flows_requires_two_venues():
     with pytest.raises(ValueError):
         compare_trade_flows([_trade("binance", 1000)])
+
+
+def test_compare_trade_flows_computes_vwap_from_qty_not_quote_weighted_price():
+    trades = [
+        NormalizedTrade(
+            event_id="binance-1",
+            venue="binance",
+            instrument_key="BINANCE:BTCUSDT:PERP",
+            price=100.0,
+            qty=1.0,
+            quote_qty=100.0,
+            taker_side="BUY",
+            venue_ts=1700000001000,
+        ),
+        NormalizedTrade(
+            event_id="binance-2",
+            venue="binance",
+            instrument_key="BINANCE:BTCUSDT:PERP",
+            price=200.0,
+            qty=1.0,
+            quote_qty=200.0,
+            taker_side="BUY",
+            venue_ts=1700000001100,
+        ),
+        _trade("bybit", 5000, price=150.0),
+    ]
+
+    result = compare_trade_flows(trades)
+    binance_flow = next(flow for flow in result.flows if flow.venue == "binance")
+
+    assert binance_flow.vwap == pytest.approx(150.0)
