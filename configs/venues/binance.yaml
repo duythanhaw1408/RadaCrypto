@@ -1,0 +1,10 @@
+venue: binance
+ws_base: wss://stream.binance.com:9443/stream
+streams:
+  - btcusdt@aggTrade
+  - btcusdt@bookTicker
+  - btcusdt@depth@100ms
+  - btcusdt@kline_1m
+  - btcusdt@kline_15m
+  - btcusdt@kline_1h
+  - btcusdt@kline_4h

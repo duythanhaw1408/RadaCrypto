@@ -1,0 +1,38 @@
+profile: swing_perp
+
+universe:
+  exchange: binance
+  quote: USDT
+  top_n: 120
+  exclude_listing_younger_than_days: 21
+  min_quote_volume_usd: 5000000
+
+scan:
+  primary_tf: 1h
+  confirm_tf: 15m
+  context_tf: 4h
+  max_candidates: 24
+  top_enrich: 10
+
+thresholds:
+  watch: 62
+  confirmed: 72
+  actionable: 78
+  min_confidence: 0.62
+
+setups:
+  stealth_accumulation: true
+  breakout_ignition: true
+  distribution: true
+  failed_breakout: true
+
+risk:
+  max_alerts_per_run: 4
+  cooldown_hours: 4
+  skip_if_spread_wide: true
+  skip_if_liquidity_low: true
+
+ai:
+  enabled: false
+  top_k: 5
+  mode: explainer_only

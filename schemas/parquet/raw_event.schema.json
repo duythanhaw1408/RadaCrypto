@@ -1,0 +1,17 @@
+{
+  "name": "raw_event",
+  "fields": [
+    {"name": "event_id", "type": "string"},
+    {"name": "source", "type": "string"},
+    {"name": "stream_type", "type": "string"},
+    {"name": "venue", "type": "string"},
+    {"name": "account_id", "type": ["null", "string"]},
+    {"name": "instrument_key", "type": "string"},
+    {"name": "seq_id", "type": ["null", "long"]},
+    {"name": "venue_ts", "type": "long"},
+    {"name": "recv_ts", "type": "long"},
+    {"name": "normalize_ts", "type": "long"},
+    {"name": "payload_json", "type": "string"},
+    {"name": "checksum", "type": ["null", "string"]}
+  ]
+}

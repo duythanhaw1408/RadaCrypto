@@ -1,0 +1,11 @@
+tier_a:
+  - BTCUSDT
+  - ETHUSDT
+tier_b:
+  - SOLUSDT
+  - ARBUSDT
+  - DOGEUSDT
+tier_c:
+  - JUP
+  - WIF
+  - PEPE

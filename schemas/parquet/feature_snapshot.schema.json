@@ -1,0 +1,15 @@
+{
+  "name": "feature_snapshot",
+  "fields": [
+    {"name": "instrument_key", "type": "string"},
+    {"name": "window_start_ts", "type": "long"},
+    {"name": "window_end_ts", "type": "long"},
+    {"name": "spread_bps", "type": "double"},
+    {"name": "microprice", "type": "double"},
+    {"name": "imbalance_l1", "type": "double"},
+    {"name": "delta_quote", "type": "double"},
+    {"name": "cvd", "type": "double"},
+    {"name": "trade_burst", "type": "double"},
+    {"name": "absorption_proxy", "type": "double"}
+  ]
+}
