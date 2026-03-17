@@ -5,6 +5,8 @@ from typing import Literal
 
 TakerSide = Literal["BUY", "SELL"]
 Stage = Literal["DETECTED", "WATCHLIST", "CONFIRMED", "ACTIONABLE", "INVALIDATED", "RESOLVED"]
+Direction = Literal["LONG_BIAS", "SHORT_BIAS"]
+Setup = Literal["stealth_accumulation", "distribution"]
 
 
 @dataclass(slots=True)
@@ -85,8 +87,8 @@ class TapeSnapshot:
 class ThesisSignal:
     thesis_id: str
     instrument_key: str
-    setup: str
-    direction: str
+    setup: Setup
+    direction: Direction
     stage: Stage
     score: float
     confidence: float
