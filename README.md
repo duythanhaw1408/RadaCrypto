@@ -45,3 +45,10 @@ Binance-centric vertical slice:
 ## Notes
 This is a starter scaffold, not a production terminal.
 Keep the architecture local-first and replay-first.
+
+
+## Replay research workflow (Phase 1C)
+- Dữ liệu replay mẫu: `fixtures/replay/btcusdt_normalized.jsonl`
+- Chạy replay deterministic:
+  `python -m cfte.cli.main replay-research --events fixtures/replay/btcusdt_normalized.jsonl --summary-out data/replay/summary_btcusdt.json`
+- Kết quả tóm tắt được lưu JSON để phục vụ phân tích lặp lại.

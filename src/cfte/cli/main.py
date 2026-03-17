@@ -98,6 +98,18 @@ async def run_binance_public_ingest(symbol: str, out_dir: Path, max_events: int,
     return 0
 
 
+def run_replay_research(events_path: Path, summary_out: Path) -> int:
+    from cfte.replay.adapters import load_replay_events
+    from cfte.replay.runner import persist_replay_summary, render_replay_summary_vi, run_replay
+
+    events = load_replay_events(events_path)
+    result = run_replay(events)
+    persist_replay_summary(result, summary_out)
+    print(render_replay_summary_vi(result))
+    print(f"Đã lưu tóm tắt replay tại: {summary_out}")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="cfte")
     sub = parser.add_subparsers(dest="cmd")
@@ -108,6 +120,10 @@ def main() -> int:
     ingest.add_argument("--out", default="data/raw")
     ingest.add_argument("--max-events", type=int, default=25)
     ingest.add_argument("--use-trade", action="store_true", help="Dùng stream trade thay vì aggTrade")
+
+    replay = sub.add_parser("replay-research")
+    replay.add_argument("--events", default="fixtures/replay/btcusdt_normalized.jsonl")
+    replay.add_argument("--summary-out", default="data/replay/summary_btcusdt.json")
 
     args = parser.parse_args()
 
@@ -122,6 +138,8 @@ def main() -> int:
                 use_agg_trade=not args.use_trade,
             )
         )
+    if args.cmd == "replay-research":
+        return run_replay_research(events_path=Path(args.events), summary_out=Path(args.summary_out))
 
     parser.print_help()
     return 0
