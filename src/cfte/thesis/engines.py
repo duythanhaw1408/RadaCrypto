@@ -5,7 +5,9 @@ import hashlib
 from cfte.models.events import Direction, Setup, Stage, TapeSnapshot, ThesisSignal
 
 ACCUMULATION_SETUP: Setup = "stealth_accumulation"
+BREAKOUT_IGNITION_SETUP: Setup = "breakout_ignition"
 DISTRIBUTION_SETUP: Setup = "distribution"
+FAILED_BREAKOUT_SETUP: Setup = "failed_breakout"
 
 LONG_BIAS: Direction = "LONG_BIAS"
 SHORT_BIAS: Direction = "SHORT_BIAS"
@@ -49,6 +51,10 @@ def build_thesis_id(
     return _thesis_id(symbol, venue, setup, direction, timeframe, regime_bucket)
 
 
+def _base_confidence(why_now_count: int) -> float:
+    return round(0.55 + min(0.4, why_now_count * 0.07), 2)
+
+
 def score_stealth_accumulation(snapshot: TapeSnapshot) -> tuple[float, float, list[str], list[str]]:
     support = 0.0
     conflicts: list[str] = []
@@ -87,8 +93,49 @@ def score_stealth_accumulation(snapshot: TapeSnapshot) -> tuple[float, float, li
         conflicts.append("Giá khớp trượt dưới microprice")
 
     score = round(100.0 * _clip01(support), 2)
-    confidence = round(0.55 + min(0.4, len(why_now) * 0.07), 2)
-    return score, confidence, why_now, conflicts
+    return score, _base_confidence(len(why_now)), why_now, conflicts
+
+
+def score_breakout_ignition(snapshot: TapeSnapshot) -> tuple[float, float, list[str], list[str]]:
+    support = 0.0
+    conflicts: list[str] = []
+    why_now: list[str] = []
+
+    if snapshot.trade_burst >= 2.8:
+        support += 0.26
+        why_now.append(f"Xung lực giao dịch tăng vọt: {snapshot.trade_burst:.2f}/s")
+    else:
+        conflicts.append("Xung lực chưa đủ mạnh cho breakout")
+
+    if snapshot.delta_quote > 0:
+        support += 0.20
+        why_now.append(f"Dòng tiền chủ động theo hướng mua: {snapshot.delta_quote:.2f}")
+    else:
+        conflicts.append("Dòng tiền mua chưa xác nhận")
+
+    if snapshot.last_trade_px > snapshot.ask_px:
+        support += 0.16
+        why_now.append("Giá khớp vượt ask hiện tại")
+    elif snapshot.last_trade_px >= snapshot.microprice:
+        support += 0.08
+        why_now.append("Giá khớp nằm trên microprice")
+    else:
+        conflicts.append("Giá khớp chưa tạo trạng thái bứt phá")
+
+    if snapshot.spread_bps <= 6.0:
+        support += 0.12
+        why_now.append(f"Spread nén thuận lợi cho bứt phá: {snapshot.spread_bps:.2f} bps")
+
+    if snapshot.imbalance_l1 >= 0.58:
+        support += 0.14
+        why_now.append(f"Lực đỡ bid rõ ràng: {snapshot.imbalance_l1:.2f}")
+
+    if snapshot.absorption_proxy >= 65:
+        support += 0.12
+        why_now.append(f"Thanh khoản hấp thụ tốt trước điểm nổ: {snapshot.absorption_proxy:.2f}")
+
+    score = round(100.0 * _clip01(support), 2)
+    return score, _base_confidence(len(why_now)), why_now, conflicts
 
 
 def score_distribution(snapshot: TapeSnapshot) -> tuple[float, float, list[str], list[str]]:
@@ -127,8 +174,44 @@ def score_distribution(snapshot: TapeSnapshot) -> tuple[float, float, list[str],
         why_now.append(f"Dấu hiệu hấp thụ phía bán: {snapshot.absorption_proxy:.2f}")
 
     score = round(100.0 * _clip01(support), 2)
-    confidence = round(0.55 + min(0.4, len(why_now) * 0.07), 2)
-    return score, confidence, why_now, conflicts
+    return score, _base_confidence(len(why_now)), why_now, conflicts
+
+
+def score_failed_breakout(snapshot: TapeSnapshot) -> tuple[float, float, list[str], list[str]]:
+    support = 0.0
+    conflicts: list[str] = []
+    why_now: list[str] = []
+
+    if snapshot.trade_burst >= 2.2:
+        support += 0.16
+        why_now.append(f"Có nỗ lực breakout trước đó: {snapshot.trade_burst:.2f}/s")
+
+    if snapshot.delta_quote < 0:
+        support += 0.24
+        why_now.append(f"Lực bán phản công sau breakout: {snapshot.delta_quote:.2f}")
+    else:
+        conflicts.append("Lực bán phản công chưa rõ")
+
+    if snapshot.last_trade_px < snapshot.microprice:
+        support += 0.20
+        why_now.append("Giá khớp quay xuống dưới microprice")
+    else:
+        conflicts.append("Giá chưa thất bại rõ khỏi vùng breakout")
+
+    if snapshot.imbalance_l1 <= 0.44:
+        support += 0.16
+        why_now.append(f"Bên mua hụt lực tại L1: {snapshot.imbalance_l1:.2f}")
+
+    if snapshot.spread_bps <= 10.0:
+        support += 0.10
+        why_now.append(f"Spread còn giao dịch được: {snapshot.spread_bps:.2f} bps")
+
+    if snapshot.absorption_proxy >= 45:
+        support += 0.12
+        why_now.append(f"Thanh khoản tạo bẫy breakout: {snapshot.absorption_proxy:.2f}")
+
+    score = round(100.0 * _clip01(support), 2)
+    return score, _base_confidence(len(why_now)), why_now, conflicts
 
 
 def _build_signal(
@@ -172,7 +255,9 @@ def _build_signal(
 
 def evaluate_setups(snapshot: TapeSnapshot) -> list[ThesisSignal]:
     acc_score, acc_confidence, acc_why_now, acc_conflicts = score_stealth_accumulation(snapshot)
+    bo_score, bo_confidence, bo_why_now, bo_conflicts = score_breakout_ignition(snapshot)
     dist_score, dist_confidence, dist_why_now, dist_conflicts = score_distribution(snapshot)
+    failed_score, failed_confidence, failed_why_now, failed_conflicts = score_failed_breakout(snapshot)
 
     signals = [
         _build_signal(
@@ -189,6 +274,18 @@ def evaluate_setups(snapshot: TapeSnapshot) -> list[ThesisSignal]:
         ),
         _build_signal(
             snapshot=snapshot,
+            setup=BREAKOUT_IGNITION_SETUP,
+            direction=LONG_BIAS,
+            score=bo_score,
+            confidence=bo_confidence,
+            why_now=bo_why_now,
+            conflicts=bo_conflicts,
+            invalidation=f"Thất bại giữ trên microprice {snapshot.microprice:.2f}",
+            entry_style="Theo breakout có xác nhận volume và giữ cấu trúc bid",
+            targets=["TP1: Mở rộng 1R", "TP2: Mở rộng 2R"],
+        ),
+        _build_signal(
+            snapshot=snapshot,
             setup=DISTRIBUTION_SETUP,
             direction=SHORT_BIAS,
             score=dist_score,
@@ -198,6 +295,18 @@ def evaluate_setups(snapshot: TapeSnapshot) -> list[ThesisSignal]:
             invalidation=f"Giá reclaim lên trên ask {snapshot.ask_px:.2f}",
             entry_style="Canh failed reclaim và lower-high",
             targets=["TP1: 1 ATR giả lập", "TP2: 2 ATR giả lập"],
+        ),
+        _build_signal(
+            snapshot=snapshot,
+            setup=FAILED_BREAKOUT_SETUP,
+            direction=SHORT_BIAS,
+            score=failed_score,
+            confidence=failed_confidence,
+            why_now=failed_why_now,
+            conflicts=failed_conflicts,
+            invalidation=f"Giá quay lại trên ask {snapshot.ask_px:.2f} và giữ được",
+            entry_style="Ưu tiên vào khi retest thất bại vùng breakout cũ",
+            targets=["TP1: Quay về mid", "TP2: Quét thanh khoản đáy gần nhất"],
         ),
     ]
     return sorted(signals, key=lambda item: (item.score, item.confidence), reverse=True)
