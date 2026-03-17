@@ -6,7 +6,12 @@ from typing import Literal
 TakerSide = Literal["BUY", "SELL"]
 Stage = Literal["DETECTED", "WATCHLIST", "CONFIRMED", "ACTIONABLE", "INVALIDATED", "RESOLVED"]
 Direction = Literal["LONG_BIAS", "SHORT_BIAS"]
-Setup = Literal["stealth_accumulation", "distribution"]
+Setup = Literal[
+    "stealth_accumulation",
+    "breakout_ignition",
+    "distribution",
+    "failed_breakout",
+]
 
 
 @dataclass(slots=True)

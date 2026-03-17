@@ -1,7 +1,7 @@
 from cfte.books.local_book import LocalBook
 from cfte.features.tape import build_tape_snapshot
 from cfte.models.events import NormalizedTrade
-from cfte.thesis.engines import assign_stage, evaluate_setups
+from cfte.thesis.engines import assign_stage, build_thesis_id, evaluate_setups
 
 
 def _sample_snapshot() -> object:
@@ -55,7 +55,13 @@ def _sample_snapshot() -> object:
 def test_thesis_engine_emits_required_setups_and_fields():
     signals = evaluate_setups(_sample_snapshot())
 
-    assert [signal.setup for signal in signals] == ["stealth_accumulation", "distribution"]
+    expected_setups = {
+        "stealth_accumulation",
+        "breakout_ignition",
+        "distribution",
+        "failed_breakout",
+    }
+    assert {signal.setup for signal in signals} == expected_setups
     for signal in signals:
         assert signal.thesis_id
         assert signal.instrument_key == "BINANCE:BTCUSDT:SPOT"
@@ -80,7 +86,34 @@ def test_assign_stage_thresholds():
 
 def test_accumulation_outscores_distribution_in_buy_pressure_snapshot():
     signals = evaluate_setups(_sample_snapshot())
+    indexed = {signal.setup: signal for signal in signals}
 
-    assert signals[0].setup == "stealth_accumulation"
-    assert signals[0].score > signals[1].score
-    assert signals[0].confidence >= 0.62
+    assert indexed["stealth_accumulation"].score > indexed["distribution"].score
+    assert indexed["stealth_accumulation"].confidence >= 0.62
+
+
+def test_thesis_id_changes_by_setup_and_is_deterministic():
+    key = "BINANCE:BTCUSDT:SPOT"
+    first = build_thesis_id(
+        instrument_key=key,
+        setup="stealth_accumulation",
+        direction="LONG_BIAS",
+        timeframe="1h",
+        regime_bucket="NEUTRAL",
+    )
+    second = build_thesis_id(
+        instrument_key=key,
+        setup="breakout_ignition",
+        direction="LONG_BIAS",
+        timeframe="1h",
+        regime_bucket="NEUTRAL",
+    )
+
+    assert first != second
+    assert first == build_thesis_id(
+        instrument_key=key,
+        setup="stealth_accumulation",
+        direction="LONG_BIAS",
+        timeframe="1h",
+        regime_bucket="NEUTRAL",
+    )
