@@ -3,6 +3,9 @@ from __future__ import annotations
 from cfte.books.local_book import LocalBook
 from cfte.models.events import NormalizedTrade, TapeSnapshot
 
+MIN_PRICE_BPS_DENOM = 0.01
+MIN_WINDOW_SECONDS = 1.0
+
 def delta_quote(trades: list[NormalizedTrade]) -> float:
     value = 0.0
     for t in trades:
@@ -10,8 +13,8 @@ def delta_quote(trades: list[NormalizedTrade]) -> float:
         value += sign * t.quote_qty
     return value
 
-def cvd(trades: list[NormalizedTrade]) -> float:
-    return delta_quote(trades)
+def cvd(trades: list[NormalizedTrade], previous_cvd: float = 0.0) -> float:
+    return previous_cvd + delta_quote(trades)
 
 def trade_burst(trades: list[NormalizedTrade], window_seconds: float) -> float:
     if window_seconds <= 0:
@@ -28,7 +31,7 @@ def microprice(book: LocalBook) -> float:
 
 def absorption_proxy(trades: list[NormalizedTrade], price_change_bps: float) -> float:
     traded_quote = sum(t.quote_qty for t in trades)
-    denom = max(abs(price_change_bps), 0.01)
+    denom = max(abs(price_change_bps), MIN_PRICE_BPS_DENOM)
     return traded_quote / denom
 
 def build_tape_snapshot(
@@ -37,13 +40,16 @@ def build_tape_snapshot(
     trades: list[NormalizedTrade],
     window_start_ts: int,
     window_end_ts: int,
+    previous_cvd: float = 0.0,
 ) -> TapeSnapshot:
     bid_px, _ = order_book.best_bid()
     ask_px, _ = order_book.best_ask()
     mid_px = (bid_px + ask_px) / 2.0
     last_trade_px = trades[-1].price if trades else mid_px
     price_change_bps = ((last_trade_px - mid_px) / mid_px) * 10000.0
-    window_seconds = max((window_end_ts - window_start_ts) / 1000.0, 1.0)
+    window_seconds = max((window_end_ts - window_start_ts) / 1000.0, MIN_WINDOW_SECONDS)
+    delta_quote_value = delta_quote(trades)
+    cvd_value = cvd(trades, previous_cvd=previous_cvd)
     return TapeSnapshot(
         instrument_key=instrument_key,
         window_start_ts=window_start_ts,
@@ -51,8 +57,8 @@ def build_tape_snapshot(
         spread_bps=order_book.spread_bps(),
         microprice=microprice(order_book),
         imbalance_l1=order_book.imbalance_l1(),
-        delta_quote=delta_quote(trades),
-        cvd=cvd(trades),
+        delta_quote=delta_quote_value,
+        cvd=cvd_value,
         trade_burst=trade_burst(trades, window_seconds=window_seconds),
         absorption_proxy=absorption_proxy(trades, price_change_bps=price_change_bps),
         bid_px=bid_px,
@@ -60,5 +66,9 @@ def build_tape_snapshot(
         mid_px=mid_px,
         last_trade_px=last_trade_px,
         trade_count=len(trades),
-        metadata={},
+        metadata={
+            "window_seconds": window_seconds,
+            "price_change_bps": price_change_bps,
+            "previous_cvd": previous_cvd,
+        },
     )
