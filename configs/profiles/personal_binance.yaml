@@ -18,9 +18,13 @@ live:
   symbol: BTCUSDT
   raw_dir: data/raw
   max_events: 1000
+  watchdog_idle_seconds: 45
+  heartbeat_interval: 250
 
 review:
   summary_path: data/replay/summary_btcusdt.json
+  health_report_path: data/review/health_status.json
+  live_runtime_path: data/review/live_runtime.json
 
 outcomes:
   horizons: ["1h", "4h", "24h"]

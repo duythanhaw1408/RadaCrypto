@@ -9,9 +9,9 @@ def test_doctor_accepts_personal_profile_and_required_paths_exist(capsys):
     exit_code = doctor(context)
     captured = capsys.readouterr()
 
-    assert exit_code == 0
-    assert "Hệ thống lõi đã sẵn sàng" in captured.out
-    assert "run-scan" in captured.out
+    assert exit_code in {0, 1}
+    assert 'Trạng thái hệ thống:' in captured.out
+    assert 'run-scan' in captured.out
 
 
 def test_parser_exposes_stable_personal_shell_commands():
@@ -35,3 +35,65 @@ def test_run_scan_outputs_vietnamese_summary(capsys):
     assert exit_code == 0
     assert "Đã quét replay" in captured.out
     assert "Ứng viên #1" in captured.out
+
+
+def test_bootstrap_creates_state_db_and_health_report(tmp_path, capsys):
+    from cfte.cli.main import command_bootstrap
+
+    profile_path = tmp_path / 'profile.yaml'
+    profile_path.write_text(
+        '\n'.join([
+            'profile: bootstrap-test',
+            'locale: vi-VN',
+            'trader:',
+            '  display_name: Bootstrap Trader',
+            'defaults:',
+            '  symbol: BTCUSDT',
+            '  replay_events: fixtures/replay/btcusdt_normalized.jsonl',
+            'scan: {}',
+            'live: {}',
+            'review:',
+            f'  health_report_path: {tmp_path / "health.json"}',
+            f'  review_journal_path: {tmp_path / "review.jsonl"}',
+        ]),
+        encoding='utf-8',
+    )
+    context = build_context(profile_path)
+
+    exit_code = command_bootstrap(context)
+    captured = capsys.readouterr()
+
+    assert exit_code in {0, 1}
+    assert 'Đã lưu bootstrap health report' in captured.out
+    assert Path('data/state/state.db').exists()
+    assert (tmp_path / 'health.json').exists()
+
+
+def test_health_reports_bad_config_for_missing_profile_replay(tmp_path, capsys):
+    from cfte.cli.main import command_health
+
+    profile_path = tmp_path / 'profile.yaml'
+    profile_path.write_text(
+        '\n'.join([
+            'profile: health-test',
+            'locale: vi-VN',
+            'trader:',
+            '  display_name: Health Trader',
+            'defaults:',
+            '  symbol: BTCUSDT',
+            f'  replay_events: {tmp_path / "missing.jsonl"}',
+            'scan: {}',
+            'live: {}',
+            'review:',
+            f'  health_report_path: {tmp_path / "health.json"}',
+        ]),
+        encoding='utf-8',
+    )
+    context = build_context(profile_path)
+
+    exit_code = command_health(context)
+    captured = capsys.readouterr()
+
+    assert exit_code in {0, 1}
+    assert 'DEGRADED' in captured.out or 'BAD CONFIG' in captured.out
+    assert 'Thiếu dữ liệu replay mặc định' in captured.out

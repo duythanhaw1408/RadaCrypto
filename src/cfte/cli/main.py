@@ -21,6 +21,8 @@ DEFAULT_DAILY_SUMMARY = Path("data/review/daily_summary.json")
 DEFAULT_WEEKLY_SUMMARY = Path("data/review/weekly_review.json")
 DEFAULT_REVIEW_JOURNAL = Path("data/review/review_journal.jsonl")
 DEFAULT_TUNING_REPORT = Path("data/review/tuning_report.json")
+DEFAULT_HEALTH_REPORT = Path("data/review/health_status.json")
+DEFAULT_LIVE_RUNTIME_REPORT = Path("data/review/live_runtime.json")
 
 
 @dataclass(frozen=True, slots=True)
@@ -87,34 +89,51 @@ def _format_header(title: str, profile: PersonalProfile) -> str:
     return f"=== {title} | hồ sơ: {profile.name} | người dùng: {trader_name} ==="
 
 
+def _health_artifact_paths(context: ShellContext) -> dict[str, Path]:
+    review = context.profile.review
+    return {
+        'replay_summary': _profile_path(context.profile, 'review', 'summary_path', DEFAULT_REPLAY_SUMMARY),
+        'daily_summary': Path(str(review.get('daily_summary_path', DEFAULT_DAILY_SUMMARY))),
+        'weekly_summary': Path(str(review.get('weekly_summary_path', DEFAULT_WEEKLY_SUMMARY))),
+        'review_journal': Path(str(review.get('review_journal_path', DEFAULT_REVIEW_JOURNAL))),
+        'tuning_report': Path(str(review.get('tuning_report_path', DEFAULT_TUNING_REPORT))),
+        'health_report': Path(str(review.get('health_report_path', DEFAULT_HEALTH_REPORT))),
+    }
+
+
 def doctor(context: ShellContext) -> int:
+    from cfte.cli.reliability import build_runtime_report, persist_runtime_report, render_runtime_report_vi
+
     required = [
-        Path("sql/sqlite/001_state.sql"),
-        Path("sql/sqlite/002_indexes.sql"),
-        context.profile_path,
-        Path("src/cfte/books/local_book.py"),
-        Path("src/cfte/features/tape.py"),
-        Path("src/cfte/thesis/engines.py"),
-        DEFAULT_REPLAY_EVENTS,
-        Path("configs/profiles/personal_binance.yaml"),
-        Path("configs/profiles/personal_binance_onchain.yaml"),
-        Path("configs/profiles/personal_replay.yaml"),
+        Path('sql/sqlite/001_state.sql'),
+        Path('sql/sqlite/002_indexes.sql'),
+        Path('src/cfte/books/local_book.py'),
+        Path('src/cfte/features/tape.py'),
+        Path('src/cfte/thesis/engines.py'),
+        Path('configs/profiles/personal_binance.yaml'),
+        Path('configs/profiles/personal_binance_onchain.yaml'),
+        Path('configs/profiles/personal_replay.yaml'),
     ]
     missing = [str(p) for p in required if not p.exists()]
-    print(_format_header("doctor", context.profile))
+    print(_format_header('doctor', context.profile))
     if missing:
-        print("Phát hiện thiếu tệp bắt buộc để chạy luồng cá nhân:")
+        print('Phát hiện thiếu tệp hệ thống bắt buộc:')
         for item in missing:
-            print(f" - {item}")
-        print("Gợi ý: hoàn thiện tệp còn thiếu rồi chạy lại `cfte doctor`.")
+            print(f' - {item}')
+        print('Gợi ý: khôi phục các tệp lõi rồi chạy lại `cfte doctor`.')
         return 1
 
-    print("Hệ thống lõi đã sẵn sàng cho luồng local-first, replay-first.")
-    print(f"- Hồ sơ đang dùng: {context.profile_path}")
-    print(f"- Cặp mặc định: {context.profile.defaults.get('symbol', 'BTCUSDT')}")
-    print(f"- Replay mặc định: {context.profile.defaults.get('replay_events', str(DEFAULT_REPLAY_EVENTS))}")
-    print("Luồng khuyến nghị: doctor -> run-scan -> run-live -> review-day -> review-week.")
-    return 0
+    report = build_runtime_report(
+        profile_path=context.profile_path,
+        profile=context.profile,
+        state_db=DEFAULT_STATE_DB,
+        artifact_paths=_health_artifact_paths(context),
+    )
+    print(render_runtime_report_vi(report))
+    saved = persist_runtime_report(_profile_path(context.profile, 'review', 'health_report_path', DEFAULT_HEALTH_REPORT), report)
+    print(f'Đã lưu báo cáo health tại: {saved}')
+    print('Luồng khuyến nghị: bootstrap -> doctor -> run-scan -> run-live -> review-day -> review-week.')
+    return 0 if report.overall_status != 'bad_config' else 1
 
 
 def run_replay_research(events_path: Path, summary_out: Path) -> int:
@@ -184,6 +203,39 @@ def command_run_scan(context: ShellContext, events_path: Path, limit: int | None
     return 0
 
 
+def command_bootstrap(context: ShellContext) -> int:
+    import sqlite3
+    from cfte.cli.reliability import build_runtime_report, persist_runtime_report, render_runtime_report_vi
+    from cfte.storage.sqlite_writer import ThesisSQLiteStore
+
+    print(_format_header('bootstrap', context.profile))
+    for path in [DEFAULT_RAW_DIR, DEFAULT_STATE_DB.parent, DEFAULT_THESIS_LOG.parent, DEFAULT_REVIEW_JOURNAL.parent]:
+        path.mkdir(parents=True, exist_ok=True)
+        print(f'- Đảm bảo thư mục: {path}')
+
+    DEFAULT_STATE_DB.parent.mkdir(parents=True, exist_ok=True)
+    with sqlite3.connect(DEFAULT_STATE_DB) as conn:
+        for sql_name in ['001_state.sql', '002_indexes.sql']:
+            conn.executescript((Path('sql/sqlite') / sql_name).read_text(encoding='utf-8'))
+        conn.commit()
+
+    async def _bootstrap() -> None:
+        await ThesisSQLiteStore(DEFAULT_STATE_DB).migrate_schema()
+
+    asyncio.run(_bootstrap())
+    print(f'- Đảm bảo SQLite schema tại: {DEFAULT_STATE_DB}')
+    report = build_runtime_report(
+        profile_path=context.profile_path,
+        profile=context.profile,
+        state_db=DEFAULT_STATE_DB,
+        artifact_paths=_health_artifact_paths(context),
+    )
+    print(render_runtime_report_vi(report))
+    saved = persist_runtime_report(_profile_path(context.profile, 'review', 'health_report_path', DEFAULT_HEALTH_REPORT), report)
+    print(f'Đã lưu bootstrap health report tại: {saved}')
+    return 0 if report.overall_status != 'bad_config' else 1
+
+
 def command_run_live(context: ShellContext, symbol: str | None, max_events: int | None, use_trade: bool) -> int:
     from cfte.live.engine import LiveThesisLoop
 
@@ -199,12 +251,18 @@ def command_run_live(context: ShellContext, symbol: str | None, max_events: int 
     print(f"- Giới hạn sự kiện: {target_max_events}")
     print(f"- Thesis log live: {thesis_log_path}")
 
+    runtime_report_path = _profile_path(context.profile, 'review', 'live_runtime_path', DEFAULT_LIVE_RUNTIME_REPORT)
+    print(f"- Runtime artifact: {runtime_report_path}")
+
     loop = LiveThesisLoop(
         symbol=str(target_symbol),
         db_path=db_path,
         use_agg_trade=not use_trade,
-        horizons=context.profile.outcomes.get("horizons"),
+        horizons=context.profile.outcomes.get('horizons'),
         thesis_log_path=thesis_log_path,
+        watchdog_idle_seconds=float(live_defaults.get('watchdog_idle_seconds', 45.0)),
+        heartbeat_interval=int(live_defaults.get('heartbeat_interval', 250)),
+        runtime_report_path=runtime_report_path,
     )
     loop.ux = context.profile.ux
 
@@ -454,18 +512,21 @@ def command_scorecard(context: ShellContext) -> int:
 
 
 def command_health(context: ShellContext) -> int:
+    from cfte.cli.reliability import build_runtime_report, persist_runtime_report, render_runtime_report_vi
     from cfte.collectors.health import CollectorHealthSnapshot
 
-    print(_format_header("health", context.profile))
-    print("Kiểm tra kết nối SQLite...")
-    if DEFAULT_STATE_DB.exists():
-        print(f"[OK] Tìm thấy database trạng thái tại: {DEFAULT_STATE_DB}")
-    else:
-        print(f"[WARN] Chưa có database tại {DEFAULT_STATE_DB}. Hãy chạy `init_sqlite_db.py`.")
+    print(_format_header('health', context.profile))
+    report = build_runtime_report(
+        profile_path=context.profile_path,
+        profile=context.profile,
+        state_db=DEFAULT_STATE_DB,
+        artifact_paths=_health_artifact_paths(context),
+    )
+    print(render_runtime_report_vi(report))
 
     snapshot = CollectorHealthSnapshot(
-        venue="binance",
-        state="idle",
+        venue='binance',
+        state='idle' if report.overall_status == 'healthy' else 'degraded',
         connected=False,
         connect_attempts=0,
         reconnect_count=0,
@@ -474,7 +535,9 @@ def command_health(context: ShellContext) -> int:
         last_error=None,
     )
     print(snapshot.to_operator_summary())
-    return 0
+    saved = persist_runtime_report(_profile_path(context.profile, 'review', 'health_report_path', DEFAULT_HEALTH_REPORT), report)
+    print(f'Đã lưu health report tại: {saved}')
+    return 0 if report.overall_status != 'bad_config' else 1
 
 
 def command_review_thesis(context: ShellContext) -> int:
@@ -552,6 +615,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--profile", default=str(DEFAULT_PROFILE_PATH), help="Đường dẫn hồ sơ YAML cá nhân.")
     sub = parser.add_subparsers(dest="cmd")
 
+    sub.add_parser('bootstrap', help='Chuẩn bị thư mục, SQLite schema và kiểm tra môi trường trước khi chạy hằng ngày.')
     sub.add_parser("doctor", help="Kiểm tra trạng thái hệ thống và tệp cấu hình (Health check).")
     sub.add_parser("health", help="Kiểm tra kết nối và tình trạng dữ liệu hiện tại.")
     sub.add_parser("review-thesis", help="Xem danh sách các luận điểm đang lưu trong SQLite.")
@@ -604,6 +668,8 @@ def main() -> int:
 
     context = build_context(args.profile)
 
+    if args.cmd == 'bootstrap':
+        return command_bootstrap(context)
     if args.cmd == "doctor":
         return doctor(context)
     if args.cmd == "health":
