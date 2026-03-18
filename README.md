@@ -48,6 +48,17 @@ pytest
 python3 scripts/replay_binance_public.py
 ```
 
+### Source-Path Execution (Workaround)
+Nếu `pip install -e .` chưa nhận diện đúng package, bạn có thể chạy trực tiếp bằng cách chỉ định `PYTHONPATH`:
+
+```bash
+source .venv/bin/activate
+PYTHONPATH=src pytest -q
+PYTHONPATH=src python3 -m cfte.cli.main doctor
+PYTHONPATH=src python3 scripts/replay_binance_public.py
+```
+*Lưu ý: Đây là source-path execution, không thay thế hoàn toàn cho việc kiểm tra packaging/installation.*
+
 ## Phase 1 goal
 Binance-centric vertical slice:
 - market data normalization

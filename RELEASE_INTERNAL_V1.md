@@ -30,6 +30,16 @@ pytest -q
 python scripts/replay_binance_public.py
 ```
 
+### 4.1. Source-Path Execution (Gợi ý dự phòng)
+Nếu môi trường chưa nhận diện đúng `cfte`, bạn có thể chạy bằng cách chỉ định rõ đường dẫn `src`:
+```bash
+source .venv/bin/activate
+PYTHONPATH=src pytest -q
+PYTHONPATH=src python -m cfte.cli.main doctor
+PYTHONPATH=src python scripts/replay_binance_public.py
+```
+*Lưu ý: Đây là source-path execution, không thay thế hoàn toàn cho việc kiểm tra packaging/installation.*
+
 ## 5. Cách bật Telegram Alert
 1. Cập nhật `TELEGRAM_BOT_TOKEN` và `TELEGRAM_CHAT_ID` vào file `.env`.
 2. Hệ thống sẽ tự động gửi Trader-card bằng tiếng Việt khi có tín hiệu `CONFIRMED` hoặc `ACTIONABLE`.
