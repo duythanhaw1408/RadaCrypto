@@ -22,6 +22,7 @@ def build_execution_summary(
 
 def render_execution_summary_vi(summary: ExecutionSummary) -> str:
     alignment = "khớp" if summary.reconciliation.is_aligned else "lệch"
+    issue_status = "có" if summary.reconciliation.has_structural_issues else "không"
     return "\n".join(
         [
             "Tóm tắt giám sát thực thi:",
@@ -32,6 +33,16 @@ def render_execution_summary_vi(summary: ExecutionSummary) -> str:
                 f"{alignment} | nội bộ={summary.reconciliation.internal_net_qty:.6f}, "
                 f"venue={summary.reconciliation.venue_net_qty:.6f}, "
                 f"delta={summary.reconciliation.delta_qty:.6f}"
+            ),
+            (
+                "- Kiểm tra đối soát mạnh hơn: "
+                f"mua={summary.reconciliation.gross_buy_qty:.6f}, "
+                f"bán={summary.reconciliation.gross_sell_qty:.6f}, "
+                f"fill duy nhất={summary.reconciliation.unique_fill_count}, "
+                f"trùng={summary.reconciliation.duplicate_fill_count}, "
+                f"đến muộn/đảo thứ tự={summary.reconciliation.out_of_order_fill_count}, "
+                f"vi phạm số lượng={summary.reconciliation.qty_violation_count}, "
+                f"lỗi cấu trúc={issue_status}"
             ),
             (
                 "- Chất lượng khớp lệnh: "

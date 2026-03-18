@@ -18,6 +18,7 @@ _ALLOWED_TRANSITIONS: dict[OrderStatus, set[OrderStatus]] = {
 @dataclass(slots=True)
 class OrderStateStore:
     _orders: dict[str, OrderSnapshot] = field(default_factory=dict)
+    _seen_fill_ids: set[str] = field(default_factory=set)
 
     def register_order(self, order: CanonicalOrder) -> None:
         if order.order_id in self._orders:
@@ -35,9 +36,17 @@ class OrderStateStore:
         current.updated_ts = updated_ts
 
     def apply_fill(self, fill: FillFact) -> None:
+        if fill.fill_id in self._seen_fill_ids:
+            return
+
         snapshot = self._get(fill.order_id)
         if snapshot.status in {"REJECTED", "CANCELED", "EXPIRED"}:
             raise ValueError(f"Cannot fill closed order in status: {snapshot.status}")
+        if fill.side != snapshot.order.side:
+            raise ValueError("Fill side does not match order side")
+        if fill.symbol != snapshot.order.symbol:
+            raise ValueError("Fill symbol does not match order symbol")
+
         filled_qty = snapshot.filled_qty + fill.qty
         if filled_qty > snapshot.order.qty + 1e-9:
             raise ValueError("Fill quantity exceeds order quantity")
@@ -47,7 +56,8 @@ class OrderStateStore:
         snapshot.quote_filled = total_quote
         snapshot.avg_fill_price = total_quote / filled_qty if filled_qty > 0 else None
         snapshot.fee_paid += fill.fee_paid
-        snapshot.updated_ts = fill.venue_ts
+        snapshot.updated_ts = max(snapshot.updated_ts, fill.venue_ts)
+        self._seen_fill_ids.add(fill.fill_id)
 
         if filled_qty >= snapshot.order.qty - 1e-9:
             snapshot.status = "FILLED"
