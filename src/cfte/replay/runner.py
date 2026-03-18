@@ -50,13 +50,15 @@ def run_replay(events: list[ReplayEvent]) -> ReplayRunResult:
     if not events:
         raise ValueError("Replay event list is empty")
 
+    ordered_events = [event for _, event in sorted(enumerate(events), key=lambda item: (item[1].venue_ts, item[0]))]
+
     book: LocalBook | None = None
     instrument_key: str | None = None
     trades: list[NormalizedTrade] = []
     thesis_events: list[ThesisSignal] = []
     feature_windows = 0
 
-    for event in events:
+    for event in ordered_events:
         if event.event_type == "book_snapshot":
             payload = event.payload
             if not isinstance(payload, ReplayBookSnapshot):
@@ -73,6 +75,8 @@ def run_replay(events: list[ReplayEvent]) -> ReplayRunResult:
             payload = event.payload
             if not isinstance(payload, NormalizedDepthDiff):
                 raise TypeError("depth_diff payload must be NormalizedDepthDiff")
+            if payload.instrument_key != instrument_key:
+                raise ValueError("Replay event instrument_key mismatch")
             book.apply_diff(payload.bid_updates, payload.ask_updates, seq_id=payload.final_update_id)
             continue
 
@@ -80,6 +84,8 @@ def run_replay(events: list[ReplayEvent]) -> ReplayRunResult:
             payload = event.payload
             if not isinstance(payload, NormalizedTrade):
                 raise TypeError("trade payload must be NormalizedTrade")
+            if payload.instrument_key != instrument_key:
+                raise ValueError("Replay event instrument_key mismatch")
             trades.append(payload)
             feature_windows += 1
             snapshot = build_tape_snapshot(
@@ -96,7 +102,7 @@ def run_replay(events: list[ReplayEvent]) -> ReplayRunResult:
 
     return ReplayRunResult(
         instrument_key=instrument_key,
-        event_count=len(events),
+        event_count=len(ordered_events),
         thesis_count=len(thesis_events),
         feature_windows=feature_windows,
         fingerprint=_fingerprint_signals(thesis_events),

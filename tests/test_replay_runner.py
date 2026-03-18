@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from cfte.replay.adapters import load_replay_events
 from cfte.replay.runner import render_replay_summary_vi, run_replay
 
@@ -24,3 +26,19 @@ def test_replay_summary_is_vietnamese_facing():
 
     assert "Replay hoàn tất" in summary
     assert "sự kiện" in summary
+
+
+def test_run_replay_sorts_events_and_rejects_instrument_mismatch():
+    events = load_replay_events("fixtures/replay/btcusdt_normalized.jsonl")
+    unordered = list(reversed(events))
+
+    ordered_result = run_replay(events)
+    unordered_result = run_replay(unordered)
+
+    assert ordered_result.fingerprint == unordered_result.fingerprint
+
+    bad_trade = unordered[-1]
+    bad_trade.payload.instrument_key = "BINANCE:ETHUSDT:SPOT"
+
+    with pytest.raises(ValueError, match="instrument_key mismatch"):
+        run_replay(unordered)

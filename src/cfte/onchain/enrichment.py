@@ -16,12 +16,22 @@ def collect_optional_context(
     bundle = ContextBundle()
     for adapter in adapters:
         ok = True
+
         try:
             bundle.pools.extend(adapter.fetch_pool_context(symbol=symbol, chain=chain))
+        except Exception:
+            ok = False
+
+        try:
             bundle.wallets.extend(adapter.fetch_wallet_context(symbol=symbol, chain=chain))
+        except Exception:
+            ok = False
+
+        try:
             bundle.holders.extend(adapter.fetch_holder_context(token_address=token_address, chain=chain))
         except Exception:
             ok = False
+
         bundle.provider_status[adapter.provider_name] = ok
     return bundle
 
