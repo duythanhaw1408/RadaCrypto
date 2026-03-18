@@ -269,31 +269,74 @@ def command_run_live(context: ShellContext, symbol: str | None, max_events: int 
     return 0
 
 
-def command_review_day(context: ShellContext, summary_path: Path) -> int:
+def command_review_day(context: ShellContext, date_str: str | None = None, summary_path: Path | None = None) -> int:
+    from cfte.storage.sqlite_writer import ThesisSQLiteStore
+    
     print(_format_header("review-day", context.profile))
-    if not summary_path.exists():
-        print(f"Chưa tìm thấy file review: {summary_path}")
-        print("Gợi ý: chạy `cfte replay` hoặc `cfte run-scan` trước để tạo summary trong ngày.")
-        return 1
+    store = ThesisSQLiteStore(DEFAULT_STATE_DB)
+    
+    async def _show():
+        # 1. Show SQLite Stats
+        stats = await store.get_daily_summary_stats(date_str)
+        print(f"Báo cáo ngày: {stats['date']}")
+        print(f" - Tổng tín hiệu mới: {stats['total_new']}")
+        print(f" - Điểm số trung bình: {stats['avg_score']:.2f}")
+        print(f" - Kết quả đã chốt: {stats['outcomes_count']}")
+        
+        if stats["stage_dist"]:
+            print(" - Phân bổ trạng thái:")
+            for stage, count in stats["stage_dist"].items():
+                print(f"    * {stage}: {count}")
+        
+        # 2. Optionally show file-based summary (for replay compatibility)
+        if summary_path and summary_path.exists():
+            print(f"\nChi tiết từ file replay: {summary_path}")
+            try:
+                summary = json.loads(summary_path.read_text(encoding="utf-8"))
+                top_signals = summary.get("top_signals", [])
+                if top_signals:
+                    print("Top tín hiệu từ replay:")
+                    for idx, signal in enumerate(top_signals, start=1):
+                        why_now = signal.get("why_now", [])
+                        print(
+                            f"  #{idx}: {signal.get('setup')} | {signal.get('stage')} | "
+                            f"score={signal.get('score')} | lý do={why_now[0] if why_now else '...'}"
+                        )
+            except Exception as e:
+                print(f"Không thể đọc file summary: {e}")
 
-    summary = json.loads(summary_path.read_text(encoding="utf-8"))
-    top_signals = summary.get("top_signals", [])
-    print(f"Instrument: {summary.get('instrument_key', 'N/A')}")
-    print(f"Số sự kiện replay: {summary.get('event_count', 0)}")
-    print(f"Số cửa sổ đặc trưng: {summary.get('feature_windows', 0)}")
-    print(f"Tổng tín hiệu thesis: {summary.get('thesis_count', 0)}")
-    print(f"Fingerprint: {summary.get('fingerprint', 'N/A')}")
-    if not top_signals:
-        print("Hôm nay chưa có tín hiệu nổi bật trong file review.")
-        return 0
+    asyncio.run(_show())
+    return 0
 
-    print("Top tín hiệu để xem lại cuối ngày:")
-    for idx, signal in enumerate(top_signals, start=1):
-        why_now = signal.get("why_now", [])
-        print(
-            f"- #{idx}: {signal.get('setup')} | {signal.get('stage')} | "
-            f"điểm={signal.get('score')} | lý do chính={why_now[0] if why_now else 'chưa có'}"
-        )
+
+def command_scorecard(context: ShellContext) -> int:
+    from cfte.storage.sqlite_writer import ThesisSQLiteStore
+    
+    print(_format_header("scorecard", context.profile))
+    store = ThesisSQLiteStore(DEFAULT_STATE_DB)
+    
+    async def _show():
+        rows = await store.get_setup_scorecard()
+        if not rows:
+            print("Chưa có đủ dữ liệu kết quả để lập bảng điểm (scorecard).")
+            print("Gợi ý: Hãy để `run-live` chạy lâu hơn để thu thập kết quả 1h/4h/24h.")
+            return
+
+        print(f"{'Setup':<25} | {'Count':<5} | {'Score':<6} | {'Returns (1h / 4h / 24h)':<30}")
+        print("-" * 80)
+        for r in rows:
+            h = r["horizons"]
+            def _fmt_h(key):
+                val = h.get(key)
+                if not val: return "N/A"
+                ret = val["avg_return"]
+                color = "🟢" if ret >= 0 else "🔴"
+                return f"{color}{ret:+.2f}%"
+
+            h_str = f"{_fmt_h('1h')} / {_fmt_h('4h')} / {_fmt_h('24h')}"
+            print(f"{r['setup']:<25} | {r['total_signals']:<5} | {r['avg_score']:<6.1f} | {h_str}")
+
+    asyncio.run(_show())
     return 0
 
 
@@ -400,6 +443,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("doctor", help="Kiểm tra trạng thái hệ thống và tệp cấu hình (Health check).")
     sub.add_parser("health", help="Kiểm tra kết nối và tình trạng dữ liệu hiện tại.")
     sub.add_parser("review-thesis", help="Xem danh sách các luận điểm đang lưu trong SQLite.")
+    sub.add_parser("scorecard", help="Xem bảng điểm hiệu suất theo từng loại setup (Edge tracking).")
 
     replay = sub.add_parser("replay", help="Chạy replay deterministic và lưu summary.")
     replay.add_argument("--events", default=None)
@@ -415,8 +459,9 @@ def build_parser() -> argparse.ArgumentParser:
     run_live.add_argument("--max-events", type=int, default=None)
     run_live.add_argument("--use-trade", action="store_true", help="Dùng stream trade thay vì aggTrade.")
 
-    review = sub.add_parser("review-day", help="Xem báo cáo tổng kết ngày từ file summary.")
-    review.add_argument("--summary", default=str(DEFAULT_REPLAY_SUMMARY), help="Đường dẫn file kết quả (summary.json).")
+    review = sub.add_parser("review-day", help="Xem báo cáo tổng kết ngày từ SQLite hoặc file summary.")
+    review.add_argument("--date", default=None, help="Ngày cần xem báo cáo (YYYY-MM-DD).")
+    review.add_argument("--summary", default=None, help="Đường dẫn file kết quả replay (tùy chọn).")
 
     return parser
 
@@ -445,10 +490,12 @@ def main() -> int:
     if args.cmd == "run-live":
         return command_run_live(context, symbol=args.symbol, max_events=args.max_events, use_trade=args.use_trade)
     if args.cmd == "review-day":
-        summary_path = _resolve_path(args.summary, _profile_path(context.profile, "review", "summary_path", DEFAULT_REPLAY_SUMMARY))
-        return command_review_day(context, summary_path=summary_path)
+        summary_path = Path(args.summary) if args.summary else None
+        return command_review_day(context, date_str=args.date, summary_path=summary_path)
     if args.cmd == "review-thesis":
         return command_review_thesis(context)
+    if args.cmd == "scorecard":
+        return command_scorecard(context)
 
     parser.print_help()
     return 0

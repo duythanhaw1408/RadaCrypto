@@ -167,3 +167,91 @@ class ThesisSQLiteStore:
             async with db.execute(query, (limit,)) as cursor:
                 rows = await cursor.fetchall()
                 return [dict(row) for row in rows]
+
+    async def get_daily_summary_stats(self, date_str: str | None = None) -> dict[str, Any]:
+        """
+        Returns stats for the given date (default today).
+        date_str format: 'YYYY-MM-DD'
+        """
+        if not date_str:
+            date_str = time.strftime("%Y-%m-%d")
+        
+        start_ts = int(time.mktime(time.strptime(date_str, "%Y-%m-%d")) * 1000)
+        end_ts = start_ts + 86400000 # 24h in ms
+        
+        async with aiosqlite.connect(self.db_path) as db:
+            db.row_factory = aiosqlite.Row
+            
+            # Total signals opened today
+            async with db.execute(
+                "SELECT COUNT(*) as cnt, AVG(score) as avg_score FROM thesis WHERE opened_ts >= ? AND opened_ts < ?",
+                (start_ts, end_ts)
+            ) as cursor:
+                row = await cursor.fetchone()
+                total_new = row["cnt"]
+                avg_score = row["avg_score"] or 0.0
+            
+            # Stage distribution for those signals
+            async with db.execute(
+                "SELECT stage, COUNT(*) as cnt FROM thesis WHERE opened_ts >= ? AND opened_ts < ? GROUP BY stage",
+                (start_ts, end_ts)
+            ) as cursor:
+                stage_rows = await cursor.fetchall()
+                stage_dist = {row["stage"]: row["cnt"] for row in stage_rows}
+            
+            # Outcomes completed today
+            async with db.execute(
+                "SELECT COUNT(*) as cnt FROM thesis_outcome WHERE updated_at >= ? AND updated_at < ? AND status = 'COMPLETED'",
+                (start_ts, end_ts)
+            ) as cursor:
+                row = await cursor.fetchone()
+                outcomes_count = row["cnt"]
+            
+            return {
+                "date": date_str,
+                "total_new": total_new,
+                "avg_score": avg_score,
+                "stage_dist": stage_dist,
+                "outcomes_count": outcomes_count
+            }
+
+    async def get_setup_scorecard(self) -> list[dict[str, Any]]:
+        """
+        Returns performance stats grouped by setup.
+        """
+        query = """
+            SELECT 
+                t.setup,
+                COUNT(DISTINCT t.thesis_id) as total_signals,
+                AVG(t.score) as avg_score,
+                o.horizon,
+                COUNT(o.thesis_id) as outcome_count,
+                AVG((o.realized_px - t.entry_px) / t.entry_px * 100) as avg_return
+            FROM thesis t
+            LEFT JOIN thesis_outcome o ON t.thesis_id = o.thesis_id AND o.status = 'COMPLETED'
+            WHERE t.entry_px IS NOT NULL AND t.entry_px > 0
+            GROUP BY t.setup, o.horizon
+        """
+        async with aiosqlite.connect(self.db_path) as db:
+            db.row_factory = aiosqlite.Row
+            async with db.execute(query) as cursor:
+                rows = await cursor.fetchall()
+                
+                # Pivot by setup
+                scorecard = {}
+                for row in rows:
+                    setup = row["setup"]
+                    if setup not in scorecard:
+                        scorecard[setup] = {
+                            "setup": setup,
+                            "total_signals": row["total_signals"],
+                            "avg_score": row["avg_score"],
+                            "horizons": {}
+                        }
+                    if row["horizon"]:
+                        scorecard[setup]["horizons"][row["horizon"]] = {
+                            "count": row["outcome_count"],
+                            "avg_return": row["avg_return"]
+                        }
+                
+                return list(scorecard.values())
