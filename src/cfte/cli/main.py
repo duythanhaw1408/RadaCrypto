@@ -4,6 +4,7 @@ import argparse
 import asyncio
 import json
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +17,8 @@ DEFAULT_REPLAY_SUMMARY = Path("data/replay/summary_btcusdt.json")
 DEFAULT_RAW_DIR = Path("data/raw")
 DEFAULT_STATE_DB = Path("data/state/state.db")
 DEFAULT_THESIS_LOG = Path("data/thesis/thesis_log.jsonl")
+DEFAULT_DAILY_SUMMARY = Path("data/review/daily_summary.json")
+DEFAULT_WEEKLY_SUMMARY = Path("data/review/weekly_review.json")
 
 
 @dataclass(frozen=True, slots=True)
@@ -108,85 +111,7 @@ def doctor(context: ShellContext) -> int:
     print(f"- Hồ sơ đang dùng: {context.profile_path}")
     print(f"- Cặp mặc định: {context.profile.defaults.get('symbol', 'BTCUSDT')}")
     print(f"- Replay mặc định: {context.profile.defaults.get('replay_events', str(DEFAULT_REPLAY_EVENTS))}")
-    print("Luồng khuyến nghị: doctor -> run-scan -> run-live -> review-day.")
-    return 0
-
-
-async def run_binance_public_ingest(symbol: str, out_dir: Path, max_events: int, use_agg_trade: bool) -> int:
-    from cfte.books.binance_depth import BinanceDepthReconciler
-    from cfte.collectors.binance_public import BinancePublicCollector, build_public_streams, try_fetch_depth_snapshot
-    from cfte.normalizers.binance import (
-        normalize_agg_trade,
-        normalize_book_ticker,
-        normalize_depth_diff,
-        normalize_kline,
-        normalize_trade,
-    )
-    from cfte.storage.raw_writer import RawParquetWriter
-
-    instrument_key = f"BINANCE:{symbol.upper()}:SPOT"
-    writer = RawParquetWriter(out_dir)
-    depth = BinanceDepthReconciler(instrument_key=instrument_key)
-
-    print(f"Khởi tạo snapshot sổ lệnh cho {symbol.upper()}...")
-    snapshot, error = try_fetch_depth_snapshot(symbol=symbol.upper())
-    if snapshot is None:
-        print(error or f"Không lấy được snapshot sổ lệnh cho {symbol.upper()}.")
-        return 1
-
-    depth.apply_snapshot(
-        bids=[(float(px), float(qty)) for px, qty in snapshot.get("bids", [])],
-        asks=[(float(px), float(qty)) for px, qty in snapshot.get("asks", [])],
-        last_update_id=int(snapshot["lastUpdateId"]),
-    )
-
-    streams = build_public_streams([symbol], use_agg_trade=use_agg_trade)
-    collector = BinancePublicCollector(streams=streams)
-
-    print(f"Bắt đầu ingest Binance public ({symbol.upper()}). Sẽ dừng sau {max_events} sự kiện.")
-    processed = 0
-    async for envelope in collector.stream_forever():
-        stream = str(envelope.get("stream", ""))
-        data = envelope.get("data", {})
-        if not isinstance(data, dict):
-            continue
-
-        event_type = str(data.get("e", ""))
-        if event_type == "aggTrade":
-            normalized = normalize_agg_trade(data, instrument_key=instrument_key)
-            writer.write_event("binance_public", "aggTrade", "binance", instrument_key, data, normalized.event_id, normalized.venue_ts)
-        elif event_type == "trade":
-            normalized = normalize_trade(data, instrument_key=instrument_key)
-            writer.write_event("binance_public", "trade", "binance", instrument_key, data, normalized.event_id, normalized.venue_ts)
-        elif event_type == "bookTicker":
-            normalized = normalize_book_ticker(data, instrument_key=instrument_key)
-            writer.write_event("binance_public", "bookTicker", "binance", instrument_key, data, normalized.event_id, normalized.venue_ts)
-        elif event_type == "depthUpdate":
-            normalized = normalize_depth_diff(data, instrument_key=instrument_key)
-            writer.write_event(
-                "binance_public",
-                "depth",
-                "binance",
-                instrument_key,
-                data,
-                normalized.event_id,
-                normalized.venue_ts,
-                seq_id=normalized.final_update_id,
-            )
-            depth.ingest_diff(normalized)
-        elif event_type == "kline":
-            normalized = normalize_kline(data, instrument_key=instrument_key)
-            writer.write_event("binance_public", f"kline_{normalized.interval}", "binance", instrument_key, data, normalized.event_id, normalized.venue_ts)
-        else:
-            continue
-
-        processed += 1
-        if processed % 10 == 0:
-            print(f"Đã ghi {processed} sự kiện. Stream gần nhất: {stream}")
-        if processed >= max_events:
-            break
-
-    print(f"Hoàn tất ingest. Tổng sự kiện đã ghi: {processed}.")
+    print("Luồng khuyến nghị: doctor -> run-scan -> run-live -> review-day -> review-week.")
     return 0
 
 
@@ -217,6 +142,8 @@ def command_replay(context: ShellContext, events_path: Path, summary_out: Path) 
 
 
 def command_run_scan(context: ShellContext, events_path: Path, limit: int | None) -> int:
+    from cfte.replay.runner import persist_replay_summary
+    from cfte.storage.thesis_log import ThesisLogWriter
     from cfte.thesis.cards import render_trader_card
 
     print(_format_header("run-scan", context.profile))
@@ -225,6 +152,22 @@ def command_run_scan(context: ShellContext, events_path: Path, limit: int | None
     candidates = [signal for signal in result.thesis_events if signal.score >= actionable_threshold]
     target_limit = limit or context.profile.scan.get("max_cards", 3)
     shown = candidates[:target_limit]
+
+    summary_out = _profile_path(context.profile, "defaults", "summary_out", DEFAULT_REPLAY_SUMMARY)
+    persist_replay_summary(result, summary_out)
+    print(f"Đã lưu summary scan tại: {summary_out}")
+
+    thesis_log_path = _profile_path(context.profile, "scan", "thesis_log", DEFAULT_THESIS_LOG)
+    ThesisLogWriter(thesis_log_path).append_scan_result(
+        profile_name=context.profile.name,
+        events_path=str(events_path),
+        instrument_key=result.instrument_key,
+        actionable_threshold=actionable_threshold,
+        feature_windows=result.feature_windows,
+        selected_signals=shown,
+        total_signals=len(result.thesis_events),
+    )
+    print(f"Đã ghi log thesis scan tại: {thesis_log_path}")
 
     print(f"Đã quét replay cho {result.instrument_key} với {result.feature_windows} cửa sổ đặc trưng.")
     print(f"Ngưỡng ưu tiên từ hồ sơ cá nhân: {actionable_threshold:.2f} điểm.")
@@ -244,19 +187,22 @@ def command_run_live(context: ShellContext, symbol: str | None, max_events: int 
 
     print(_format_header("run-live", context.profile))
     live_defaults = context.profile.live
-    target_symbol = (symbol or live_defaults.get("symbol") or context.profile.defaults.get("symbol") or "BTCUSDT")
+    target_symbol = symbol or live_defaults.get("symbol") or context.profile.defaults.get("symbol") or "BTCUSDT"
     target_max_events = int(max_events or live_defaults.get("max_events", 25))
     db_path = DEFAULT_STATE_DB
+    thesis_log_path = _profile_path(context.profile, "live", "thesis_log", DEFAULT_THESIS_LOG)
 
     print(f"Bắt đầu bộ máy live thesis cho {target_symbol}...")
     print(f"- Cơ sở dữ liệu trạng thái: {db_path}")
     print(f"- Giới hạn sự kiện: {target_max_events}")
+    print(f"- Thesis log live: {thesis_log_path}")
 
     loop = LiveThesisLoop(
         symbol=str(target_symbol),
         db_path=db_path,
         use_agg_trade=not use_trade,
         horizons=context.profile.outcomes.get("horizons"),
+        thesis_log_path=thesis_log_path,
     )
     loop.ux = context.profile.ux
 
@@ -272,26 +218,39 @@ def command_run_live(context: ShellContext, symbol: str | None, max_events: int 
     return 0
 
 
+def _period_from_date(date_str: str) -> tuple[int, int]:
+    start = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    end = start + timedelta(days=1)
+    return int(start.timestamp() * 1000), int(end.timestamp() * 1000)
+
+
+def _weekly_period(end_date_str: str | None) -> tuple[str, int, int]:
+    if end_date_str is None:
+        end = datetime.now(tz=timezone.utc)
+    else:
+        end = datetime.strptime(end_date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc) + timedelta(days=1)
+    start = end - timedelta(days=7)
+    label = f"{start.date().isoformat()}..{(end - timedelta(days=1)).date().isoformat()}"
+    return label, int(start.timestamp() * 1000), int(end.timestamp() * 1000)
+
+
 def command_review_day(context: ShellContext, date_str: str | None = None, summary_path: Path | None = None) -> int:
+    from cfte.storage.measurement import SummaryDocument, persist_summary_document, render_daily_summary_vi
     from cfte.storage.sqlite_writer import ThesisSQLiteStore
-    
+
     print(_format_header("review-day", context.profile))
     store = ThesisSQLiteStore(DEFAULT_STATE_DB)
-    
-    async def _show():
-        # 1. Show SQLite Stats
+
+    async def _show() -> None:
+        await store.migrate_schema()
         stats = await store.get_daily_summary_stats(date_str)
-        print(f"Báo cáo ngày: {stats['date']}")
-        print(f" - Tổng tín hiệu mới: {stats['total_new']}")
-        print(f" - Điểm số trung bình: {stats['avg_score']:.2f}")
-        print(f" - Kết quả đã chốt: {stats['outcomes_count']}")
-        
-        if stats["stage_dist"]:
-            print(" - Phân bổ trạng thái:")
-            for stage, count in stats["stage_dist"].items():
-                print(f"    * {stage}: {count}")
-        
-        # 2. Optionally show file-based summary (for replay compatibility)
+        text = render_daily_summary_vi(stats)
+        print(text)
+
+        output_path = _profile_path(context.profile, "review", "daily_summary_path", DEFAULT_DAILY_SUMMARY)
+        saved_path = persist_summary_document(output_path, SummaryDocument(label=stats["label"], summary_vi=text, payload=stats))
+        print(f"Đã lưu daily summary tại: {saved_path}")
+
         if summary_path and summary_path.exists():
             print(f"\nChi tiết từ file replay: {summary_path}")
             try:
@@ -302,42 +261,59 @@ def command_review_day(context: ShellContext, date_str: str | None = None, summa
                     for idx, signal in enumerate(top_signals, start=1):
                         why_now = signal.get("why_now", [])
                         print(
-                            f"  #{idx}: {signal.get('setup')} | {signal.get('stage')} | "
-                            f"score={signal.get('score')} | lý do={why_now[0] if why_now else '...'}"
+                            f"  #{idx}: {signal.get('setup')} | {signal.get('stage')} | score={signal.get('score')} | lý do={why_now[0] if why_now else '...'}"
                         )
-            except Exception as e:
-                print(f"Không thể đọc file summary: {e}")
+            except Exception as exc:
+                print(f"Không thể đọc file summary: {exc}")
+
+    asyncio.run(_show())
+    return 0
+
+
+def command_review_week(context: ShellContext, end_date_str: str | None = None) -> int:
+    from cfte.storage.measurement import (
+        SummaryDocument,
+        persist_summary_document,
+        render_setup_scorecard_vi,
+        render_weekly_review_vi,
+    )
+    from cfte.storage.sqlite_writer import ThesisSQLiteStore
+
+    print(_format_header("review-week", context.profile))
+    store = ThesisSQLiteStore(DEFAULT_STATE_DB)
+
+    async def _show() -> None:
+        await store.migrate_schema()
+        label, start_ts, end_ts = _weekly_period(end_date_str)
+        stats = await store.get_period_summary(start_ts=start_ts, end_ts=end_ts, label=label)
+        scorecard = await store.get_setup_scorecard()
+        review_text = render_weekly_review_vi(stats, scorecard)
+        print(review_text)
+        print()
+        print(render_setup_scorecard_vi(scorecard))
+
+        output_path = _profile_path(context.profile, "review", "weekly_summary_path", DEFAULT_WEEKLY_SUMMARY)
+        saved_path = persist_summary_document(
+            output_path,
+            SummaryDocument(label=label, summary_vi=review_text, payload={"stats": stats, "scorecard": scorecard}),
+        )
+        print(f"\nĐã lưu weekly review tại: {saved_path}")
 
     asyncio.run(_show())
     return 0
 
 
 def command_scorecard(context: ShellContext) -> int:
+    from cfte.storage.measurement import render_setup_scorecard_vi
     from cfte.storage.sqlite_writer import ThesisSQLiteStore
-    
+
     print(_format_header("scorecard", context.profile))
     store = ThesisSQLiteStore(DEFAULT_STATE_DB)
-    
-    async def _show():
+
+    async def _show() -> None:
+        await store.migrate_schema()
         rows = await store.get_setup_scorecard()
-        if not rows:
-            print("Chưa có đủ dữ liệu kết quả để lập bảng điểm (scorecard).")
-            print("Gợi ý: Hãy để `run-live` chạy lâu hơn để thu thập kết quả 1h/4h/24h.")
-            return
-
-        print(f"{'Setup':<25} | {'Count':<5} | {'Score':<6} | {'Returns (1h / 4h / 24h)':<30}")
-        print("-" * 80)
-        for r in rows:
-            h = r["horizons"]
-            def _fmt_h(key):
-                val = h.get(key)
-                if not val: return "N/A"
-                ret = val["avg_return"]
-                color = "🟢" if ret >= 0 else "🔴"
-                return f"{color}{ret:+.2f}%"
-
-            h_str = f"{_fmt_h('1h')} / {_fmt_h('4h')} / {_fmt_h('24h')}"
-            print(f"{r['setup']:<25} | {r['total_signals']:<5} | {r['avg_score']:<6.1f} | {h_str}")
+        print(render_setup_scorecard_vi(rows))
 
     asyncio.run(_show())
     return 0
@@ -368,61 +344,60 @@ def command_health(context: ShellContext) -> int:
 
 
 def command_review_thesis(context: ShellContext) -> int:
-    import asyncio
+    from cfte.models.events import ThesisSignal
     from cfte.storage.sqlite_writer import ThesisSQLiteStore
     from cfte.thesis.cards import render_trader_card
-    from cfte.models.events import ThesisSignal
 
     print(_format_header("review-thesis", context.profile))
     store = ThesisSQLiteStore(DEFAULT_STATE_DB)
-    
-    async def _show():
+
+    async def _show() -> None:
         await store.migrate_schema()
         active = await store.get_active_thesis()
         recent = await store.get_recent_thesis(limit=10)
-        
+
         if active:
             print(f"--- Đang hoạt động ({len(active)}) ---")
-            for t in active:
-                outcomes = await store.get_thesis_outcomes(t["thesis_id"])
-                _render_t(t, outcomes)
-        
+            for thesis in active:
+                outcomes = await store.get_thesis_outcomes(thesis["thesis_id"])
+                _render_thesis(thesis, outcomes)
+
         if recent:
             print(f"\n--- Lịch sử gần đây ({len(recent)}) ---")
-            for t in recent:
-                if any(a["thesis_id"] == t["thesis_id"] for a in active):
+            for thesis in recent:
+                if any(item["thesis_id"] == thesis["thesis_id"] for item in active):
                     continue
-                outcomes = await store.get_thesis_outcomes(t["thesis_id"])
-                _render_t(t, outcomes)
+                outcomes = await store.get_thesis_outcomes(thesis["thesis_id"])
+                _render_thesis(thesis, outcomes)
 
         if not active and not recent:
             print("Không tìm thấy luận điểm nào trong database.")
 
-    def _render_t(t, outcomes: list[dict[str, Any]] | None = None):
-        entry_px = t.get("entry_px")
+    def _render_thesis(thesis: dict[str, Any], outcomes: list[dict[str, Any]] | None = None) -> None:
+        entry_px = thesis.get("entry_px")
         entry_str = f" | Entry: {entry_px:.2f}" if entry_px else ""
-        print(f"\nID: {t['thesis_id']} | {t['instrument_key']} | {t['setup']}{entry_str}")
-        
+        print(f"\nID: {thesis['thesis_id']} | {thesis['instrument_key']} | {thesis['setup']}{entry_str}")
+
         if outcomes:
-            outcome_parts = []
-            for o in outcomes:
-                if o["status"] == "COMPLETED":
-                    change = ((o["realized_px"] / entry_px) - 1) * 100 if entry_px else 0
+            outcome_parts: list[str] = []
+            for outcome in outcomes:
+                if outcome["status"] == "COMPLETED":
+                    change = ((outcome["realized_px"] / entry_px) - 1) * 100 if entry_px else 0.0
                     color = "🟢" if change >= 0 else "🔴"
-                    outcome_parts.append(f"{o['horizon']}: {color}{change:+.2f}%")
+                    outcome_parts.append(f"{outcome['horizon']}: {color}{change:+.2f}%")
                 else:
-                    outcome_parts.append(f"{o['horizon']}: ⌛")
+                    outcome_parts.append(f"{outcome['horizon']}: ⌛")
             print(f"Kết quả: {' | '.join(outcome_parts)}")
 
         signal = ThesisSignal(
-            thesis_id=t["thesis_id"],
-            instrument_key=t["instrument_key"],
-            setup=t["setup"],
-            direction=t["direction"],
-            stage=t["stage"],
-            score=t["score"],
-            confidence=t["confidence"],
-            coverage=t["coverage"],
+            thesis_id=thesis["thesis_id"],
+            instrument_key=thesis["instrument_key"],
+            setup=thesis["setup"],
+            direction=thesis["direction"],
+            stage=thesis["stage"],
+            score=thesis["score"],
+            confidence=thesis["confidence"],
+            coverage=thesis["coverage"],
             why_now=[],
             conflicts=[],
             invalidation="N/A",
@@ -438,7 +413,7 @@ def command_review_thesis(context: ShellContext) -> int:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="cfte",
-        description="Shell cá nhân cho Crypto Flow Thesis Engine theo luồng doctor -> run-scan -> run-live -> review-day.",
+        description="Shell cá nhân cho Crypto Flow Thesis Engine theo luồng doctor -> run-scan -> run-live -> review-day -> review-week.",
     )
     parser.add_argument("--profile", default=str(DEFAULT_PROFILE_PATH), help="Đường dẫn hồ sơ YAML cá nhân.")
     sub = parser.add_subparsers(dest="cmd")
@@ -446,7 +421,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("doctor", help="Kiểm tra trạng thái hệ thống và tệp cấu hình (Health check).")
     sub.add_parser("health", help="Kiểm tra kết nối và tình trạng dữ liệu hiện tại.")
     sub.add_parser("review-thesis", help="Xem danh sách các luận điểm đang lưu trong SQLite.")
-    sub.add_parser("scorecard", help="Xem bảng điểm hiệu suất theo từng loại setup (Edge tracking).")
+    sub.add_parser("scorecard", help="Xem bảng điểm hiệu suất theo từng loại setup.")
 
     replay = sub.add_parser("replay", help="Chạy replay deterministic và lưu summary.")
     replay.add_argument("--events", default=None)
@@ -462,9 +437,12 @@ def build_parser() -> argparse.ArgumentParser:
     run_live.add_argument("--max-events", type=int, default=None)
     run_live.add_argument("--use-trade", action="store_true", help="Dùng stream trade thay vì aggTrade.")
 
-    review = sub.add_parser("review-day", help="Xem báo cáo tổng kết ngày từ SQLite hoặc file summary.")
-    review.add_argument("--date", default=None, help="Ngày cần xem báo cáo (YYYY-MM-DD).")
-    review.add_argument("--summary", default=None, help="Đường dẫn file kết quả replay (tùy chọn).")
+    review_day = sub.add_parser("review-day", help="Sinh tổng kết ngày từ SQLite và lưu file summary tiếng Việt.")
+    review_day.add_argument("--date", default=None, help="Ngày cần xem báo cáo (YYYY-MM-DD).")
+    review_day.add_argument("--summary", default=None, help="Đường dẫn file kết quả replay (tùy chọn).")
+
+    review_week = sub.add_parser("review-week", help="Sinh weekly review và setup scorecard từ outcome đã log.")
+    review_week.add_argument("--end-date", default=None, help="Ngày kết thúc tuần review (YYYY-MM-DD).")
 
     return parser
 
@@ -495,6 +473,8 @@ def main() -> int:
     if args.cmd == "review-day":
         summary_path = Path(args.summary) if args.summary else None
         return command_review_day(context, date_str=args.date, summary_path=summary_path)
+    if args.cmd == "review-week":
+        return command_review_week(context, end_date_str=args.end_date)
     if args.cmd == "review-thesis":
         return command_review_thesis(context)
     if args.cmd == "scorecard":

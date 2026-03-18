@@ -6,6 +6,7 @@ from typing import Any
 
 from cfte.collectors.binance_public import fetch_historical_kline
 from cfte.storage.sqlite_writer import ThesisSQLiteStore
+from cfte.thesis.state import ThesisEventRecord
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +54,27 @@ class OutcomeMonitor:
                 realized_high=high_px,
                 realized_low=low_px
             )
-            print(f"Đã cập nhật kết quả {horizon} cho {thesis_id}: Price={close_px}")
+            terminal_stage = await self.store.finalize_thesis_from_outcome(
+                thesis_id=thesis_id,
+                horizon=horizon,
+                updated_at=target_ts,
+            )
+            if terminal_stage is not None:
+                await self.store.append_event(
+                    ThesisEventRecord(
+                        thesis_id=thesis_id,
+                        event_type="outcome_terminal",
+                        from_stage=outcome["stage"],
+                        to_stage=terminal_stage,
+                        event_ts=target_ts,
+                        summary_vi=f"Luận điểm được chốt {terminal_stage.lower()} theo outcome {horizon}.",
+                        score=0.0,
+                        confidence=0.0,
+                    )
+                )
+                print(f"Đã cập nhật kết quả {horizon} cho {thesis_id}: Price={close_px} | terminal={terminal_stage}")
+            else:
+                print(f"Đã cập nhật kết quả {horizon} cho {thesis_id}: Price={close_px}")
         else:
             print(f"Chưa lấy được dữ liệu giá cho {horizon} của {thesis_id}. Sẽ thử lại sau.")
 
