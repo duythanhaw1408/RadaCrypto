@@ -67,6 +67,34 @@ class _HealthyAdapter:
         )
 
 
+class _PartiallyFailingAdapter:
+    provider_name = "partial"
+
+    def fetch_pool_context(self, symbol: str, chain: str):
+        return normalize_dexscreener_pools(
+            {
+                "pairs": [
+                    {
+                        "pairAddress": "pair-partial",
+                        "baseToken": {"symbol": symbol},
+                        "quoteToken": {"symbol": "USDC"},
+                        "liquidity": {"usd": 950000},
+                        "volume": {"h24": 250000},
+                        "priceChange": {"h24": 0.9},
+                        "txns": {"h24": {"buys": 300, "sells": 240}},
+                    }
+                ]
+            },
+            chain=chain,
+        )
+
+    def fetch_wallet_context(self, symbol: str, chain: str):
+        raise RuntimeError("wallet endpoint timeout")
+
+    def fetch_holder_context(self, token_address: str, chain: str):
+        return []
+
+
 class _FailingAdapter:
     provider_name = "failing"
 
@@ -173,3 +201,18 @@ def test_fallback_without_adapters_returns_original_signal_with_no_crash():
     assert enriched.why_now == original.why_now
     assert enriched.conflicts == original.conflicts
     assert enriched.coverage == original.coverage
+
+
+def test_partial_provider_failure_keeps_successful_context_slices():
+    context = collect_optional_context(
+        symbol="SOL",
+        chain="solana",
+        token_address="token-1",
+        adapters=[_PartiallyFailingAdapter()],
+    )
+
+    assert context.provider_status["partial"] is False
+    assert len(context.pools) == 1
+    assert context.pools[0].source == "dexscreener"
+    assert context.wallets == []
+    assert context.holders == []
