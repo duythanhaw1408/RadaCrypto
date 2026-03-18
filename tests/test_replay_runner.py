@@ -42,3 +42,89 @@ def test_run_replay_sorts_events_and_rejects_instrument_mismatch():
 
     with pytest.raises(ValueError, match="instrument_key mismatch"):
         run_replay(unordered)
+
+
+from cfte.models.events import NormalizedTrade
+from cfte.replay.adapters import ReplayBookSnapshot, ReplayEvent
+
+
+def test_run_replay_records_lifecycle_history_for_real_stage_progression():
+    events = load_replay_events("fixtures/replay/btcusdt_normalized.jsonl")
+
+    result = run_replay(events)
+
+    accumulation = next(state for state in result.thesis_state.values() if state.signal.setup == "stealth_accumulation")
+    history = [event for event in result.thesis_event_history if event.thesis_id == accumulation.signal.thesis_id]
+
+    assert [event.to_stage for event in history] == ["DETECTED", "WATCHLIST", "CONFIRMED", "ACTIONABLE", "RESOLVED"]
+    assert accumulation.signal.stage == "RESOLVED"
+    assert accumulation.closed_ts == 1_700_000_002_000
+    assert history[-1].summary_vi.endswith("'Đã hoàn tất'.")
+
+
+def test_run_replay_reaches_invalidated_terminal_stage_through_real_state_update_path():
+    events = [
+        ReplayEvent(
+            event_type="book_snapshot",
+            venue_ts=1_000,
+            payload=ReplayBookSnapshot(
+                instrument_key="BINANCE:BTCUSDT:SPOT",
+                bids=[(100.0, 8.0)],
+                asks=[(100.5, 3.0)],
+                seq_id=1,
+                venue_ts=1_000,
+            ),
+        ),
+        ReplayEvent(
+            event_type="trade",
+            venue_ts=2_000,
+            payload=NormalizedTrade(
+                event_id="t1",
+                venue="binance",
+                instrument_key="BINANCE:BTCUSDT:SPOT",
+                price=100.45,
+                qty=1.0,
+                quote_qty=100.45,
+                taker_side="BUY",
+                venue_ts=2_000,
+            ),
+        ),
+        ReplayEvent(
+            event_type="trade",
+            venue_ts=3_000,
+            payload=NormalizedTrade(
+                event_id="t2",
+                venue="binance",
+                instrument_key="BINANCE:BTCUSDT:SPOT",
+                price=100.48,
+                qty=1.2,
+                quote_qty=120.576,
+                taker_side="BUY",
+                venue_ts=3_000,
+            ),
+        ),
+        ReplayEvent(
+            event_type="trade",
+            venue_ts=4_000,
+            payload=NormalizedTrade(
+                event_id="t3",
+                venue="binance",
+                instrument_key="BINANCE:BTCUSDT:SPOT",
+                price=99.90,
+                qty=2.0,
+                quote_qty=199.8,
+                taker_side="SELL",
+                venue_ts=4_000,
+            ),
+        ),
+    ]
+
+    result = run_replay(events)
+
+    accumulation = next(state for state in result.thesis_state.values() if state.signal.setup == "stealth_accumulation")
+    history = [event for event in result.thesis_event_history if event.thesis_id == accumulation.signal.thesis_id]
+
+    assert accumulation.signal.stage == "INVALIDATED"
+    assert accumulation.closed_ts == 4_000
+    assert [event.to_stage for event in history] == ["DETECTED", "WATCHLIST", "CONFIRMED", "INVALIDATED"]
+    assert "Đã bị vô hiệu" in history[-1].summary_vi
