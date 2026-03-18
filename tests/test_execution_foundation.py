@@ -85,8 +85,84 @@ def test_reconciliation_logic():
     result = reconcile_position(fills=fills, symbol="BTCUSDT", venue_net_qty=0.59, tolerance=0.02)
 
     assert result.internal_net_qty == pytest.approx(0.6)
+    assert result.gross_buy_qty == pytest.approx(1.0)
+    assert result.gross_sell_qty == pytest.approx(0.4)
     assert result.delta_qty == pytest.approx(0.01)
+    assert result.unique_fill_count == 2
     assert result.is_aligned
+
+
+def test_duplicate_fill_is_ignored_by_order_state_store():
+    store = OrderStateStore()
+    order = _sample_order(qty=1.0)
+    store.register_order(order)
+
+    fill = _fill("fill-dup", order.order_id, qty=1.0, price=100.0, ts=3)
+    store.apply_fill(fill)
+    store.apply_fill(fill)
+
+    snapshot = store.get(order.order_id)
+    assert snapshot.status == "FILLED"
+    assert snapshot.filled_qty == pytest.approx(1.0)
+    assert snapshot.fee_paid == pytest.approx(0.01)
+
+
+def test_late_fill_keeps_state_deterministic_and_monotonic():
+    store = OrderStateStore()
+    order = _sample_order(qty=2.0)
+    store.register_order(order)
+
+    store.apply_fill(_fill("fill-late-2", order.order_id, qty=1.0, price=102.0, ts=5))
+    store.apply_fill(_fill("fill-late-1", order.order_id, qty=1.0, price=98.0, ts=3))
+
+    snapshot = store.get(order.order_id)
+    assert snapshot.status == "FILLED"
+    assert snapshot.filled_qty == pytest.approx(2.0)
+    assert snapshot.avg_fill_price == pytest.approx(100.0)
+    assert snapshot.updated_ts == 5
+
+
+def test_reconciliation_detects_duplicates_and_out_of_order_fills_without_double_counting():
+    fills = [
+        _fill("fill-2", "ord-1", qty=0.3, price=101.0, ts=20),
+        _fill("fill-1", "ord-1", qty=0.7, price=99.0, ts=10),
+        _fill("fill-2", "ord-1", qty=0.3, price=101.0, ts=20),
+    ]
+
+    result = reconcile_position(
+        fills=fills,
+        symbol="BTCUSDT",
+        venue_net_qty=1.0,
+        order_qty_by_order_id={"ord-1": 1.0},
+    )
+
+    assert result.internal_net_qty == pytest.approx(1.0)
+    assert result.duplicate_fill_count == 1
+    assert result.out_of_order_fill_count == 2
+    assert result.qty_violation_count == 0
+    assert result.has_structural_issues
+    assert not result.is_aligned
+
+
+def test_reconciliation_flags_overfill_even_when_net_delta_matches():
+    fills = [
+        _fill("fill-1", "ord-1", qty=0.6, price=100.0, ts=1),
+        _fill("fill-2", "ord-1", qty=0.6, price=100.5, ts=2),
+        FillFact("fill-3", "ord-2", "binance", "acct-1", "BTCUSDT", "SELL", 0.2, 101.0, 0.0, "USDT", "TAKER", 3),
+    ]
+
+    result = reconcile_position(
+        fills=fills,
+        symbol="BTCUSDT",
+        venue_net_qty=1.0,
+        order_qty_by_order_id={"ord-1": 1.0, "ord-2": 0.2},
+    )
+
+    assert result.internal_net_qty == pytest.approx(1.0)
+    assert result.delta_qty == pytest.approx(0.0)
+    assert result.qty_violation_count == 1
+    assert result.has_structural_issues
+    assert not result.is_aligned
 
 
 def test_slippage_metric_computation():
@@ -106,7 +182,12 @@ def test_execution_summary_defaults_to_vietnamese_text():
     fill = _fill("fill-1", order.order_id, qty=1.0, price=100.2, ts=3)
     store.apply_fill(fill)
 
-    reconciliation = reconcile_position([fill], symbol="BTCUSDT", venue_net_qty=1.0)
+    reconciliation = reconcile_position(
+        [fill],
+        symbol="BTCUSDT",
+        venue_net_qty=1.0,
+        order_qty_by_order_id={order.order_id: order.qty},
+    )
     quality = compute_execution_quality(
         fills=[fill],
         decision_price_by_order_id={order.order_id: 100.0},
@@ -117,3 +198,4 @@ def test_execution_summary_defaults_to_vietnamese_text():
 
     assert "Tóm tắt giám sát thực thi" in text
     assert "Đối soát vị thế" in text
+    assert "Kiểm tra đối soát mạnh hơn" in text

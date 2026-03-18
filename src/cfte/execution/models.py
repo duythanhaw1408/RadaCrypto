@@ -57,7 +57,14 @@ class PositionReconciliation:
     internal_net_qty: float
     venue_net_qty: float
     delta_qty: float
-    is_aligned: bool
+    gross_buy_qty: float = 0.0
+    gross_sell_qty: float = 0.0
+    unique_fill_count: int = 0
+    duplicate_fill_count: int = 0
+    out_of_order_fill_count: int = 0
+    qty_violation_count: int = 0
+    has_structural_issues: bool = False
+    is_aligned: bool = False
 
 
 @dataclass(slots=True)
