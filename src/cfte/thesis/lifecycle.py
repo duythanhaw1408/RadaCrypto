@@ -31,6 +31,10 @@ _STAGE_LABELS_VI: Final[dict[Stage, str]] = {
 }
 
 
+def stage_label_vi(stage: Stage) -> str:
+    return _STAGE_LABELS_VI[stage]
+
+
 class InvalidThesisTransitionError(ValueError):
     """Raised when a thesis lifecycle transition violates deterministic guardrails."""
 
@@ -65,5 +69,5 @@ def summarize_lifecycle_transition(current_stage: Stage, next_stage: Stage) -> s
     resolved_stage = reduce_thesis_stage(current_stage=current_stage, next_stage=next_stage)
     return (
         "Luận điểm chuyển trạng thái từ "
-        f"'{_STAGE_LABELS_VI[current_stage]}' sang '{_STAGE_LABELS_VI[resolved_stage]}'."
+        f"'{stage_label_vi(current_stage)}' sang '{stage_label_vi(resolved_stage)}'."
     )
