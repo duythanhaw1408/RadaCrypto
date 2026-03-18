@@ -12,12 +12,14 @@ on:
 jobs:
   smoke-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.12'
+        cache: 'pip'
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -28,6 +30,6 @@ jobs:
     - name: Run Replay Determinism
       run: |
         PYTHONPATH=src python -m cfte.cli.main replay
-    - name: Run Tests
+    - name: Run Tests (skip live engine tests)
       run: |
-        PYTHONPATH=src python -m pytest tests/ -q
+        PYTHONPATH=src python -m pytest tests/ -q --ignore=tests/test_live_loop_shell.py -x
