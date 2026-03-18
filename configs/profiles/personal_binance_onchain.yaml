@@ -20,7 +20,10 @@ live:
   max_events: 500
 
 review:
-  summary_path: data/replay/summary_sol_onchain.json
+  summary_path: "data/replay/summary_sol.json"
+
+outcomes:
+  horizons: ["1h", "4h", "24h"]
 
 # Placeholder for future on-chain data providers
 onchain:

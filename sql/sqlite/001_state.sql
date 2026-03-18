@@ -90,7 +90,21 @@ CREATE TABLE IF NOT EXISTS thesis (
     coverage REAL NOT NULL,
     invalidation_px REAL,
     opened_ts INTEGER NOT NULL,
-    closed_ts INTEGER
+    closed_ts INTEGER,
+    entry_px REAL
+);
+
+CREATE TABLE IF NOT EXISTS thesis_outcome (
+    thesis_id TEXT NOT NULL,
+    horizon TEXT NOT NULL,
+    target_ts INTEGER NOT NULL,
+    realized_px REAL,
+    realized_high REAL,
+    realized_low REAL,
+    status TEXT NOT NULL DEFAULT 'PENDING',
+    updated_at INTEGER NOT NULL,
+    PRIMARY KEY (thesis_id, horizon),
+    FOREIGN KEY (thesis_id) REFERENCES thesis(thesis_id)
 );
 
 CREATE TABLE IF NOT EXISTS thesis_event (

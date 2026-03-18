@@ -37,6 +37,25 @@ def fetch_depth_snapshot(symbol: str, limit: int = DEFAULT_DEPTH_LEVEL, rest_bas
     return response.json()
 
 
+def fetch_historical_kline(symbol: str, timestamp_ms: int, rest_base: str = BINANCE_REST_BASE) -> dict[str, Any] | None:
+    url = f"{rest_base}/api/v3/klines"
+    params = {
+        "symbol": symbol.upper(),
+        "interval": "1m",
+        "startTime": timestamp_ms,
+        "limit": 1
+    }
+    try:
+        response = requests.get(url, params=params, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        if data and len(data) > 0:
+            return data[0] # [Open time, Open, High, Low, Close, Volume, ...]
+    except Exception:
+        return None
+    return None
+
+
 def try_fetch_depth_snapshot(
     symbol: str,
     limit: int = DEFAULT_DEPTH_LEVEL,

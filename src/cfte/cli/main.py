@@ -27,6 +27,7 @@ class PersonalProfile:
     scan: dict[str, Any]
     live: dict[str, Any]
     review: dict[str, Any]
+    outcomes: dict[str, Any]
 
 
 @dataclass(frozen=True, slots=True)
@@ -52,6 +53,7 @@ def load_personal_profile(profile_path: Path) -> PersonalProfile:
         scan=dict(data.get("scan", {})),
         live=dict(data.get("live", {})),
         review=dict(data.get("review", {})),
+        outcomes=dict(data.get("outcomes", {"horizons": ["1h", "4h", "24h"]})),
     )
 
 
@@ -252,6 +254,7 @@ def command_run_live(context: ShellContext, symbol: str | None, max_events: int 
         symbol=str(target_symbol),
         db_path=db_path,
         use_agg_trade=not use_trade,
+        horizons=context.profile.outcomes.get("horizons"),
     )
 
     try:
@@ -328,26 +331,43 @@ def command_review_thesis(context: ShellContext) -> int:
     store = ThesisSQLiteStore(DEFAULT_STATE_DB)
     
     async def _show():
+        await store.migrate_schema()
         active = await store.get_active_thesis()
-        recent = await store.get_recent_thesis(limit=5)
+        recent = await store.get_recent_thesis(limit=10)
         
         if active:
             print(f"--- Đang hoạt động ({len(active)}) ---")
             for t in active:
-                _render_t(t)
+                outcomes = await store.get_thesis_outcomes(t["thesis_id"])
+                _render_t(t, outcomes)
         
         if recent:
             print(f"\n--- Lịch sử gần đây ({len(recent)}) ---")
             for t in recent:
                 if any(a["thesis_id"] == t["thesis_id"] for a in active):
                     continue
-                _render_t(t)
+                outcomes = await store.get_thesis_outcomes(t["thesis_id"])
+                _render_t(t, outcomes)
 
         if not active and not recent:
             print("Không tìm thấy luận điểm nào trong database.")
 
-    def _render_t(t):
-        print(f"\nID: {t['thesis_id']} | {t['instrument_key']} | {t['setup']}")
+    def _render_t(t, outcomes: list[dict[str, Any]] | None = None):
+        entry_px = t.get("entry_px")
+        entry_str = f" | Entry: {entry_px:.2f}" if entry_px else ""
+        print(f"\nID: {t['thesis_id']} | {t['instrument_key']} | {t['setup']}{entry_str}")
+        
+        if outcomes:
+            outcome_parts = []
+            for o in outcomes:
+                if o["status"] == "COMPLETED":
+                    change = ((o["realized_px"] / entry_px) - 1) * 100 if entry_px else 0
+                    color = "🟢" if change >= 0 else "🔴"
+                    outcome_parts.append(f"{o['horizon']}: {color}{change:+.2f}%")
+                else:
+                    outcome_parts.append(f"{o['horizon']}: ⌛")
+            print(f"Kết quả: {' | '.join(outcome_parts)}")
+
         signal = ThesisSignal(
             thesis_id=t["thesis_id"],
             instrument_key=t["instrument_key"],

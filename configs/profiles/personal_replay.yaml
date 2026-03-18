@@ -21,3 +21,6 @@ live:
 
 review:
   summary_path: data/replay/research_eth.json
+
+outcomes:
+  horizons: ["1h", "4h", "24h"]

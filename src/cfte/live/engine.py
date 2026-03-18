@@ -17,6 +17,7 @@ from cfte.normalizers.binance import (
     normalize_trade,
 )
 from cfte.storage.sqlite_writer import ThesisSQLiteStore
+from cfte.live.outcome_monitor import OutcomeMonitor
 from cfte.thesis.engines import evaluate_setups
 from cfte.thesis.state import ThesisLifecycleRecord, apply_signal_update
 
@@ -36,11 +37,13 @@ class LiveThesisLoop:
         symbol: str,
         db_path: Path,
         use_agg_trade: bool = True,
+        horizons: list[str] | None = None,
     ) -> None:
         self.symbol = symbol.upper()
         self.instrument_key = f"BINANCE:{self.symbol}:SPOT"
         self.db_path = db_path
         self.use_agg_trade = use_agg_trade
+        self.horizons = horizons or ["1h", "4h", "24h"]
         self.store = ThesisSQLiteStore(db_path)
         self.health = LiveEngineHealth(venue="binance")
         self.thesis_state: dict[str, ThesisLifecycleRecord] = {}
@@ -66,6 +69,11 @@ class LiveThesisLoop:
         if not await self._init_book():
             print("Lỗi khởi tạo sổ lệnh.")
             return
+
+        await self.store.migrate_schema()
+
+        monitor = OutcomeMonitor(self.store)
+        monitor_task = asyncio.create_task(monitor.run_forever())
 
         streams = build_public_streams([self.symbol], use_agg_trade=self.use_agg_trade)
         collector = BinancePublicCollector(streams=streams)
@@ -111,6 +119,7 @@ class LiveThesisLoop:
             self.health.last_error = str(exc)
             self.health.connected = False
         finally:
+            monitor.stop()
             self.health.connected = False
 
     async def _process_trade_event(self, trade: NormalizedTrade):
@@ -142,10 +151,28 @@ class LiveThesisLoop:
             
             # Check if stage changed or important update
             if next_state.signal.stage != prev_stage:
-                 # Persistence
-                 await self.store.save_thesis(next_state.signal, opened_ts=next_state.opened_ts, closed_ts=next_state.closed_ts)
-                 for event in events:
-                     await self.store.append_event(event)
+                # Get current entry price (mid-price or last trade)
+                entry_px = snapshot.mid_price
+                
+                # Persistence
+                await self.store.save_thesis(
+                    next_state.signal, 
+                    opened_ts=next_state.opened_ts, 
+                    entry_px=entry_px,
+                    closed_ts=next_state.closed_ts
+                )
+                
+                # If this is a new thesis (prev_stage was None or it just opened)
+                # initialize outcomes
+                if prev_stage is None:
+                    await self.store.init_outcomes(
+                        thesis_id=signal.thesis_id,
+                        horizons=self.horizons,
+                        opened_ts=next_state.opened_ts
+                    )
+
+                for event in events:
+                    await self.store.append_event(event)
 
             self.thesis_state[signal.thesis_id] = next_state
 
