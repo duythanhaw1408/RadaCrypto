@@ -66,6 +66,7 @@ Các phần cấu hình cá nhân hiện hỗ trợ:
 - symbol mặc định
 - đường dẫn replay mặc định
 - ngưỡng scan cá nhân
+- đường dẫn log thesis cho scan/live
 - tham số ingest live cơ bản
 
 ## Daily workflow đề xuất
@@ -90,11 +91,15 @@ cfte replay \
 cfte run-scan --events fixtures/replay/btcusdt_normalized.jsonl --limit 3
 ```
 
+`run-scan` sẽ tự động ghi summary replay theo hồ sơ cá nhân và append log thesis JSONL để trader xem lại sau.
+
 ### 4) Chạy ingest live cho phiên theo dõi
 
 ```bash
 cfte run-live --symbol BTCUSDT --max-events 25
 ```
+
+`run-live` giữ tối thiểu ingest thật từ Binance public, đánh giá thesis theo cửa sổ trade gần nhất, ghi raw parquet, và append thesis log JSONL cho từng nhịp trade. Nếu snapshot đầu vào lỗi, shell sẽ báo trạng thái suy giảm thay vì crash mơ hồ.
 
 ### 5) Xem review cuối ngày
 

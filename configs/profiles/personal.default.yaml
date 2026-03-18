@@ -13,11 +13,15 @@ defaults:
 scan:
   actionable_threshold: 75
   max_cards: 3
+  thesis_log: data/thesis/scan_thesis.jsonl
 
 live:
   symbol: BTCUSDT
   raw_dir: data/raw
   max_events: 25
+  trade_window_size: 20
+  actionable_threshold: 75
+  thesis_log: data/thesis/live_thesis.jsonl
 
 review:
   summary_path: data/replay/summary_btcusdt.json

@@ -14,6 +14,7 @@ DEFAULT_PROFILE_PATH = Path("configs/profiles/personal.default.yaml")
 DEFAULT_REPLAY_EVENTS = Path("fixtures/replay/btcusdt_normalized.jsonl")
 DEFAULT_REPLAY_SUMMARY = Path("data/replay/summary_btcusdt.json")
 DEFAULT_RAW_DIR = Path("data/raw")
+DEFAULT_THESIS_LOG = Path("data/thesis/thesis_log.jsonl")
 
 
 @dataclass(frozen=True, slots=True)
@@ -62,6 +63,15 @@ def _resolve_path(value: str | Path | None, fallback: Path) -> Path:
     return Path(value) if value is not None else fallback
 
 
+def _profile_path(profile: PersonalProfile, section: str, key: str, fallback: Path) -> Path:
+    if section == "defaults":
+        value = profile.defaults.get(key)
+    else:
+        section_map = getattr(profile, section)
+        value = section_map.get(key)
+    return Path(str(value)) if value is not None else fallback
+
+
 def _format_header(title: str, profile: PersonalProfile) -> str:
     trader_name = profile.trader.get("display_name", "Trader")
     return f"=== {title} | hồ sơ: {profile.name} | người dùng: {trader_name} ==="
@@ -94,7 +104,17 @@ def doctor(context: ShellContext) -> int:
     return 0
 
 
-async def run_binance_public_ingest(symbol: str, out_dir: Path, max_events: int, use_agg_trade: bool) -> int:
+async def run_binance_public_ingest(
+    profile_name: str,
+    symbol: str,
+    out_dir: Path,
+    thesis_log_path: Path,
+    actionable_threshold: float,
+    max_events: int,
+    use_agg_trade: bool,
+    trade_window_size: int,
+) -> int:
+    from cfte.cli.runtime import LiveThesisLoop, health_snapshot_to_dict
     from cfte.books.binance_depth import BinanceDepthReconciler
     from cfte.collectors.binance_public import BinancePublicCollector, build_public_streams, try_fetch_depth_snapshot
     from cfte.normalizers.binance import (
@@ -105,28 +125,35 @@ async def run_binance_public_ingest(symbol: str, out_dir: Path, max_events: int,
         normalize_trade,
     )
     from cfte.storage.raw_writer import RawParquetWriter
+    from cfte.storage.thesis_log import ThesisLogWriter
+    from cfte.thesis.cards import render_trader_card
 
     instrument_key = f"BINANCE:{symbol.upper()}:SPOT"
     writer = RawParquetWriter(out_dir)
+    thesis_writer = ThesisLogWriter(thesis_log_path)
     depth = BinanceDepthReconciler(instrument_key=instrument_key)
+    live_loop = LiveThesisLoop(instrument_key=instrument_key, trade_window_size=trade_window_size)
 
     print(f"Khởi tạo snapshot sổ lệnh cho {symbol.upper()}...")
     snapshot, error = try_fetch_depth_snapshot(symbol=symbol.upper())
     if snapshot is None:
+        print("Trạng thái live: suy giảm do thiếu snapshot mở đầu.")
         print(error or f"Không lấy được snapshot sổ lệnh cho {symbol.upper()}.")
         return 1
 
-    depth.apply_snapshot(
-        bids=[(float(px), float(qty)) for px, qty in snapshot.get("bids", [])],
-        asks=[(float(px), float(qty)) for px, qty in snapshot.get("asks", [])],
-        last_update_id=int(snapshot["lastUpdateId"]),
-    )
+    bids = [(float(px), float(qty)) for px, qty in snapshot.get("bids", [])]
+    asks = [(float(px), float(qty)) for px, qty in snapshot.get("asks", [])]
+    last_update_id = int(snapshot["lastUpdateId"])
+    depth.apply_snapshot(bids=bids, asks=asks, last_update_id=last_update_id)
+    live_loop.apply_snapshot(bids=bids, asks=asks, seq_id=last_update_id)
 
     streams = build_public_streams([symbol], use_agg_trade=use_agg_trade)
     collector = BinancePublicCollector(streams=streams)
 
     print(f"Bắt đầu ingest Binance public ({symbol.upper()}). Sẽ dừng sau {max_events} sự kiện.")
+    print(f"Log thesis live sẽ lưu tại: {thesis_log_path}")
     processed = 0
+    trade_evaluations = 0
     async for envelope in collector.stream_forever():
         stream = str(envelope.get("stream", ""))
         data = envelope.get("data", {})
@@ -137,12 +164,15 @@ async def run_binance_public_ingest(symbol: str, out_dir: Path, max_events: int,
         if event_type == "aggTrade":
             normalized = normalize_agg_trade(data, instrument_key=instrument_key)
             writer.write_event("binance_public", "aggTrade", "binance", instrument_key, data, normalized.event_id, normalized.venue_ts)
+            evaluation = live_loop.ingest_trade(normalized)
         elif event_type == "trade":
             normalized = normalize_trade(data, instrument_key=instrument_key)
             writer.write_event("binance_public", "trade", "binance", instrument_key, data, normalized.event_id, normalized.venue_ts)
+            evaluation = live_loop.ingest_trade(normalized)
         elif event_type == "bookTicker":
             normalized = normalize_book_ticker(data, instrument_key=instrument_key)
             writer.write_event("binance_public", "bookTicker", "binance", instrument_key, data, normalized.event_id, normalized.venue_ts)
+            evaluation = None
         elif event_type == "depthUpdate":
             normalized = normalize_depth_diff(data, instrument_key=instrument_key)
             writer.write_event(
@@ -156,19 +186,46 @@ async def run_binance_public_ingest(symbol: str, out_dir: Path, max_events: int,
                 seq_id=normalized.final_update_id,
             )
             depth.ingest_diff(normalized)
+            live_loop.ingest_depth(normalized)
+            evaluation = None
         elif event_type == "kline":
             normalized = normalize_kline(data, instrument_key=instrument_key)
             writer.write_event("binance_public", f"kline_{normalized.interval}", "binance", instrument_key, data, normalized.event_id, normalized.venue_ts)
+            evaluation = None
         else:
             continue
 
         processed += 1
+        if evaluation is not None:
+            trade_evaluations += 1
+            thesis_writer.append_live_snapshot(
+                profile_name=profile_name,
+                symbol=symbol.upper(),
+                instrument_key=instrument_key,
+                event_type=evaluation.event_type,
+                venue_ts=evaluation.venue_ts,
+                trade_window_size=trade_window_size,
+                signals=evaluation.signals,
+                health=health_snapshot_to_dict(collector.health_snapshot()),
+            )
+            prioritized = [signal for signal in evaluation.signals if signal.score >= actionable_threshold]
+            if prioritized:
+                print(
+                    f"\nTín hiệu live mới vượt ngưỡng {actionable_threshold:.2f} "
+                    f"sau trade #{trade_evaluations}:"
+                )
+                print(render_trader_card(prioritized[0]))
+                print("---")
+
         if processed % 10 == 0:
             print(f"Đã ghi {processed} sự kiện. Stream gần nhất: {stream}")
+            print(collector.health_snapshot().to_operator_summary())
         if processed >= max_events:
             break
 
     print(f"Hoàn tất ingest. Tổng sự kiện đã ghi: {processed}.")
+    print(f"Tổng lần đánh giá thesis live: {trade_evaluations}.")
+    print(collector.health_snapshot().to_operator_summary())
     return 0
 
 
@@ -198,19 +255,38 @@ def command_replay(context: ShellContext, events_path: Path, summary_out: Path) 
     return run_replay_research(events_path=events_path, summary_out=summary_out)
 
 
-def command_run_scan(context: ShellContext, events_path: Path, limit: int) -> int:
+def command_run_scan(context: ShellContext, events_path: Path, limit: int | None) -> int:
+    from cfte.replay.runner import persist_replay_summary
+    from cfte.storage.thesis_log import ThesisLogWriter
     from cfte.thesis.cards import render_trader_card
 
     print(_format_header("run-scan", context.profile))
     result = _load_replay_result(events_path)
     actionable_threshold = float(context.profile.scan.get("actionable_threshold", 75.0))
+    summary_path = _profile_path(context.profile, "defaults", "summary_out", DEFAULT_REPLAY_SUMMARY)
+    thesis_log_path = _profile_path(context.profile, "scan", "thesis_log", DEFAULT_THESIS_LOG)
+    target_limit = int(limit or context.profile.scan.get("max_cards", 3))
     candidates = [signal for signal in result.thesis_events if signal.score >= actionable_threshold]
-    shown = candidates[:limit]
+    shown = candidates[:target_limit]
+
+    persist_replay_summary(result, summary_path)
+    ThesisLogWriter(thesis_log_path).append_scan_result(
+        profile_name=context.profile.name,
+        events_path=str(events_path),
+        instrument_key=result.instrument_key,
+        actionable_threshold=actionable_threshold,
+        feature_windows=result.feature_windows,
+        selected_signals=shown,
+        total_signals=len(result.thesis_events),
+    )
 
     print(f"Đã quét replay cho {result.instrument_key} với {result.feature_windows} cửa sổ đặc trưng.")
     print(f"Ngưỡng ưu tiên từ hồ sơ cá nhân: {actionable_threshold:.2f} điểm.")
+    print(f"Đã lưu summary scan tại: {summary_path}")
+    print(f"Đã ghi log thesis scan tại: {thesis_log_path}")
     if not shown:
-        print("Chưa có thiết lập nào vượt ngưỡng ưu tiên. Hãy tiếp tục theo dõi watchlist.")
+        print("Trạng thái shell: chạy ổn định nhưng chưa có thiết lập vượt ngưỡng ưu tiên.")
+        print("Hãy tiếp tục theo dõi watchlist.")
         return 0
 
     print(f"Có {len(shown)} thiết lập đáng chú ý để trader xem nhanh:")
@@ -226,15 +302,24 @@ def command_run_live(context: ShellContext, symbol: str | None, out_dir: Path | 
     target_symbol = (symbol or live_defaults.get("symbol") or context.profile.defaults.get("symbol") or "BTCUSDT")
     target_out = _resolve_path(out_dir, Path(str(live_defaults.get("raw_dir", DEFAULT_RAW_DIR))))
     target_max_events = int(max_events or live_defaults.get("max_events", 25))
+    trade_window_size = int(live_defaults.get("trade_window_size", 20))
+    actionable_threshold = float(live_defaults.get("actionable_threshold", context.profile.scan.get("actionable_threshold", 75.0)))
+    thesis_log_path = _profile_path(context.profile, "live", "thesis_log", DEFAULT_THESIS_LOG)
     print(f"Chuẩn bị chạy live cho {target_symbol}.")
     print(f"- Thư mục raw: {target_out}")
     print(f"- Giới hạn sự kiện: {target_max_events}")
+    print(f"- Cửa sổ trade thesis live: {trade_window_size}")
+    print(f"- Ngưỡng in trader-card: {actionable_threshold}")
     return asyncio.run(
         run_binance_public_ingest(
+            profile_name=context.profile.name,
             symbol=str(target_symbol),
             out_dir=target_out,
+            thesis_log_path=thesis_log_path,
+            actionable_threshold=actionable_threshold,
             max_events=target_max_events,
             use_agg_trade=not use_trade,
+            trade_window_size=trade_window_size,
         )
     )
 
@@ -271,6 +356,9 @@ def command_health(context: ShellContext) -> int:
     from cfte.collectors.health import CollectorHealthSnapshot
 
     print(_format_header("health", context.profile))
+    replay_path = _profile_path(context.profile, "defaults", "replay_events", DEFAULT_REPLAY_EVENTS)
+    summary_path = _profile_path(context.profile, "defaults", "summary_out", DEFAULT_REPLAY_SUMMARY)
+    live_log_path = _profile_path(context.profile, "live", "thesis_log", DEFAULT_THESIS_LOG)
     snapshot = CollectorHealthSnapshot(
         venue="binance",
         state="idle",
@@ -282,6 +370,9 @@ def command_health(context: ShellContext) -> int:
         last_error=None,
     )
     print(snapshot.to_operator_summary())
+    print(f"- Replay mặc định: {replay_path} | tồn tại={replay_path.exists()}")
+    print(f"- Summary scan/replay: {summary_path} | tồn tại={summary_path.exists()}")
+    print(f"- Log thesis live: {live_log_path} | tồn tại={live_log_path.exists()}")
     print("Health này phản ánh trạng thái shell hiện tại trước khi bật collector live.")
     return 0
 
@@ -298,12 +389,12 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("health", help="Xem trạng thái shell/collector trước khi chạy live.")
 
     replay = sub.add_parser("replay", help="Chạy replay deterministic và lưu summary.")
-    replay.add_argument("--events", default=str(DEFAULT_REPLAY_EVENTS))
-    replay.add_argument("--summary-out", default=str(DEFAULT_REPLAY_SUMMARY))
+    replay.add_argument("--events", default=None)
+    replay.add_argument("--summary-out", default=None)
 
     run_scan = sub.add_parser("run-scan", help="Quét replay theo hồ sơ cá nhân và in trader card tiếng Việt.")
-    run_scan.add_argument("--events", default=str(DEFAULT_REPLAY_EVENTS))
-    run_scan.add_argument("--limit", type=int, default=3)
+    run_scan.add_argument("--events", default=None)
+    run_scan.add_argument("--limit", type=int, default=None)
 
     run_live = sub.add_parser("run-live", help="Chạy ingest live Binance public bằng cấu hình cá nhân.")
     run_live.add_argument("--symbol", default=None)
@@ -312,7 +403,7 @@ def build_parser() -> argparse.ArgumentParser:
     run_live.add_argument("--use-trade", action="store_true", help="Dùng stream trade thay vì aggTrade.")
 
     review = sub.add_parser("review-day", help="Xem tóm tắt cuối ngày từ summary replay.")
-    review.add_argument("--summary", default=str(DEFAULT_REPLAY_SUMMARY))
+    review.add_argument("--summary", default=None)
 
     return parser
 
@@ -332,14 +423,18 @@ def main() -> int:
     if args.cmd == "health":
         return command_health(context)
     if args.cmd == "replay":
-        return command_replay(context, events_path=Path(args.events), summary_out=Path(args.summary_out))
+        replay_events = _resolve_path(args.events, _profile_path(context.profile, "defaults", "replay_events", DEFAULT_REPLAY_EVENTS))
+        replay_summary = _resolve_path(args.summary_out, _profile_path(context.profile, "defaults", "summary_out", DEFAULT_REPLAY_SUMMARY))
+        return command_replay(context, events_path=replay_events, summary_out=replay_summary)
     if args.cmd == "run-scan":
-        return command_run_scan(context, events_path=Path(args.events), limit=args.limit)
+        replay_events = _resolve_path(args.events, _profile_path(context.profile, "defaults", "replay_events", DEFAULT_REPLAY_EVENTS))
+        return command_run_scan(context, events_path=replay_events, limit=args.limit)
     if args.cmd == "run-live":
         out_dir = Path(args.out) if args.out is not None else None
         return command_run_live(context, symbol=args.symbol, out_dir=out_dir, max_events=args.max_events, use_trade=args.use_trade)
     if args.cmd == "review-day":
-        return command_review_day(context, summary_path=Path(args.summary))
+        summary_path = _resolve_path(args.summary, _profile_path(context.profile, "review", "summary_path", DEFAULT_REPLAY_SUMMARY))
+        return command_review_day(context, summary_path=summary_path)
 
     parser.print_help()
     return 0
