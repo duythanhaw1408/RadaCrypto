@@ -175,9 +175,17 @@ function timeAgo(ts) {
 async function loadJSON(file) {
   try {
     const r = await fetch(`${DATA_BASE}/${file}?t=${Date.now()}`);
-    if (!r.ok) return null;
-    return await r.json();
-  } catch { return null; }
+    if (!r.ok) {
+      console.warn(`Fetch failed for ${file}: ${r.status}`);
+      return null;
+    }
+    const data = await r.json();
+    console.log(`Loaded ${file}:`, data);
+    return data;
+  } catch (e) { 
+    console.error(`Error loading ${file}:`, e);
+    return null; 
+  }
 }
 
 async function loadAllData() {
