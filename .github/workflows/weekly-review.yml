@@ -1,5 +1,8 @@
 name: CFTE Weekly Review
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   schedule:
     # Chạy Chủ nhật 01:00 UTC = 08:00 ICT

@@ -1,5 +1,8 @@
 name: CFTE Scan Cycle (4x/ngày)
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   schedule:
     # Chạy mỗi 6 giờ: 00:00, 06:00, 12:00, 18:00 UTC
