@@ -36,9 +36,9 @@ Báo cáo này đánh giá mức độ sẵn sàng của bản **v1-internal-rc1
 
 ---
 
-## 4. Watch items
 - **Binance Health Monitoring**: Hiện tại mới chỉ hỗ trợ các thông tin cơ bản, cần theo dõi thêm độ trễ (latency) khi scale số lượng symbol.
 - **Auto-resolve**: Logic đóng luận điểm tại cuối stream replay còn đơn giản, có thể cần tinh chỉnh để tránh tín hiệu Actionable bị treo.
+- **CLI Shell Confirmation**: Cần xác nhận lại CLI shell trên môi trường đã được `pip install -e .` để đảm bảo lệnh `cfte` hoặc module mapping hoạt động chính xác.
 
 ---
 
