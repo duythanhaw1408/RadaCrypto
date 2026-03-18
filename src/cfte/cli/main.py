@@ -26,7 +26,7 @@ def doctor() -> int:
 
 async def run_binance_public_ingest(symbol: str, out_dir: Path, max_events: int, use_agg_trade: bool) -> int:
     from cfte.books.binance_depth import BinanceDepthReconciler
-    from cfte.collectors.binance_public import BinancePublicCollector, build_public_streams, fetch_depth_snapshot
+    from cfte.collectors.binance_public import BinancePublicCollector, build_public_streams, try_fetch_depth_snapshot
     from cfte.normalizers.binance import (
         normalize_agg_trade,
         normalize_book_ticker,
@@ -41,7 +41,11 @@ async def run_binance_public_ingest(symbol: str, out_dir: Path, max_events: int,
     depth = BinanceDepthReconciler(instrument_key=instrument_key)
 
     print(f"Khởi tạo snapshot sổ lệnh cho {symbol.upper()}...")
-    snapshot = fetch_depth_snapshot(symbol=symbol.upper())
+    snapshot, error = try_fetch_depth_snapshot(symbol=symbol.upper())
+    if snapshot is None:
+        print(error or f"Không lấy được snapshot sổ lệnh cho {symbol.upper()}.")
+        return 1
+
     depth.apply_snapshot(
         bids=[(float(px), float(qty)) for px, qty in snapshot.get("bids", [])],
         asks=[(float(px), float(qty)) for px, qty in snapshot.get("asks", [])],

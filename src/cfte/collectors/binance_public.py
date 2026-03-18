@@ -5,6 +5,8 @@ import json
 from dataclasses import dataclass
 from typing import Any
 
+import requests
+
 
 BINANCE_WS_BASE = "wss://stream.binance.com:9443/stream"
 BINANCE_REST_BASE = "https://api.binance.com"
@@ -28,11 +30,23 @@ def build_public_streams(symbols: list[str], use_agg_trade: bool = True) -> list
 
 def fetch_depth_snapshot(symbol: str, limit: int = DEFAULT_DEPTH_LEVEL, rest_base: str = BINANCE_REST_BASE) -> dict[str, Any]:
     url = f"{rest_base}/api/v3/depth"
-    import requests
-
     response = requests.get(url, params={"symbol": symbol.upper(), "limit": limit}, timeout=10)
     response.raise_for_status()
     return response.json()
+
+
+def try_fetch_depth_snapshot(
+    symbol: str,
+    limit: int = DEFAULT_DEPTH_LEVEL,
+    rest_base: str = BINANCE_REST_BASE,
+) -> tuple[dict[str, Any] | None, str | None]:
+    try:
+        snapshot = fetch_depth_snapshot(symbol=symbol, limit=limit, rest_base=rest_base)
+    except requests.RequestException as exc:
+        return None, f"Không lấy được snapshot depth Binance cho {symbol.upper()}: {exc}"
+    except (KeyError, TypeError, ValueError) as exc:
+        return None, f"Snapshot depth Binance không hợp lệ cho {symbol.upper()}: {exc}"
+    return snapshot, None
 
 
 @dataclass(slots=True)

@@ -20,4 +20,4 @@ def init_db(db_path: Path = DB_PATH) -> None:
 
 if __name__ == "__main__":
     init_db()
-    print(f"Initialized SQLite DB at: {DB_PATH}")
+    print(f"Đã khởi tạo SQLite tại: {DB_PATH}")
