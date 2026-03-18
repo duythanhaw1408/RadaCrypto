@@ -1,1 +1,1 @@
-{"last_run": "2026-03-18T16:04:36.495596+00:00", "last_scan_time": "2026-03-18T16:04:36.495608+00:00", "scan_count": 6, "workflows": [{"name": "CFTE Scan Cycle (4h/lần)", "status": "success", "last_run": "2026-03-18T16:04:36.495611+00:00", "duration": "~2m"}]}
+{"last_run": "2026-03-18T20:29:14.244537+00:00", "last_scan_time": "2026-03-18T20:29:14.244548+00:00", "scan_count": 7, "workflows": [{"name": "CFTE Scan Cycle (4h/lần)", "status": "success", "last_run": "2026-03-18T20:29:14.244550+00:00", "duration": "~2m"}]}
