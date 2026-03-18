@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CFTE Dashboard — Crypto Flow Thesis Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d1117; --bg2: #161b22; --card: #1c2333; --border: #30363d;
+  --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff; --green: #3fb950;
+  --red: #f85149; --yellow: #d29922; --purple: #bc8cff; --cyan: #39d2c0;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, sans-serif; font-size: 14px; min-height: 100vh; }
+
+/* Header */
+.header { background: linear-gradient(135deg, #161b22 0%, #1a2332 100%); border-bottom: 1px solid var(--border); padding: 20px 24px; }
+.header-inner { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo h1 { font-size: 22px; font-weight: 700; background: linear-gradient(90deg, var(--accent), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.logo .subtitle { color: var(--muted); font-size: 12px; }
+.header-meta { display: flex; align-items: center; gap: 16px; font-size: 12px; color: var(--muted); }
+.live-indicator { display: flex; align-items: center; gap: 6px; }
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+/* Main grid */
+.container { max-width: 1280px; margin: 0 auto; padding: 20px 24px; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; transition: transform 0.2s, box-shadow 0.2s; }
+.stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+.stat-card .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 8px; }
+.stat-card .value { font-size: 32px; font-weight: 700; }
+.stat-card .sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.green { color: var(--green); }
+.red { color: var(--red); }
+.yellow { color: var(--yellow); }
+.accent { color: var(--accent); }
+.cyan { color: var(--cyan); }
+.purple { color: var(--purple); }
+
+/* Status badges */
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.badge.healthy { background: rgba(63,185,80,0.15); color: var(--green); }
+.badge.degraded { background: rgba(210,153,34,0.15); color: var(--yellow); }
+.badge.bad { background: rgba(248,81,73,0.15); color: var(--red); }
+.badge.long { background: rgba(63,185,80,0.12); color: var(--green); }
+.badge.short { background: rgba(248,81,73,0.12); color: var(--red); }
+.stage-badge { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+.stage-badge.DETECTED { background: rgba(88,166,255,0.12); color: var(--accent); }
+.stage-badge.WATCHLIST { background: rgba(57,210,192,0.12); color: var(--cyan); }
+.stage-badge.CONFIRMED { background: rgba(63,185,80,0.12); color: var(--green); }
+.stage-badge.ACTIONABLE { background: rgba(210,153,34,0.15); color: var(--yellow); }
+.stage-badge.INVALIDATED { background: rgba(248,81,73,0.12); color: var(--red); }
+.stage-badge.RESOLVED { background: rgba(188,140,255,0.12); color: var(--purple); }
+
+/* Tabs */
+.tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 16px; overflow-x: auto; }
+.tab { padding: 10px 18px; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; font-size: 13px; font-weight: 500; white-space: nowrap; transition: all 0.2s; }
+.tab:hover { color: var(--text); background: rgba(88,166,255,0.05); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Cards & sections */
+.section-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+.section-card h3 { font-size: 14px; margin-bottom: 14px; color: var(--text); }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 8px; border-bottom: 1px solid var(--border); }
+td { padding: 10px 8px; border-bottom: 1px solid rgba(48,54,61,0.5); }
+tr:hover { background: rgba(88,166,255,0.04); }
+
+/* Score bar */
+.score-bar { width: 60px; height: 5px; border-radius: 3px; background: var(--border); overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 6px; }
+.score-fill { height: 100%; border-radius: 3px; }
+
+/* Log */
+pre.log { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; font-size: 12px; font-family: 'SF Mono', 'Fira Code', monospace; max-height: 500px; overflow: auto; white-space: pre-wrap; color: var(--muted); line-height: 1.6; }
+pre.log .signal { color: var(--accent); }
+pre.log .actionable { color: var(--yellow); font-weight: 600; }
+pre.log .heartbeat { color: var(--green); }
+
+/* Health checks */
+.health-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px; }
+.health-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 6px; background: rgba(255,255,255,0.02); }
+.health-icon { font-size: 16px; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .header-inner { flex-direction: column; align-items: flex-start; }
+  .container { padding: 12px; }
+  .stat-card .value { font-size: 24px; }
+}
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr; }
+}
+
+/* Loading */
+.loading { text-align: center; padding: 40px; color: var(--muted); }
+.loading::after { content: ''; display: inline-block; width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-left: 10px; vertical-align: middle; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.empty { text-align: center; padding: 30px; color: var(--muted); font-size: 13px; }
+.footer { text-align: center; color: var(--muted); font-size: 11px; padding: 20px; border-top: 1px solid var(--border); margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <h1>⚡ CFTE Dashboard</h1>
+      <span class="subtitle">Crypto Flow Thesis Engine</span>
+    </div>
+    <div class="header-meta">
+      <div class="live-indicator"><div class="live-dot"></div> <span id="statusText">Đang kết nối...</span></div>
+      <span id="lastUpdate"></span>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div id="stats-area" class="stats-grid"></div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(this,'signals')">🔥 Tín hiệu</div>
+    <div class="tab" onclick="switchTab(this,'theses')">📊 Luận điểm</div>
+    <div class="tab" onclick="switchTab(this,'scan')">🔍 Scan Log</div>
+    <div class="tab" onclick="switchTab(this,'health')">🏥 Health</div>
+    <div class="tab" onclick="switchTab(this,'actions')">⚙️ GitHub Actions</div>
+  </div>
+
+  <div id="tab-signals" class="tab-content active"></div>
+  <div id="tab-theses" class="tab-content"></div>
+  <div id="tab-scan" class="tab-content"></div>
+  <div id="tab-health" class="tab-content"></div>
+  <div id="tab-actions" class="tab-content"></div>
+</div>
+
+<div class="footer">
+  CFTE Dashboard v1.0 — Auto-refresh mỗi 60 giây — Dữ liệu từ GitHub Actions
+</div>
+
+<script>
+const REPO = 'duythanhaw1408/RadaCrypto';
+const DATA_BASE = `data`;
+const SETUP_VI = {stealth_accumulation:'Tích lũy âm thầm',breakout_ignition:'Kích hoạt bứt phá',distribution:'Phân phối',failed_breakout:'Bứt phá thất bại'};
+const DIR_EMOJI = {LONG_BIAS:'🔼 LONG',SHORT_BIAS:'🔽 SHORT'};
+const STAGE_MAP = {DETECTED:'🔍 Phát hiện',WATCHLIST:'👀 Theo dõi',CONFIRMED:'✅ Xác nhận',ACTIONABLE:'🔥 Hành động',INVALIDATED:'❌ Vô hiệu',RESOLVED:'🏁 Kết thúc'};
+
+function badge(cls, text) { return `<span class="badge ${cls}">${text}</span>`; }
+function stageBadge(s) { return `<span class="stage-badge ${s}">${STAGE_MAP[s]||s}</span>`; }
+function scoreBar(v) {
+  const c = v >= 80 ? 'var(--green)' : v >= 60 ? 'var(--yellow)' : 'var(--red)';
+  return `<span class="score-bar"><span class="score-fill" style="width:${Math.min(100,v)}%;background:${c}"></span></span>${v.toFixed(0)}`;
+}
+function dirBadge(d) {
+  return badge(d==='LONG_BIAS'?'long':'short', DIR_EMOJI[d]||d);
+}
+function timeAgo(ts) {
+  if (!ts) return '';
+  const d = typeof ts === 'number' ? new Date(ts > 1e12 ? ts : ts * 1000) : new Date(ts);
+  const m = Math.floor((Date.now() - d) / 60000);
+  if (m < 1) return 'vừa xong';
+  if (m < 60) return m + 'p trước';
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + 'h trước';
+  return Math.floor(h / 24) + 'ngày';
+}
+
+async function loadJSON(file) {
+  try {
+    const r = await fetch(`${DATA_BASE}/${file}?t=${Date.now()}`);
+    if (!r.ok) return null;
+    return await r.json();
+  } catch { return null; }
+}
+
+async function loadAllData() {
+  const [health, daily, weekly, replay, thesisLog, actionsStatus] = await Promise.all([
+    loadJSON('health_status.json'),
+    loadJSON('daily_summary.json'),
+    loadJSON('weekly_review.json'),
+    loadJSON('summary_btcusdt.json'),
+    loadJSON('thesis_log.json'),
+    loadJSON('actions_status.json'),
+  ]);
+  return { health, daily, weekly, replay, thesisLog, actionsStatus };
+}
+
+function renderStats(data) {
+  const h = data.health || {};
+  const d = data.daily || {};
+  const w = data.weekly || {};
+  const status = h.overall_status || 'unknown';
+  const checks = h.checks || [];
+  const okCount = checks.filter(c => c.status === 'ok').length;
+
+  document.getElementById('statusText').textContent = status === 'healthy' ? 'Hệ thống khỏe' : status === 'degraded' ? 'Cần kiểm tra' : 'Đang tải...';
+  document.getElementById('lastUpdate').textContent = timeAgo(h.timestamp || data.actionsStatus?.last_run);
+
+  document.getElementById('stats-area').innerHTML = `
+    <div class="stat-card">
+      <div class="label">Trạng thái</div>
+      <div>${badge(status==='healthy'?'healthy':status==='degraded'?'degraded':'bad', status.toUpperCase())}</div>
+      <div class="sub">${okCount}/${checks.length} kiểm tra OK</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Thesis hôm nay</div>
+      <div class="value accent">${d.new_thesis_count || 0}</div>
+      <div class="sub">Score TB: ${(d.avg_score||0).toFixed(1)}</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Edge</div>
+      <div class="value ${(d.avg_edge||0)>=0?'green':'red'}">${(d.avg_edge||0)>0?'+':''}${((d.avg_edge||0)).toFixed(2)}%</div>
+      <div class="sub">Hit rate: ${((d.hit_rate||0)*100).toFixed(0)}%</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Scan gần nhất</div>
+      <div class="value cyan">${data.actionsStatus?.scan_count || '—'}</div>
+      <div class="sub">${data.actionsStatus?.last_scan_time ? timeAgo(data.actionsStatus.last_scan_time) : 'Chưa có'}</div>
+    </div>
+  `;
+}
+
+function renderSignals(data) {
+  const replay = data.replay;
+  if (!replay || !replay.signals) {
+    document.getElementById('tab-signals').innerHTML = '<div class="empty">Chưa có tín hiệu scan. Chờ GitHub Actions chạy cycle tiếp theo.</div>';
+    return;
+  }
+  const signals = (replay.signals || []).sort((a,b) => (b.score||0) - (a.score||0));
+  const actionable = signals.filter(s => (s.score||0) >= 70);
+  const watching = signals.filter(s => (s.score||0) >= 40 && (s.score||0) < 70);
+  const detected = signals.filter(s => (s.score||0) < 40);
+
+  let html = '';
+  if (actionable.length > 0) {
+    html += `<div class="section-card"><h3>🔥 Có thể hành động (${actionable.length})</h3>`;
+    html += signalTable(actionable);
+    html += '</div>';
+  }
+  if (watching.length > 0) {
+    html += `<div class="section-card"><h3>👀 Theo dõi (${watching.length})</h3>`;
+    html += signalTable(watching);
+    html += '</div>';
+  }
+  if (detected.length > 0) {
+    html += `<div class="section-card"><h3>🔍 Mới phát hiện (${detected.length})</h3>`;
+    html += signalTable(detected);
+    html += '</div>';
+  }
+  document.getElementById('tab-signals').innerHTML = html || '<div class="empty">Không có tín hiệu</div>';
+}
+
+function signalTable(signals) {
+  return `<table>
+    <tr><th>Setup</th><th>Hướng</th><th>Score</th><th>Confidence</th><th>Cơ sở</th></tr>
+    ${signals.map(s => `<tr>
+      <td><strong>${SETUP_VI[s.setup]||s.setup}</strong></td>
+      <td>${dirBadge(s.direction||'')}</td>
+      <td>${scoreBar(s.score||0)}</td>
+      <td>${((s.confidence||0)*100).toFixed(0)}%</td>
+      <td style="font-size:12px;color:var(--muted);max-width:300px">${s.rationale||s.basis||''}</td>
+    </tr>`).join('')}
+  </table>`;
+}
+
+function renderTheses(data) {
+  const log = data.thesisLog || [];
+  if (log.length === 0) {
+    document.getElementById('tab-theses').innerHTML = '<div class="empty">Chưa có dữ liệu luận điểm</div>';
+    return;
+  }
+  const entries = [...log].reverse().slice(0, 30);
+  document.getElementById('tab-theses').innerHTML = `<div class="section-card">
+    <h3>📊 Lịch sử Thesis (${log.length} entries)</h3>
+    <table>
+      <tr><th>ID</th><th>Setup</th><th>Hướng</th><th>Stage</th><th>Score</th><th>Thời gian</th></tr>
+      ${entries.map(t => `<tr>
+        <td style="font-family:monospace;font-size:12px">${(t.thesis_id||'').slice(0,8)}</td>
+        <td>${SETUP_VI[t.setup]||t.setup||''}</td>
+        <td>${dirBadge(t.direction||'')}</td>
+        <td>${stageBadge(t.to_stage||t.stage||'')}</td>
+        <td>${scoreBar(t.score||0)}</td>
+        <td style="color:var(--muted);font-size:12px">${timeAgo(t.event_ts||t.timestamp)}</td>
+      </tr>`).join('')}
+    </table>
+  </div>`;
+}
+
+function renderScan(data) {
+  const replay = data.replay;
+  if (!replay) {
+    document.getElementById('tab-scan').innerHTML = '<div class="empty">Chưa có dữ liệu scan</div>';
+    return;
+  }
+  const windows = replay.windows || [];
+  document.getElementById('tab-scan').innerHTML = `<div class="section-card">
+    <h3>🔍 Kết quả Replay Scan</h3>
+    <table>
+      <tr><th>Window</th><th>Setup</th><th>Score</th><th>Stage</th><th>Rationale</th></tr>
+      ${(replay.signals||[]).map(s => `<tr>
+        <td>${s.window_id||''}</td>
+        <td>${SETUP_VI[s.setup]||s.setup}</td>
+        <td>${scoreBar(s.score||0)}</td>
+        <td>${stageBadge(s.stage||'')}</td>
+        <td style="font-size:12px;color:var(--muted)">${s.rationale||''}</td>
+      </tr>`).join('')}
+    </table>
+    <div class="sub" style="margin-top:12px">Fingerprint: <code>${replay.fingerprint||'N/A'}</code> | Windows: ${windows.length}</div>
+  </div>`;
+}
+
+function renderHealth(data) {
+  const h = data.health || {};
+  const checks = h.checks || [];
+  document.getElementById('tab-health').innerHTML = `<div class="section-card">
+    <h3>🏥 Chi tiết Health Check</h3>
+    <div class="health-grid">
+      ${checks.map(c => `<div class="health-item">
+        <span class="health-icon">${c.status==='ok'?'✅':c.status==='warn'?'⚠️':'❌'}</span>
+        <div>
+          <div style="font-weight:500">${c.key}</div>
+          <div style="font-size:12px;color:var(--muted)">${c.summary_vi||''}</div>
+        </div>
+      </div>`).join('')}
+    </div>
+    ${h.collector ? `<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+      <strong>Collector:</strong> ${h.collector.venue} | connected=${h.collector.connected} | messages=${h.collector.message_count || 0}
+    </div>` : ''}
+  </div>`;
+}
+
+function renderActions(data) {
+  const a = data.actionsStatus;
+  document.getElementById('tab-actions').innerHTML = `<div class="section-card">
+    <h3>⚙️ GitHub Actions Status</h3>
+    ${a ? `
+    <table>
+      <tr><th>Workflow</th><th>Lần chạy cuối</th><th>Trạng thái</th><th>Thời gian</th></tr>
+      ${(a.workflows||[]).map(w => `<tr>
+        <td><strong>${w.name}</strong></td>
+        <td style="color:var(--muted)">${w.last_run||'chưa chạy'}</td>
+        <td>${w.status==='success'?badge('healthy','✅ OK'):w.status==='failure'?badge('bad','❌ FAIL'):badge('degraded','🔄 Pending')}</td>
+        <td>${w.duration||''}</td>
+      </tr>`).join('')}
+    </table>` : `
+    <div class="empty">
+      <p>Dữ liệu Actions sẽ cập nhật sau mỗi lần scan cycle chạy.</p>
+      <p style="margin-top:8px">
+        <a href="https://github.com/${REPO}/actions" target="_blank" style="color:var(--accent)">
+          → Xem trực tiếp trên GitHub Actions
+        </a>
+      </p>
+    </div>`}
+  </div>
+  <div class="section-card">
+    <h3>📱 Truy cập nhanh</h3>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <a href="https://github.com/${REPO}/actions" target="_blank" class="badge healthy" style="text-decoration:none;font-size:13px;padding:8px 16px">⚙️ GitHub Actions</a>
+      <a href="https://github.com/${REPO}" target="_blank" class="badge degraded" style="text-decoration:none;font-size:13px;padding:8px 16px">📁 Repository</a>
+    </div>
+  </div>`;
+}
+
+async function refresh() {
+  const data = await loadAllData();
+  renderStats(data);
+  renderSignals(data);
+  renderTheses(data);
+  renderScan(data);
+  renderHealth(data);
+  renderActions(data);
+}
+
+function switchTab(el, id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
+}
+
+refresh();
+setInterval(refresh, 60000);
+</script>
+</body>
+</html>

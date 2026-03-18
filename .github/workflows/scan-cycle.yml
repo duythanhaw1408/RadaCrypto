@@ -10,6 +10,9 @@ on:
     - cron: '0 0,6,12,18 * * *'
   workflow_dispatch:  # Cho phép chạy bằng tay
 
+permissions:
+  contents: write
+
 jobs:
   scan-cycle:
     runs-on: ubuntu-latest
@@ -48,6 +51,46 @@ jobs:
         python scripts/run_cycle.py \
           --skip-live \
           --profile configs/profiles/personal_binance.yaml
+
+    - name: Copy data to docs for GitHub Pages
+      run: |
+        mkdir -p docs/data
+        # Copy scan/review data to docs/data
+        cp -f data/review/health_status.json docs/data/ 2>/dev/null || true
+        cp -f data/review/daily_summary.json docs/data/ 2>/dev/null || true
+        cp -f data/review/weekly_review.json docs/data/ 2>/dev/null || true
+        cp -f data/replay/summary_btcusdt.json docs/data/ 2>/dev/null || true
+        # Convert thesis_log.jsonl to JSON array for dashboard
+        if [ -f data/thesis/thesis_log.jsonl ]; then
+          python3 -c "
+        import json
+        lines = open('data/thesis/thesis_log.jsonl').readlines()
+        entries = [json.loads(l) for l in lines if l.strip()]
+        json.dump(entries[-100:], open('docs/data/thesis_log.json','w'), ensure_ascii=False)
+        "
+        fi
+        # Generate actions status
+        python3 -c "
+        import json
+        from datetime import datetime, timezone
+        status = {
+          'last_run': datetime.now(tz=timezone.utc).isoformat(),
+          'last_scan_time': datetime.now(tz=timezone.utc).isoformat(),
+          'scan_count': ${{ github.run_number }},
+          'workflows': [
+            {'name':'CFTE Scan Cycle','status':'success','last_run':datetime.now(tz=timezone.utc).isoformat(),'duration':'~30s'},
+          ]
+        }
+        json.dump(status, open('docs/data/actions_status.json','w'), ensure_ascii=False)
+        "
+
+    - name: Commit dashboard data
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add docs/data/
+        git diff --staged --quiet || git commit -m "📊 Update dashboard data [skip ci]"
+        git push || true
 
     - name: Upload scan artifacts
       uses: actions/upload-artifact@v4
