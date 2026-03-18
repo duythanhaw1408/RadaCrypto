@@ -32,9 +32,19 @@ def test_run_binance_public_ingest_fails_gracefully_when_snapshot_unavailable(mo
     )
 
     exit_code = asyncio.run(
-        run_binance_public_ingest(symbol="BTCUSDT", out_dir=tmp_path, max_events=1, use_agg_trade=True)
+        run_binance_public_ingest(
+            profile_name="test-profile",
+            symbol="BTCUSDT",
+            out_dir=tmp_path,
+            thesis_log_path=tmp_path / "thesis.jsonl",
+            actionable_threshold=75.0,
+            max_events=1,
+            use_agg_trade=True,
+            trade_window_size=5,
+        )
     )
 
     captured = capsys.readouterr()
     assert exit_code == 1
+    assert "Trạng thái live: suy giảm" in captured.out
     assert "Không lấy được snapshot depth Binance cho BTCUSDT" in captured.out
