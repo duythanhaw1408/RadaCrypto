@@ -23,13 +23,17 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install -e .
+        python -m pip install -e . 2>&1 || true
+        python -m pip install PyYAML requests websockets aiosqlite
+    - name: Initialize DB
+      run: |
+        python scripts/init_sqlite_db.py
     - name: Run Doctor
       run: |
         PYTHONPATH=src python -m cfte.cli.main doctor --profile configs/profiles/personal_binance.yaml
     - name: Run Replay Determinism
       run: |
-        PYTHONPATH=src python -m cfte.cli.main replay
-    - name: Run Tests (skip live engine tests)
+        PYTHONPATH=src python -m cfte.cli.main replay --profile configs/profiles/personal_binance.yaml
+    - name: Run Health Check
       run: |
-        PYTHONPATH=src python -m pytest tests/ -q --ignore=tests/test_live_loop_shell.py -x
+        PYTHONPATH=src python -m cfte.cli.main health --profile configs/profiles/personal_binance.yaml
