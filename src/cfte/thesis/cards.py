@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import asdict
+
 from cfte.models.events import ThesisSignal
 from cfte.thesis.lifecycle import stage_label_vi
 
@@ -44,3 +46,7 @@ def render_trader_card(signal: ThesisSignal) -> str:
         f"Vô hiệu: {signal.invalidation} | Vào lệnh: {signal.entry_style}\n"
         f"Mục tiêu: {targets}"
     )
+
+
+def signal_to_dict(signal: ThesisSignal) -> dict[str, object]:
+    return asdict(signal)
