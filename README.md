@@ -34,6 +34,20 @@ Local-first, replay-first starter repo for a crypto flow thesis engine.
 6. Doctor check
    python -m cfte.cli.main doctor
 
+## How to Run
+To run the project again once set up:
+
+```bash
+cd crypto-flow-thesis-engine-starter
+source .venv/bin/activate
+# Kiểm tra trạng thái
+python3 -m cfte.cli.main doctor
+# Chạy tests
+pytest
+# Chạy simulation
+python3 scripts/replay_binance_public.py
+```
+
 ## Phase 1 goal
 Binance-centric vertical slice:
 - market data normalization

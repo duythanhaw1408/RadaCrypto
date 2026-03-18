@@ -192,4 +192,4 @@ Do not:
 - replace replayable pipelines with ad hoc scripts
 - treat generic sentiment as a core signal
 - collapse accumulation and distribution into one score
-- make AI responsible for truth
+- make AI responsible for truth.
