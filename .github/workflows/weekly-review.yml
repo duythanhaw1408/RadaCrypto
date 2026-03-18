@@ -16,3 +16,14 @@ jobs:
       - run: python -m pip install -e .
       - run: python scripts/init_sqlite_db.py
       - run: python -m cfte.cli.main --profile configs/profiles/personal.default.yaml review-week
+
+      - name: Run tuning snapshot
+        run: python -m cfte.cli.main --profile configs/profiles/personal.default.yaml tune-profile
+      - name: Upload review artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-review-artifacts
+          path: |
+            data/review/*.json
+            data/review/*.jsonl
+          if-no-files-found: warn

@@ -27,4 +27,7 @@ review:
   summary_path: data/replay/summary_btcusdt.json
 
   daily_summary_path: data/review/daily_summary.json
+
+  review_journal_path: data/review/review_journal.jsonl
+  tuning_report_path: data/review/tuning_report.json
   weekly_summary_path: data/review/weekly_review.json

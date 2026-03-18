@@ -19,7 +19,7 @@ def _fmt_pct(value: float) -> str:
     return f"{value:+.2f}%"
 
 
-def render_daily_summary_vi(stats: dict[str, Any]) -> str:
+def render_daily_summary_vi(stats: dict[str, Any], review_summary: dict[str, Any] | None = None) -> str:
     stage_parts = [
         f"{stage_label_vi(stage)}: {count}"
         for stage, count in stats.get("stage_dist", {}).items()
@@ -30,6 +30,9 @@ def render_daily_summary_vi(stats: dict[str, Any]) -> str:
     ]
     top_setup = next(iter(stats.get("setup_dist", {})), None)
     hit_rate = (stats["positive_outcomes"] / stats["outcomes_count"] * 100.0) if stats["outcomes_count"] else 0.0
+    review_summary = review_summary or {}
+    decision_counts = review_summary.get('decision_counts', {})
+    usefulness_counts = review_summary.get('usefulness_counts', {})
     lines = [
         f"Tổng kết ngày {stats['label']}",
         f"- Luận điểm mới: {stats['opened_count']} | score TB: {stats['avg_score']:.2f} | confidence TB: {stats['avg_confidence']:.2f}",
@@ -37,11 +40,19 @@ def render_daily_summary_vi(stats: dict[str, Any]) -> str:
         f"- Setup xuất hiện nhiều nhất: {top_setup or 'chưa có'}",
         f"- Trạng thái mở mới: {', '.join(stage_parts) if stage_parts else 'chưa có'}",
         f"- Trạng thái đóng trong ngày: {', '.join(closed_parts) if closed_parts else 'chưa có'}",
+        (
+            '- Review cá nhân: '
+            f"vào={decision_counts.get('taken', 0)}, bỏ={decision_counts.get('skipped', 0)}, phớt lờ={decision_counts.get('ignored', 0)}"
+        ),
+        (
+            '- Hữu ích / nhiễu: '
+            f"hữu ích={usefulness_counts.get('useful', 0)}, trung tính={usefulness_counts.get('neutral', 0)}, nhiễu={usefulness_counts.get('noise', 0)}"
+        ),
     ]
     return "\n".join(lines)
 
 
-def render_weekly_review_vi(stats: dict[str, Any], scorecard: list[dict[str, Any]]) -> str:
+def render_weekly_review_vi(stats: dict[str, Any], scorecard: list[dict[str, Any]], review_summary: dict[str, Any] | None = None, tuning_suggestions: list[dict[str, Any]] | None = None) -> str:
     ranked = sorted(
         scorecard,
         key=lambda row: (row.get("horizons", {}).get("24h", {}).get("avg_edge", float("-inf")), row["total_signals"]),
@@ -49,12 +60,29 @@ def render_weekly_review_vi(stats: dict[str, Any], scorecard: list[dict[str, Any
     )
     best = ranked[0]["setup"] if ranked else "chưa có"
     worst = ranked[-1]["setup"] if ranked else "chưa có"
+    review_summary = review_summary or {}
+    tuning_suggestions = tuning_suggestions or []
+    setup_rows = review_summary.get('setup_rows', [])
+    noisy_from_review = next((row['setup'] for row in sorted(setup_rows, key=lambda item: (item['noise_rate'], item['total']), reverse=True) if row['total'] > 0), 'chưa có')
+    top_tuning = tuning_suggestions[0] if tuning_suggestions else None
     lines = [
         f"Review tuần {stats['label']}",
         f"- Tổng luận điểm mở mới: {stats['opened_count']} | outcome hoàn tất: {stats['outcomes_count']}",
         f"- Score TB: {stats['avg_score']:.2f} | Confidence TB: {stats['avg_confidence']:.2f} | Edge TB: {_fmt_pct(stats['avg_edge'])}",
         f"- Setup hiệu quả nhất tạm thời: {best}",
         f"- Setup nhiễu nhất tạm thời: {worst}",
+        f"- Setup bị chấm nhiễu nhiều nhất trong journal: {noisy_from_review}",
+        (
+            '- Review cá nhân tuần: '
+            f"vào={review_summary.get('decision_counts', {}).get('taken', 0)}, "
+            f"bỏ={review_summary.get('decision_counts', {}).get('skipped', 0)}, "
+            f"phớt lờ={review_summary.get('decision_counts', {}).get('ignored', 0)}"
+        ),
+        (
+            '- Tuning ưu tiên: '
+            f"{top_tuning['setup']} -> {top_tuning['suggested_threshold']:.1f}"
+            if top_tuning else '- Tuning ưu tiên: chưa có dữ liệu'
+        ),
         "- Gợi ý review: siết threshold với setup có edge âm, kiểm tra confidence nếu hit rate không tăng theo score.",
     ]
     return "\n".join(lines)

@@ -19,6 +19,8 @@ DEFAULT_STATE_DB = Path("data/state/state.db")
 DEFAULT_THESIS_LOG = Path("data/thesis/thesis_log.jsonl")
 DEFAULT_DAILY_SUMMARY = Path("data/review/daily_summary.json")
 DEFAULT_WEEKLY_SUMMARY = Path("data/review/weekly_review.json")
+DEFAULT_REVIEW_JOURNAL = Path("data/review/review_journal.jsonl")
+DEFAULT_TUNING_REPORT = Path("data/review/tuning_report.json")
 
 
 @dataclass(frozen=True, slots=True)
@@ -224,6 +226,13 @@ def _period_from_date(date_str: str) -> tuple[int, int]:
     return int(start.timestamp() * 1000), int(end.timestamp() * 1000)
 
 
+
+
+def _timestamp_ms(value: str | None) -> int:
+    if value is None:
+        return int(datetime.now(tz=timezone.utc).timestamp() * 1000)
+    return int(datetime.strptime(value, "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc).timestamp() * 1000)
+
 def _weekly_period(end_date_str: str | None) -> tuple[str, int, int]:
     if end_date_str is None:
         end = datetime.now(tz=timezone.utc)
@@ -236,6 +245,7 @@ def _weekly_period(end_date_str: str | None) -> tuple[str, int, int]:
 
 def command_review_day(context: ShellContext, date_str: str | None = None, summary_path: Path | None = None) -> int:
     from cfte.storage.measurement import SummaryDocument, persist_summary_document, render_daily_summary_vi
+    from cfte.storage.review_journal import ReviewJournal, render_review_journal_vi, summarize_review_journal
     from cfte.storage.sqlite_writer import ThesisSQLiteStore
 
     print(_format_header("review-day", context.profile))
@@ -244,17 +254,30 @@ def command_review_day(context: ShellContext, date_str: str | None = None, summa
     async def _show() -> None:
         await store.migrate_schema()
         stats = await store.get_daily_summary_stats(date_str)
-        text = render_daily_summary_vi(stats)
+        journal_path = _profile_path(context.profile, "review", "review_journal_path", DEFAULT_REVIEW_JOURNAL)
+        review_summary = summarize_review_journal(
+            ReviewJournal(journal_path).read_records(),
+            start_ts=stats["start_ts"],
+            end_ts=stats["end_ts"],
+        )
+        text = render_daily_summary_vi(stats, review_summary)
         print(text)
+        if review_summary.get("total_reviews", 0):
+            print()
+            print(render_review_journal_vi(review_summary))
 
         output_path = _profile_path(context.profile, "review", "daily_summary_path", DEFAULT_DAILY_SUMMARY)
-        saved_path = persist_summary_document(output_path, SummaryDocument(label=stats["label"], summary_vi=text, payload=stats))
+        saved_path = persist_summary_document(
+            output_path,
+            SummaryDocument(label=stats["label"], summary_vi=text, payload={**stats, "review_summary": review_summary}),
+        )
         print(f"Đã lưu daily summary tại: {saved_path}")
 
-        if summary_path and summary_path.exists():
-            print(f"\nChi tiết từ file replay: {summary_path}")
+        summary_candidate = summary_path or _profile_path(context.profile, "review", "summary_path", DEFAULT_REPLAY_SUMMARY)
+        if summary_candidate.exists():
+            print(f"\nChi tiết từ file replay: {summary_candidate}")
             try:
-                summary = json.loads(summary_path.read_text(encoding="utf-8"))
+                summary = json.loads(summary_candidate.read_text(encoding="utf-8"))
                 top_signals = summary.get("top_signals", [])
                 if top_signals:
                     print("Top tín hiệu từ replay:")
@@ -277,6 +300,13 @@ def command_review_week(context: ShellContext, end_date_str: str | None = None) 
         render_setup_scorecard_vi,
         render_weekly_review_vi,
     )
+    from cfte.storage.review_journal import (
+        ReviewJournal,
+        build_tuning_suggestions,
+        render_review_journal_vi,
+        render_tuning_report_vi,
+        summarize_review_journal,
+    )
     from cfte.storage.sqlite_writer import ThesisSQLiteStore
 
     print(_format_header("review-week", context.profile))
@@ -287,19 +317,123 @@ def command_review_week(context: ShellContext, end_date_str: str | None = None) 
         label, start_ts, end_ts = _weekly_period(end_date_str)
         stats = await store.get_period_summary(start_ts=start_ts, end_ts=end_ts, label=label)
         scorecard = await store.get_setup_scorecard()
-        review_text = render_weekly_review_vi(stats, scorecard)
+        journal_path = _profile_path(context.profile, "review", "review_journal_path", DEFAULT_REVIEW_JOURNAL)
+        review_summary = summarize_review_journal(ReviewJournal(journal_path).read_records(), start_ts=start_ts, end_ts=end_ts)
+        threshold = float(context.profile.scan.get("actionable_threshold", 75.0))
+        tuning_suggestions = build_tuning_suggestions(scorecard, review_summary, base_threshold=threshold)
+        review_text = render_weekly_review_vi(stats, scorecard, review_summary, tuning_suggestions)
         print(review_text)
         print()
         print(render_setup_scorecard_vi(scorecard))
+        if review_summary.get("total_reviews", 0):
+            print()
+            print(render_review_journal_vi(review_summary))
+        print()
+        tuning_text = render_tuning_report_vi(tuning_suggestions)
+        print(tuning_text)
 
         output_path = _profile_path(context.profile, "review", "weekly_summary_path", DEFAULT_WEEKLY_SUMMARY)
+        tuning_path = _profile_path(context.profile, "review", "tuning_report_path", DEFAULT_TUNING_REPORT)
         saved_path = persist_summary_document(
             output_path,
-            SummaryDocument(label=label, summary_vi=review_text, payload={"stats": stats, "scorecard": scorecard}),
+            SummaryDocument(
+                label=label,
+                summary_vi=review_text,
+                payload={"stats": stats, "scorecard": scorecard, "review_summary": review_summary, "tuning_suggestions": tuning_suggestions},
+            ),
+        )
+        tuning_saved_path = persist_summary_document(
+            tuning_path,
+            SummaryDocument(label=label, summary_vi=tuning_text, payload={"tuning_suggestions": tuning_suggestions}),
         )
         print(f"\nĐã lưu weekly review tại: {saved_path}")
+        print(f"Đã lưu tuning report tại: {tuning_saved_path}")
 
     asyncio.run(_show())
+    return 0
+
+
+def command_log_review(
+    context: ShellContext,
+    thesis_id: str,
+    decision: str,
+    usefulness: str,
+    note: str | None = None,
+    tags: list[str] | None = None,
+    review_ts: str | None = None,
+) -> int:
+    from cfte.storage.review_journal import ReviewDecision, ReviewJournal
+    from cfte.storage.sqlite_writer import ThesisSQLiteStore
+
+    print(_format_header("log-review", context.profile))
+    store = ThesisSQLiteStore(DEFAULT_STATE_DB)
+    journal_path = _profile_path(context.profile, "review", "review_journal_path", DEFAULT_REVIEW_JOURNAL)
+
+    async def _run() -> int:
+        await store.migrate_schema()
+        thesis = await store.get_thesis_by_id(thesis_id)
+        if thesis is None:
+            print(f"Không tìm thấy thesis_id={thesis_id} trong SQLite.")
+            return 1
+        saved_path = ReviewJournal(journal_path).append(
+            ReviewDecision(
+                thesis_id=thesis_id,
+                decision=decision,
+                usefulness=usefulness,
+                review_ts=_timestamp_ms(review_ts),
+                setup=str(thesis.get("setup")),
+                instrument_key=str(thesis.get("instrument_key")),
+                note=note,
+                tags=tuple(tags or ()),
+                profile_name=context.profile.name,
+            )
+        )
+        print(f"Đã ghi review cá nhân tại: {saved_path}")
+        print(f"- thesis: {thesis_id} | setup={thesis.get('setup')} | quyết định={decision} | đánh giá={usefulness}")
+        if note:
+            print(f"- ghi chú: {note}")
+        return 0
+
+    return asyncio.run(_run())
+
+
+def command_review_log(context: ShellContext, start_date: str | None = None, end_date: str | None = None) -> int:
+    from cfte.storage.review_journal import ReviewJournal, render_review_journal_vi, summarize_review_journal
+
+    print(_format_header("review-log", context.profile))
+    start_ts = int(datetime.strptime(start_date, "%Y-%m-%d").replace(tzinfo=timezone.utc).timestamp() * 1000) if start_date else None
+    end_ts = int((datetime.strptime(end_date, "%Y-%m-%d").replace(tzinfo=timezone.utc) + timedelta(days=1)).timestamp() * 1000) if end_date else None
+    journal_path = _profile_path(context.profile, "review", "review_journal_path", DEFAULT_REVIEW_JOURNAL)
+    summary = summarize_review_journal(ReviewJournal(journal_path).read_records(), start_ts=start_ts, end_ts=end_ts)
+    print(render_review_journal_vi(summary))
+    return 0
+
+
+def command_tune_profile(context: ShellContext) -> int:
+    from cfte.storage.measurement import SummaryDocument, persist_summary_document
+    from cfte.storage.review_journal import build_tuning_suggestions, render_tuning_report_vi, ReviewJournal, summarize_review_journal
+    from cfte.storage.sqlite_writer import ThesisSQLiteStore
+
+    print(_format_header("tune-profile", context.profile))
+    store = ThesisSQLiteStore(DEFAULT_STATE_DB)
+
+    async def _run() -> None:
+        await store.migrate_schema()
+        scorecard = await store.get_setup_scorecard()
+        journal_path = _profile_path(context.profile, "review", "review_journal_path", DEFAULT_REVIEW_JOURNAL)
+        review_summary = summarize_review_journal(ReviewJournal(journal_path).read_records())
+        threshold = float(context.profile.scan.get("actionable_threshold", 75.0))
+        tuning_suggestions = build_tuning_suggestions(scorecard, review_summary, base_threshold=threshold)
+        text = render_tuning_report_vi(tuning_suggestions)
+        print(text)
+        tuning_path = _profile_path(context.profile, "review", "tuning_report_path", DEFAULT_TUNING_REPORT)
+        saved_path = persist_summary_document(
+            tuning_path,
+            SummaryDocument(label=context.profile.name, summary_vi=text, payload={"tuning_suggestions": tuning_suggestions, "review_summary": review_summary}),
+        )
+        print(f"Đã lưu tuning report tại: {saved_path}")
+
+    asyncio.run(_run())
     return 0
 
 
@@ -422,6 +556,19 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("health", help="Kiểm tra kết nối và tình trạng dữ liệu hiện tại.")
     sub.add_parser("review-thesis", help="Xem danh sách các luận điểm đang lưu trong SQLite.")
     sub.add_parser("scorecard", help="Xem bảng điểm hiệu suất theo từng loại setup.")
+    log_review = sub.add_parser("log-review", help="Ghi quyết định cá nhân: vào lệnh, bỏ qua hay phớt lờ một thesis.")
+    log_review.add_argument("--thesis-id", required=True)
+    log_review.add_argument("--decision", choices=["taken", "skipped", "ignored"], required=True)
+    log_review.add_argument("--usefulness", choices=["useful", "neutral", "noise"], required=True)
+    log_review.add_argument("--note", default=None)
+    log_review.add_argument("--tags", nargs="*", default=None)
+    log_review.add_argument("--review-ts", default=None, help="Thời gian review UTC dạng YYYY-MM-DDTHH:MM:SS.")
+
+    review_log = sub.add_parser("review-log", help="Tổng hợp journal taken/skipped/ignored để review định kỳ.")
+    review_log.add_argument("--start-date", default=None, help="Ngày bắt đầu (YYYY-MM-DD).")
+    review_log.add_argument("--end-date", default=None, help="Ngày kết thúc (YYYY-MM-DD).")
+
+    sub.add_parser("tune-profile", help="Sinh gợi ý tuning threshold cá nhân từ scorecard và review journal.")
 
     replay = sub.add_parser("replay", help="Chạy replay deterministic và lưu summary.")
     replay.add_argument("--events", default=None)
@@ -479,6 +626,12 @@ def main() -> int:
         return command_review_thesis(context)
     if args.cmd == "scorecard":
         return command_scorecard(context)
+    if args.cmd == "log-review":
+        return command_log_review(context, thesis_id=args.thesis_id, decision=args.decision, usefulness=args.usefulness, note=args.note, tags=args.tags, review_ts=args.review_ts)
+    if args.cmd == "review-log":
+        return command_review_log(context, start_date=args.start_date, end_date=args.end_date)
+    if args.cmd == "tune-profile":
+        return command_tune_profile(context)
 
     parser.print_help()
     return 0
