@@ -5,9 +5,9 @@ env:
 
 on:
   schedule:
-    # Chạy mỗi 6 giờ: 00:00, 06:00, 12:00, 18:00 UTC
-    # = 07:00, 13:00, 19:00, 01:00 ICT (UTC+7)
-    - cron: '0 0,6,12,18 * * *'
+    # Chạy mỗi 4 giờ: 00:00, 04:00, 08:00, 12:00, 16:00, 20:00 UTC
+    # = 07:00, 11:00, 15:00, 19:00, 23:00, 03:00 ICT (UTC+7)
+    - cron: '0 */4 * * *'
   push:
     branches: [ main ]
     paths:
@@ -55,19 +55,19 @@ jobs:
       env:
         PYTHONPATH: src
       run: |
+        # Chạy 50 events live để lấy data mới nhất trước khi scan
         python scripts/run_cycle.py \
-          --skip-live \
+          --max-events 50 \
           --profile configs/profiles/personal_binance.yaml
 
     - name: Copy data to docs for GitHub Pages
       run: |
         mkdir -p docs/data
-        # Copy scan/review data to docs/data
         cp -f data/review/health_status.json docs/data/ 2>/dev/null || true
         cp -f data/review/daily_summary.json docs/data/ 2>/dev/null || true
         cp -f data/review/weekly_review.json docs/data/ 2>/dev/null || true
         cp -f data/replay/summary_btcusdt.json docs/data/ 2>/dev/null || true
-        # Convert thesis_log.jsonl to JSON array for dashboard
+        
         if [ -f data/thesis/thesis_log.jsonl ]; then
           python3 -c "
         import json
@@ -76,7 +76,7 @@ jobs:
         json.dump(entries[-100:], open('docs/data/thesis_log.json','w'), ensure_ascii=False)
         "
         fi
-        # Generate actions status
+
         python3 -c "
         import json
         from datetime import datetime, timezone
@@ -85,7 +85,7 @@ jobs:
           'last_scan_time': datetime.now(tz=timezone.utc).isoformat(),
           'scan_count': ${{ github.run_number }},
           'workflows': [
-            {'name':'CFTE Scan Cycle','status':'success','last_run':datetime.now(tz=timezone.utc).isoformat(),'duration':'~30s'},
+            {'name':'CFTE Scan Cycle (4h/lần)','status':'success','last_run':datetime.now(tz=timezone.utc).isoformat(),'duration':'~2m'},
           ]
         }
         json.dump(status, open('docs/data/actions_status.json','w'), ensure_ascii=False)

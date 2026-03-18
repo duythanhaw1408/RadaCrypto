@@ -161,31 +161,32 @@ function scoreBar(v) {
 function dirBadge(d) {
   return badge(d==='LONG_BIAS'?'long':'short', DIR_EMOJI[d]||d);
 }
-function timeAgo(ts) {
+function formatTime(ts) {
   if (!ts) return '';
   const d = typeof ts === 'number' ? new Date(ts > 1e12 ? ts : ts * 1000) : new Date(ts);
-  const m = Math.floor((Date.now() - d) / 60000);
-  if (m < 1) return 'vừa xong';
-  if (m < 60) return m + 'p trước';
-  const h = Math.floor(m / 60);
-  if (h < 24) return h + 'h trước';
-  return Math.floor(h / 24) + 'ngày';
+  const now = new Date();
+  const m = Math.floor((now - d) / 60000);
+  
+  const hms = d.toLocaleTimeString('vi-VN', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const day = d.getDate().toString().padStart(2, '0') + '/' + (d.getMonth() + 1).toString().padStart(2, '0');
+  
+  let ago = '';
+  if (m < 1) ago = 'vừa xong';
+  else if (m < 60) ago = m + 'p trước';
+  else if (m < 1440) ago = Math.floor(m / 60) + 'h trước';
+  else ago = Math.floor(m / 1440) + 'ngày';
+
+  return `<span title="${d.toLocaleString()}">${hms}</span> <span style="font-size:0.85em;opacity:0.6">(${ago})</span>`;
 }
+function timeAgo(ts) { return formatTime(ts); } // Fallback for old calls
 
 async function loadJSON(file) {
   try {
     const r = await fetch(`${DATA_BASE}/${file}?t=${Date.now()}`);
-    if (!r.ok) {
-      console.warn(`Fetch failed for ${file}: ${r.status}`);
-      return null;
-    }
+    if (!r.ok) return null;
     const data = await r.json();
-    console.log(`Loaded ${file}:`, data);
     return data;
-  } catch (e) { 
-    console.error(`Error loading ${file}:`, e);
-    return null; 
-  }
+  } catch { return null; }
 }
 
 async function loadAllData() {
@@ -203,13 +204,15 @@ async function loadAllData() {
 function renderStats(data) {
   const h = data.health || {};
   const d = data.daily || {};
-  const w = data.weekly || {};
+  const rs = d.review_summary || {};
+  const dc = rs.decision_counts || {};
+  
   const status = h.overall_status || 'unknown';
   const checks = h.checks || [];
   const okCount = checks.filter(c => c.status === 'ok').length;
 
   document.getElementById('statusText').textContent = status === 'healthy' ? 'Hệ thống khỏe' : status === 'degraded' ? 'Cần kiểm tra' : 'Đang tải...';
-  document.getElementById('lastUpdate').textContent = timeAgo(h.timestamp || data.actionsStatus?.last_run);
+  document.getElementById('lastUpdate').innerHTML = formatTime(h.timestamp || data.actionsStatus?.last_run);
 
   document.getElementById('stats-area').innerHTML = `
     <div class="stat-card">
@@ -221,6 +224,11 @@ function renderStats(data) {
       <div class="label">Thesis hôm nay</div>
       <div class="value accent">${d.new_thesis_count || 0}</div>
       <div class="sub">Score TB: ${(d.avg_score||0).toFixed(1)}</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Hành động của bạn</div>
+      <div class="value yellow">${dc.taken || 0}</div>
+      <div class="sub">Bỏ: ${dc.skipped || 0} | Phớt lờ: ${dc.ignored || 0}</div>
     </div>
     <div class="stat-card">
       <div class="label">Edge</div>
