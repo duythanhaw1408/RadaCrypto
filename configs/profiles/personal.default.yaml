@@ -25,3 +25,6 @@ live:
 
 review:
   summary_path: data/replay/summary_btcusdt.json
+
+  daily_summary_path: data/review/daily_summary.json
+  weekly_summary_path: data/review/weekly_review.json

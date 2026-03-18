@@ -17,6 +17,7 @@ from cfte.normalizers.binance import (
     normalize_trade,
 )
 from cfte.storage.sqlite_writer import ThesisSQLiteStore
+from cfte.storage.thesis_log import ThesisLogWriter
 from cfte.live.outcome_monitor import OutcomeMonitor
 from cfte.thesis.engines import evaluate_setups
 from cfte.thesis.state import ThesisLifecycleRecord, apply_signal_update
@@ -38,6 +39,7 @@ class LiveThesisLoop:
         db_path: Path,
         use_agg_trade: bool = True,
         horizons: list[str] | None = None,
+        thesis_log_path: Path | None = None,
     ) -> None:
         self.symbol = symbol.upper()
         self.instrument_key = f"BINANCE:{self.symbol}:SPOT"
@@ -45,6 +47,7 @@ class LiveThesisLoop:
         self.use_agg_trade = use_agg_trade
         self.horizons = horizons or ["1h", "4h", "24h"]
         self.store = ThesisSQLiteStore(db_path)
+        self.thesis_log = ThesisLogWriter(thesis_log_path) if thesis_log_path is not None else None
         self.health = LiveEngineHealth(venue="binance")
         self.thesis_state: dict[str, ThesisLifecycleRecord] = {}
         self._depth = BinanceDepthReconciler(instrument_key=self.instrument_key)
@@ -173,6 +176,24 @@ class LiveThesisLoop:
 
                 for event in events:
                     await self.store.append_event(event)
+                    if self.thesis_log is not None:
+                        self.thesis_log.append_record(
+                            {
+                                "flow": "live",
+                                "event_type": event.event_type,
+                                "thesis_id": event.thesis_id,
+                                "from_stage": event.from_stage,
+                                "to_stage": event.to_stage,
+                                "event_ts": event.event_ts,
+                                "summary_vi": event.summary_vi,
+                                "score": event.score,
+                                "confidence": event.confidence,
+                                "symbol": self.symbol,
+                                "instrument_key": self.instrument_key,
+                                "setup": signal.setup,
+                                "direction": signal.direction,
+                            }
+                        )
 
             self.thesis_state[signal.thesis_id] = next_state
 
