@@ -28,6 +28,7 @@ class PersonalProfile:
     live: dict[str, Any]
     review: dict[str, Any]
     outcomes: dict[str, Any]
+    ux: dict[str, Any]
 
 
 @dataclass(frozen=True, slots=True)
@@ -54,6 +55,7 @@ def load_personal_profile(profile_path: Path) -> PersonalProfile:
         live=dict(data.get("live", {})),
         review=dict(data.get("review", {})),
         outcomes=dict(data.get("outcomes", {"horizons": ["1h", "4h", "24h"]})),
+        ux=dict(data.get("ux", {"alert_on_stage_change": True, "alert_on_score_delta": 10.0})),
     )
 
 
@@ -256,6 +258,7 @@ def command_run_live(context: ShellContext, symbol: str | None, max_events: int 
         use_agg_trade=not use_trade,
         horizons=context.profile.outcomes.get("horizons"),
     )
+    loop.ux = context.profile.ux
 
     try:
         asyncio.run(loop.run_forever(max_events=target_max_events))

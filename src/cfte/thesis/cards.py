@@ -11,48 +11,36 @@ _SETUP_LABELS_VI: dict[str, str] = {
 }
 
 _DIRECTION_LABELS_VI: dict[str, str] = {
-    "LONG_BIAS": "Ưu tiên kịch bản tăng",
-    "SHORT_BIAS": "Ưu tiên kịch bản giảm",
+    "LONG_BIAS": "LONG 🔼",
+    "SHORT_BIAS": "SHORT 🔽",
+}
+
+_STAGE_EMOJI: dict[str, str] = {
+    "DETECTED": "🔍",
+    "WATCHLIST": "👀",
+    "CONFIRMED": "✅",
+    "ACTIONABLE": "🔥",
+    "INVALIDATED": "❌",
+    "RESOLVED": "🏁",
 }
 
 
-def signal_to_dict(signal: ThesisSignal) -> dict:
-    return {
-        "thesis_id": signal.thesis_id,
-        "instrument_key": signal.instrument_key,
-        "setup": signal.setup,
-        "direction": signal.direction,
-        "stage": signal.stage,
-        "score": signal.score,
-        "confidence": signal.confidence,
-        "coverage": signal.coverage,
-        "why_now": signal.why_now,
-        "conflicts": signal.conflicts,
-        "invalidation": signal.invalidation,
-        "entry_style": signal.entry_style,
-        "targets": signal.targets,
-    }
-
-
 def render_trader_card(signal: ThesisSignal) -> str:
-    why_now = "\n".join(f"- {line}" for line in signal.why_now) if signal.why_now else "- Không có"
-    conflicts = "\n".join(f"- {line}" for line in signal.conflicts) if signal.conflicts else "- Không có"
-    targets = "\n".join(f"- {line}" for line in signal.targets) if signal.targets else "- Chưa xác định"
+    why_now = " | ".join(signal.why_now) if signal.why_now else "N/A"
+    conflicts = " | ".join(signal.conflicts) if signal.conflicts else "N/A"
+    targets = " | ".join(signal.targets) if signal.targets else "N/A"
+    
     setup_label = _SETUP_LABELS_VI.get(signal.setup, signal.setup)
     direction_label = _DIRECTION_LABELS_VI.get(signal.direction, signal.direction)
+    stage_emoji = _STAGE_EMOJI.get(signal.stage, "")
     stage_label = stage_label_vi(signal.stage)
+
     return (
-        f"Mã luận điểm: {signal.thesis_id}\n"
-        f"Cặp giao dịch: {signal.instrument_key}\n"
-        f"Thiết lập: {setup_label}\n"
-        f"Xu hướng: {direction_label}\n"
-        f"Trạng thái luận điểm: {stage_label}\n"
-        f"Điểm số: {signal.score:.2f}\n"
-        f"Độ tin cậy: {signal.confidence:.2f}\n"
-        f"Độ phủ: {signal.coverage:.2f}\n"
-        f"Lý do lúc này:\n{why_now}\n"
-        f"Yếu tố mâu thuẫn:\n{conflicts}\n"
-        f"Điểm vô hiệu: {signal.invalidation}\n"
-        f"Cách vào lệnh: {signal.entry_style}\n"
-        f"Mục tiêu:\n{targets}"
+        f"[{signal.thesis_id[:8]}] {signal.instrument_key} | {setup_label}\n"
+        f"Bias: {direction_label} | {stage_emoji} {stage_label}\n"
+        f"Điểm: {signal.score:>.1f} | Tin cậy: {signal.confidence:>.2f} | Độ phủ: {signal.coverage:>.2f}\n"
+        f"Cơ sở: {why_now}\n"
+        f"Rủi ro: {conflicts}\n"
+        f"Vô hiệu: {signal.invalidation} | Vào lệnh: {signal.entry_style}\n"
+        f"Mục tiêu: {targets}"
     )

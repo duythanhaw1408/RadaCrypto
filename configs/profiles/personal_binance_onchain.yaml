@@ -25,6 +25,10 @@ review:
 outcomes:
   horizons: ["1h", "4h", "24h"]
 
+ux:
+  alert_on_stage_change: true
+  alert_on_score_delta: 5.0 # On-chain needs more sensitivity
+
 # Placeholder for future on-chain data providers
 onchain:
   helius_api_key: "${HELIUS_API_KEY}"

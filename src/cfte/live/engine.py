@@ -44,9 +44,11 @@ class LiveThesisLoop:
         self.db_path = db_path
         self.use_agg_trade = use_agg_trade
         self.horizons = horizons or ["1h", "4h", "24h"]
+        self.ux = {}  # Will be set by run-live
         self.store = ThesisSQLiteStore(db_path)
         self.health = LiveEngineHealth(venue="binance")
         self.thesis_state: dict[str, ThesisLifecycleRecord] = {}
+        self._last_alert_score: dict[str, float] = {}
         self._depth = BinanceDepthReconciler(instrument_key=self.instrument_key)
         self._trades: list[NormalizedTrade] = []
         self._stop_event = asyncio.Event()
@@ -112,6 +114,9 @@ class LiveThesisLoop:
                     await self._process_trade_event(normalized)
 
                 processed += 1
+                if processed % 1000 == 0:
+                    print(f"💓 Hệ thống đang chạy... Đã xử lý {processed} sự kiện.")
+                
                 if max_events and processed >= max_events:
                     break
         except Exception as exc:
@@ -123,6 +128,8 @@ class LiveThesisLoop:
             self.health.connected = False
 
     async def _process_trade_event(self, trade: NormalizedTrade):
+        from cfte.thesis.cards import render_trader_card
+        
         if not self._depth or not self._depth.book.bids or not self._depth.book.asks:
             return
 
@@ -142,6 +149,7 @@ class LiveThesisLoop:
         for signal in signals:
             prev_record = self.thesis_state.get(signal.thesis_id)
             prev_stage = prev_record.signal.stage if prev_record else None
+            prev_score = self._last_alert_score.get(signal.thesis_id, 0.0)
             
             next_state, events = apply_signal_update(
                 state=prev_record,
@@ -150,9 +158,24 @@ class LiveThesisLoop:
             )
             
             # Check if stage changed or important update
+            should_alert = False
+            if next_state.signal.stage != prev_stage:
+                if self.ux.get("alert_on_stage_change", True):
+                    should_alert = True
+            
+            score_delta = abs(next_state.signal.score - prev_score)
+            if score_delta >= self.ux.get("alert_on_score_delta", 10.0):
+                should_alert = True
+
+            if should_alert:
+                print(f"\n--- THÔNG BÁO TÍN HIỆU [{next_state.signal.thesis_id[:8]}] ---")
+                print(render_trader_card(next_state.signal))
+                self._last_alert_score[signal.thesis_id] = next_state.signal.score
+
+            # Persistence if stage changed or new thesis
             if next_state.signal.stage != prev_stage:
                 # Get current entry price (mid-price or last trade)
-                entry_px = snapshot.mid_price
+                entry_px = snapshot.mid_px
                 
                 # Persistence
                 await self.store.save_thesis(

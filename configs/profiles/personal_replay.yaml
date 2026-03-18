@@ -24,3 +24,7 @@ review:
 
 outcomes:
   horizons: ["1h", "4h", "24h"]
+
+ux:
+  alert_on_stage_change: true
+  alert_on_score_delta: 20.0 # Replay needs less noise
