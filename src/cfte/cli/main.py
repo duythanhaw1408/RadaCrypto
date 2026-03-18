@@ -2,25 +2,95 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import json
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
+
+import yaml
 
 
-def doctor() -> int:
+DEFAULT_PROFILE_PATH = Path("configs/profiles/personal.default.yaml")
+DEFAULT_REPLAY_EVENTS = Path("fixtures/replay/btcusdt_normalized.jsonl")
+DEFAULT_REPLAY_SUMMARY = Path("data/replay/summary_btcusdt.json")
+DEFAULT_RAW_DIR = Path("data/raw")
+
+
+@dataclass(frozen=True, slots=True)
+class PersonalProfile:
+    name: str
+    locale: str
+    trader: dict[str, Any]
+    defaults: dict[str, Any]
+    scan: dict[str, Any]
+    live: dict[str, Any]
+    review: dict[str, Any]
+
+
+@dataclass(frozen=True, slots=True)
+class ShellContext:
+    profile_path: Path
+    profile: PersonalProfile
+
+
+def _read_yaml(path: Path) -> dict[str, Any]:
+    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError(f"Nội dung YAML không hợp lệ: {path}")
+    return data
+
+
+def load_personal_profile(profile_path: Path) -> PersonalProfile:
+    data = _read_yaml(profile_path)
+    return PersonalProfile(
+        name=str(data.get("profile", "personal-default")),
+        locale=str(data.get("locale", "vi-VN")),
+        trader=dict(data.get("trader", {})),
+        defaults=dict(data.get("defaults", {})),
+        scan=dict(data.get("scan", {})),
+        live=dict(data.get("live", {})),
+        review=dict(data.get("review", {})),
+    )
+
+
+def build_context(profile_path: str | Path) -> ShellContext:
+    path = Path(profile_path)
+    return ShellContext(profile_path=path, profile=load_personal_profile(path))
+
+
+def _resolve_path(value: str | Path | None, fallback: Path) -> Path:
+    return Path(value) if value is not None else fallback
+
+
+def _format_header(title: str, profile: PersonalProfile) -> str:
+    trader_name = profile.trader.get("display_name", "Trader")
+    return f"=== {title} | hồ sơ: {profile.name} | người dùng: {trader_name} ==="
+
+
+def doctor(context: ShellContext) -> int:
     required = [
         Path("sql/sqlite/001_state.sql"),
         Path("sql/sqlite/002_indexes.sql"),
-        Path("configs/profiles/swing_perp.yaml"),
+        context.profile_path,
         Path("src/cfte/books/local_book.py"),
         Path("src/cfte/features/tape.py"),
         Path("src/cfte/thesis/engines.py"),
+        DEFAULT_REPLAY_EVENTS,
     ]
     missing = [str(p) for p in required if not p.exists()]
+    print(_format_header("doctor", context.profile))
     if missing:
-        print("Thiếu các tệp bắt buộc:")
+        print("Phát hiện thiếu tệp bắt buộc để chạy luồng cá nhân:")
         for item in missing:
             print(f" - {item}")
+        print("Gợi ý: hoàn thiện tệp còn thiếu rồi chạy lại `cfte doctor`.")
         return 1
-    print("Doctor OK: các tệp lõi đã sẵn sàng.")
+
+    print("Hệ thống lõi đã sẵn sàng cho luồng local-first, replay-first.")
+    print(f"- Hồ sơ đang dùng: {context.profile_path}")
+    print(f"- Cặp mặc định: {context.profile.defaults.get('symbol', 'BTCUSDT')}")
+    print(f"- Replay mặc định: {context.profile.defaults.get('replay_events', str(DEFAULT_REPLAY_EVENTS))}")
+    print("Luồng khuyến nghị: doctor -> run-scan -> run-live -> review-day.")
     return 0
 
 
@@ -114,36 +184,162 @@ def run_replay_research(events_path: Path, summary_out: Path) -> int:
     return 0
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(prog="cfte")
+def _load_replay_result(events_path: Path):
+    from cfte.replay.adapters import load_replay_events
+    from cfte.replay.runner import run_replay
+
+    events = load_replay_events(events_path)
+    return run_replay(events)
+
+
+def command_replay(context: ShellContext, events_path: Path, summary_out: Path) -> int:
+    print(_format_header("replay", context.profile))
+    print(f"Đang chạy replay từ: {events_path}")
+    return run_replay_research(events_path=events_path, summary_out=summary_out)
+
+
+def command_run_scan(context: ShellContext, events_path: Path, limit: int) -> int:
+    from cfte.thesis.cards import render_trader_card
+
+    print(_format_header("run-scan", context.profile))
+    result = _load_replay_result(events_path)
+    actionable_threshold = float(context.profile.scan.get("actionable_threshold", 75.0))
+    candidates = [signal for signal in result.thesis_events if signal.score >= actionable_threshold]
+    shown = candidates[:limit]
+
+    print(f"Đã quét replay cho {result.instrument_key} với {result.feature_windows} cửa sổ đặc trưng.")
+    print(f"Ngưỡng ưu tiên từ hồ sơ cá nhân: {actionable_threshold:.2f} điểm.")
+    if not shown:
+        print("Chưa có thiết lập nào vượt ngưỡng ưu tiên. Hãy tiếp tục theo dõi watchlist.")
+        return 0
+
+    print(f"Có {len(shown)} thiết lập đáng chú ý để trader xem nhanh:")
+    for index, signal in enumerate(shown, start=1):
+        print(f"\n--- Ứng viên #{index} ---")
+        print(render_trader_card(signal))
+    return 0
+
+
+def command_run_live(context: ShellContext, symbol: str | None, out_dir: Path | None, max_events: int | None, use_trade: bool) -> int:
+    print(_format_header("run-live", context.profile))
+    live_defaults = context.profile.live
+    target_symbol = (symbol or live_defaults.get("symbol") or context.profile.defaults.get("symbol") or "BTCUSDT")
+    target_out = _resolve_path(out_dir, Path(str(live_defaults.get("raw_dir", DEFAULT_RAW_DIR))))
+    target_max_events = int(max_events or live_defaults.get("max_events", 25))
+    print(f"Chuẩn bị chạy live cho {target_symbol}.")
+    print(f"- Thư mục raw: {target_out}")
+    print(f"- Giới hạn sự kiện: {target_max_events}")
+    return asyncio.run(
+        run_binance_public_ingest(
+            symbol=str(target_symbol),
+            out_dir=target_out,
+            max_events=target_max_events,
+            use_agg_trade=not use_trade,
+        )
+    )
+
+
+def command_review_day(context: ShellContext, summary_path: Path) -> int:
+    print(_format_header("review-day", context.profile))
+    if not summary_path.exists():
+        print(f"Chưa tìm thấy file review: {summary_path}")
+        print("Gợi ý: chạy `cfte replay` hoặc `cfte run-scan` trước để tạo summary trong ngày.")
+        return 1
+
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    top_signals = summary.get("top_signals", [])
+    print(f"Instrument: {summary.get('instrument_key', 'N/A')}")
+    print(f"Số sự kiện replay: {summary.get('event_count', 0)}")
+    print(f"Số cửa sổ đặc trưng: {summary.get('feature_windows', 0)}")
+    print(f"Tổng tín hiệu thesis: {summary.get('thesis_count', 0)}")
+    print(f"Fingerprint: {summary.get('fingerprint', 'N/A')}")
+    if not top_signals:
+        print("Hôm nay chưa có tín hiệu nổi bật trong file review.")
+        return 0
+
+    print("Top tín hiệu để xem lại cuối ngày:")
+    for idx, signal in enumerate(top_signals, start=1):
+        why_now = signal.get("why_now", [])
+        print(
+            f"- #{idx}: {signal.get('setup')} | {signal.get('stage')} | "
+            f"điểm={signal.get('score')} | lý do chính={why_now[0] if why_now else 'chưa có'}"
+        )
+    return 0
+
+
+def command_health(context: ShellContext) -> int:
+    from cfte.collectors.health import CollectorHealthSnapshot
+
+    print(_format_header("health", context.profile))
+    snapshot = CollectorHealthSnapshot(
+        venue="binance",
+        state="idle",
+        connected=False,
+        connect_attempts=0,
+        reconnect_count=0,
+        message_count=0,
+        last_disconnect_reason=None,
+        last_error=None,
+    )
+    print(snapshot.to_operator_summary())
+    print("Health này phản ánh trạng thái shell hiện tại trước khi bật collector live.")
+    return 0
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="cfte",
+        description="Shell cá nhân cho Crypto Flow Thesis Engine theo luồng doctor -> run-scan -> run-live -> review-day.",
+    )
+    parser.add_argument("--profile", default=str(DEFAULT_PROFILE_PATH), help="Đường dẫn hồ sơ YAML cá nhân.")
     sub = parser.add_subparsers(dest="cmd")
-    sub.add_parser("doctor")
 
-    ingest = sub.add_parser("binance-public-ingest")
-    ingest.add_argument("--symbol", default="BTCUSDT")
-    ingest.add_argument("--out", default="data/raw")
-    ingest.add_argument("--max-events", type=int, default=25)
-    ingest.add_argument("--use-trade", action="store_true", help="Dùng stream trade thay vì aggTrade")
+    sub.add_parser("doctor", help="Kiểm tra hệ thống và cấu hình cá nhân.")
+    sub.add_parser("health", help="Xem trạng thái shell/collector trước khi chạy live.")
 
-    replay = sub.add_parser("replay-research")
-    replay.add_argument("--events", default="fixtures/replay/btcusdt_normalized.jsonl")
-    replay.add_argument("--summary-out", default="data/replay/summary_btcusdt.json")
+    replay = sub.add_parser("replay", help="Chạy replay deterministic và lưu summary.")
+    replay.add_argument("--events", default=str(DEFAULT_REPLAY_EVENTS))
+    replay.add_argument("--summary-out", default=str(DEFAULT_REPLAY_SUMMARY))
 
+    run_scan = sub.add_parser("run-scan", help="Quét replay theo hồ sơ cá nhân và in trader card tiếng Việt.")
+    run_scan.add_argument("--events", default=str(DEFAULT_REPLAY_EVENTS))
+    run_scan.add_argument("--limit", type=int, default=3)
+
+    run_live = sub.add_parser("run-live", help="Chạy ingest live Binance public bằng cấu hình cá nhân.")
+    run_live.add_argument("--symbol", default=None)
+    run_live.add_argument("--out", default=None)
+    run_live.add_argument("--max-events", type=int, default=None)
+    run_live.add_argument("--use-trade", action="store_true", help="Dùng stream trade thay vì aggTrade.")
+
+    review = sub.add_parser("review-day", help="Xem tóm tắt cuối ngày từ summary replay.")
+    review.add_argument("--summary", default=str(DEFAULT_REPLAY_SUMMARY))
+
+    return parser
+
+
+def main() -> int:
+    parser = build_parser()
     args = parser.parse_args()
 
+    if not args.cmd:
+        parser.print_help()
+        return 0
+
+    context = build_context(args.profile)
+
     if args.cmd == "doctor":
-        return doctor()
-    if args.cmd == "binance-public-ingest":
-        return asyncio.run(
-            run_binance_public_ingest(
-                symbol=args.symbol,
-                out_dir=Path(args.out),
-                max_events=args.max_events,
-                use_agg_trade=not args.use_trade,
-            )
-        )
-    if args.cmd == "replay-research":
-        return run_replay_research(events_path=Path(args.events), summary_out=Path(args.summary_out))
+        return doctor(context)
+    if args.cmd == "health":
+        return command_health(context)
+    if args.cmd == "replay":
+        return command_replay(context, events_path=Path(args.events), summary_out=Path(args.summary_out))
+    if args.cmd == "run-scan":
+        return command_run_scan(context, events_path=Path(args.events), limit=args.limit)
+    if args.cmd == "run-live":
+        out_dir = Path(args.out) if args.out is not None else None
+        return command_run_live(context, symbol=args.symbol, out_dir=out_dir, max_events=args.max_events, use_trade=args.use_trade)
+    if args.cmd == "review-day":
+        return command_review_day(context, summary_path=Path(args.summary))
 
     parser.print_help()
     return 0

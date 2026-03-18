@@ -22,58 +22,93 @@ Local-first, replay-first starter repo for a crypto flow thesis engine.
 2. Install
    python3 -m pip install -e .
 
-3. Copy env
-   cp .env.example .env
-
-4. Initialize SQLite
+3. Initialize SQLite
    python scripts/init_sqlite_db.py
 
-5. Run tests
+4. Run tests
    pytest -q
 
-6. Doctor check
-   python -m cfte.cli.main doctor
+## Personal-use CLI flow
 
-## How to Run
-To run the project again once set up:
+Mục tiêu của shell CLI là giúp trader cá nhân chạy một flow ổn định mỗi ngày mà không phải nhớ script rời rạc.
 
-```bash
-cd crypto-flow-thesis-engine-starter
-source .venv/bin/activate
-# Kiểm tra trạng thái
-python3 -m cfte.cli.main doctor
-# Chạy tests
-pytest
-# Chạy simulation
-python3 scripts/replay_binance_public.py
-```
+### Entrypoint ổn định
 
-### Source-Path Execution (Workaround)
-Nếu `pip install -e .` chưa nhận diện đúng package, bạn có thể chạy trực tiếp bằng cách chỉ định `PYTHONPATH`:
+Sau khi cài `pip install -e .`, bạn có thể dùng trực tiếp:
 
 ```bash
-source .venv/bin/activate
-PYTHONPATH=src pytest -q
-PYTHONPATH=src python3 -m cfte.cli.main doctor
-PYTHONPATH=src python3 scripts/replay_binance_public.py
+cfte doctor
+cfte run-scan
+cfte run-live --max-events 25
+cfte review-day
+cfte health
 ```
-*Lưu ý: Đây là source-path execution, không thay thế hoàn toàn cho việc kiểm tra packaging/installation.*
 
-## Phase 1 goal
-Binance-centric vertical slice:
-- market data normalization
-- order book reconstruction
-- tape metrics
-- initial deterministic thesis signals
-- replayable research path
+Nếu muốn chạy bằng module:
+
+```bash
+python -m cfte.cli.main doctor
+python -m cfte.cli.main run-scan
+```
+
+### Hồ sơ cấu hình cá nhân
+
+CLI mặc định dùng hồ sơ `configs/profiles/personal.default.yaml`.
+
+Bạn có thể tạo một hồ sơ riêng rồi truyền vào bằng `--profile`:
+
+```bash
+cfte --profile configs/profiles/personal.default.yaml doctor
+```
+
+Các phần cấu hình cá nhân hiện hỗ trợ:
+- trader display name
+- symbol mặc định
+- đường dẫn replay mặc định
+- ngưỡng scan cá nhân
+- tham số ingest live cơ bản
+
+## Daily workflow đề xuất
+
+### 1) Kiểm tra hệ thống
+
+```bash
+cfte doctor
+```
+
+### 2) Chạy replay deterministic
+
+```bash
+cfte replay \
+  --events fixtures/replay/btcusdt_normalized.jsonl \
+  --summary-out data/replay/summary_btcusdt.json
+```
+
+### 3) Quét cơ hội theo hồ sơ cá nhân
+
+```bash
+cfte run-scan --events fixtures/replay/btcusdt_normalized.jsonl --limit 3
+```
+
+### 4) Chạy ingest live cho phiên theo dõi
+
+```bash
+cfte run-live --symbol BTCUSDT --max-events 25
+```
+
+### 5) Xem review cuối ngày
+
+```bash
+cfte review-day --summary data/replay/summary_btcusdt.json
+```
+
+### 6) Kiểm tra trạng thái shell trước live
+
+```bash
+cfte health
+```
 
 ## Notes
-This is a starter scaffold, not a production terminal.
-Keep the architecture local-first and replay-first.
-
-
-## Replay research workflow (Phase 1C)
-- Dữ liệu replay mẫu: `fixtures/replay/btcusdt_normalized.jsonl`
-- Chạy replay deterministic:
-  `python -m cfte.cli.main replay-research --events fixtures/replay/btcusdt_normalized.jsonl --summary-out data/replay/summary_btcusdt.json`
-- Kết quả tóm tắt được lưu JSON để phục vụ phân tích lặp lại.
+- Giữ nguyên kiến trúc local-first và replay-first.
+- CLI chỉ productize shell sử dụng cá nhân, không thay đổi roadmap lõi.
+- Các module features/thesis/replay hiện có vẫn được giữ nguyên.

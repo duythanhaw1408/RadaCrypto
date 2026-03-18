@@ -24,3 +24,7 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+
+[project.scripts]
+cfte = "cfte.cli.main:main"
