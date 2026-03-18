@@ -8,8 +8,10 @@ from pathlib import Path
 from cfte.books.local_book import LocalBook
 from cfte.features.tape import build_tape_snapshot
 from cfte.models.events import NormalizedDepthDiff, NormalizedTrade, ThesisSignal
+from cfte.thesis.lifecycle import ACTIVE_STAGES
 from cfte.replay.adapters import ReplayBookSnapshot, ReplayEvent
 from cfte.thesis.engines import evaluate_setups
+from cfte.thesis.state import ThesisEventRecord, ThesisLifecycleRecord, apply_signal_update, close_signal_state
 
 
 @dataclass(slots=True)
@@ -20,6 +22,8 @@ class ReplayRunResult:
     feature_windows: int
     fingerprint: str
     thesis_events: list[ThesisSignal]
+    thesis_state: dict[str, ThesisLifecycleRecord]
+    thesis_event_history: list[ThesisEventRecord]
 
 
 def _fingerprint_signals(signals: list[ThesisSignal]) -> str:
@@ -56,6 +60,8 @@ def run_replay(events: list[ReplayEvent]) -> ReplayRunResult:
     instrument_key: str | None = None
     trades: list[NormalizedTrade] = []
     thesis_events: list[ThesisSignal] = []
+    thesis_state: dict[str, ThesisLifecycleRecord] = {}
+    thesis_event_history: list[ThesisEventRecord] = []
     feature_windows = 0
 
     for event in ordered_events:
@@ -95,10 +101,26 @@ def run_replay(events: list[ReplayEvent]) -> ReplayRunResult:
                 window_start_ts=trades[0].venue_ts,
                 window_end_ts=payload.venue_ts,
             )
-            thesis_events.extend(evaluate_setups(snapshot))
+            evaluated_signals = evaluate_setups(snapshot)
+            thesis_events.extend(evaluated_signals)
+            for signal in evaluated_signals:
+                next_state, state_events = apply_signal_update(
+                    state=thesis_state.get(signal.thesis_id),
+                    signal=signal,
+                    event_ts=payload.venue_ts,
+                )
+                thesis_state[signal.thesis_id] = next_state
+                thesis_event_history.extend(state_events)
 
     if instrument_key is None:
         raise ValueError("No instrument_key found in replay events")
+
+    for thesis_id, state in list(thesis_state.items()):
+        if state.signal.stage == "ACTIONABLE":
+            next_state, state_event = close_signal_state(state=state, next_stage="RESOLVED", event_ts=ordered_events[-1].venue_ts)
+            thesis_state[thesis_id] = next_state
+            if state_event is not None:
+                thesis_event_history.append(state_event)
 
     return ReplayRunResult(
         instrument_key=instrument_key,
@@ -107,6 +129,8 @@ def run_replay(events: list[ReplayEvent]) -> ReplayRunResult:
         feature_windows=feature_windows,
         fingerprint=_fingerprint_signals(thesis_events),
         thesis_events=thesis_events,
+        thesis_state=thesis_state,
+        thesis_event_history=thesis_event_history,
     )
 
 
