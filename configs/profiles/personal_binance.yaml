@@ -1,0 +1,23 @@
+profile: personal-binance
+locale: vi-VN
+
+trader:
+  display_name: Trader Binance
+  timezone: Asia/Ho_Chi_Minh
+
+defaults:
+  symbol: BTCUSDT
+  replay_events: fixtures/replay/btcusdt_normalized.jsonl
+  summary_out: data/replay/summary_btcusdt.json
+
+scan:
+  actionable_threshold: 70
+  max_cards: 5
+
+live:
+  symbol: BTCUSDT
+  raw_dir: data/raw
+  max_events: 1000
+
+review:
+  summary_path: data/replay/summary_btcusdt.json

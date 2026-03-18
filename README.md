@@ -30,90 +30,44 @@ Local-first, replay-first starter repo for a crypto flow thesis engine.
 
 ## Personal-use CLI flow
 
-Mục tiêu của shell CLI là giúp trader cá nhân chạy một flow ổn định mỗi ngày mà không phải nhớ script rời rạc.
+Mục tiêu của shell CLI là giúp trader cá nhân chạy một chu kỳ (flow) ổn định mỗi ngày.
 
-### Entrypoint ổn định
-
-Sau khi cài `pip install -e .`, bạn có thể dùng trực tiếp:
+### 1. Chuẩn bị (Setup)
 
 ```bash
-cfte doctor
-cfte run-scan
-cfte run-live --max-events 25
-cfte review-day
-cfte health
+# Cài đặt môi trường sạch (nếu chưa)
+python -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -e .
+python scripts/init_sqlite_db.py
 ```
 
-Nếu muốn chạy bằng module:
+### 2. Kiểm tra (Doctor)
 
-```bash
-python -m cfte.cli.main doctor
-python -m cfte.cli.main run-scan
-```
-
-### Hồ sơ cấu hình cá nhân
-
-CLI mặc định dùng hồ sơ `configs/profiles/personal.default.yaml`.
-
-Bạn có thể tạo một hồ sơ riêng rồi truyền vào bằng `--profile`:
-
-```bash
-cfte --profile configs/profiles/personal.default.yaml doctor
-```
-
-Các phần cấu hình cá nhân hiện hỗ trợ:
-- trader display name
-- symbol mặc định
-- đường dẫn replay mặc định
-- ngưỡng scan cá nhân
-- đường dẫn log thesis cho scan/live
-- tham số ingest live cơ bản
-
-## Daily workflow đề xuất
-
-### 1) Kiểm tra hệ thống
-
+Đảm bảo các tệp cấu hình và dữ liệu cơ bản đã sẵn sàng:
 ```bash
 cfte doctor
 ```
 
-### 2) Chạy replay deterministic
+### 3. Quy trình hàng ngày (Daily Workflow)
 
-```bash
-cfte replay \
-  --events fixtures/replay/btcusdt_normalized.jsonl \
-  --summary-out data/replay/summary_btcusdt.json
-```
+Sử dụng bộ hồ sơ cá nhân (`--profile`) để tự động hóa tham số:
 
-### 3) Quét cơ hội theo hồ sơ cá nhân
+| Lệnh | Ý nghĩa | Ví dụ |
+| :--- | :--- | :--- |
+| **doctor** | Kiểm tra hệ thống | `cfte doctor` |
+| **run-scan** | Quét nhanh cơ hội | `cfte --profile configs/profiles/personal_binance.yaml run-scan` |
+| **run-live** | Bám sát thị trường | `cfte --profile configs/profiles/personal_binance.yaml run-live` |
+| **review-thesis** | Dashboard luận điểm | `cfte review-thesis` |
+| **review-day** | Tổng kết cuối ngày | `cfte review-day` |
 
-```bash
-cfte run-scan --events fixtures/replay/btcusdt_normalized.jsonl --limit 3
-```
+### 4. Các hồ sơ hỗ trợ sẵn
 
-`run-scan` sẽ tự động ghi summary replay theo hồ sơ cá nhân và append log thesis JSONL để trader xem lại sau.
-
-### 4) Chạy ingest live cho phiên theo dõi
-
-```bash
-cfte run-live --symbol BTCUSDT --max-events 25
-```
-
-`run-live` giữ tối thiểu ingest thật từ Binance public, đánh giá thesis theo cửa sổ trade gần nhất, ghi raw parquet, và append thesis log JSONL cho từng nhịp trade. Nếu snapshot đầu vào lỗi, shell sẽ báo trạng thái suy giảm thay vì crash mơ hồ.
-
-### 5) Xem review cuối ngày
-
-```bash
-cfte review-day --summary data/replay/summary_btcusdt.json
-```
-
-### 6) Kiểm tra trạng thái shell trước live
-
-```bash
-cfte health
-```
+- `configs/profiles/personal_binance.yaml`: Phổ thông (BTC/ETH)
+- `configs/profiles/personal_binance_onchain.yaml`: Theo dõi hệ sinh thái (SOL)
+- `configs/profiles/personal_replay.yaml`: Nghiên cứu & Backtest
 
 ## Notes
 - Giữ nguyên kiến trúc local-first và replay-first.
-- CLI chỉ productize shell sử dụng cá nhân, không thay đổi roadmap lõi.
-- Các module features/thesis/replay hiện có vẫn được giữ nguyên.
+- CLI chỉ đóng vai trò "Product Shell" cho trader cá nhân.
+- Toàn bộ output người dùng mặc định là tiếng Việt.

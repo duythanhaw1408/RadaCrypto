@@ -1,0 +1,28 @@
+profile: personal-binance-onchain
+locale: vi-VN
+
+trader:
+  display_name: Trader On-chain Specialist
+  timezone: Asia/Ho_Chi_Minh
+
+defaults:
+  symbol: SOLUSDT
+  replay_events: fixtures/replay/btcusdt_normalized.jsonl
+  summary_out: data/replay/summary_sol_onchain.json
+
+scan:
+  actionable_threshold: 65
+  max_cards: 10
+
+live:
+  symbol: SOLUSDT
+  raw_dir: data/raw/onchain
+  max_events: 500
+
+review:
+  summary_path: data/replay/summary_sol_onchain.json
+
+# Placeholder for future on-chain data providers
+onchain:
+  helius_api_key: "${HELIUS_API_KEY}"
+  jupiter_enabled: true

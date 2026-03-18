@@ -1,0 +1,23 @@
+profile: personal-replay
+locale: vi-VN
+
+trader:
+  display_name: Research Analyst
+  timezone: Asia/Ho_Chi_Minh
+
+defaults:
+  symbol: ETHUSDT
+  replay_events: fixtures/replay/btcusdt_normalized.jsonl
+  summary_out: data/replay/research_eth.json
+
+scan:
+  actionable_threshold: 80
+  max_cards: 20
+
+live:
+  symbol: ETHUSDT
+  raw_dir: data/raw/research
+  max_events: 50
+
+review:
+  summary_path: data/replay/research_eth.json

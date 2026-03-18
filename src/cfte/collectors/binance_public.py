@@ -101,14 +101,23 @@ class BinancePublicCollector:
         while True:
             try:
                 import websockets
+                import ssl
+                
+                # Create unverified SSL context for macOS compatibility in personal use
+                ssl_context = ssl.create_default_context()
+                ssl_context.check_hostname = False
+                ssl_context.verify_mode = ssl.CERT_NONE
 
                 self._connect_attempts += 1
-                async with websockets.connect(self.url, ping_interval=20, ping_timeout=20) as ws:
+                async with websockets.connect(self.url, ping_interval=20, ping_timeout=20, ssl=ssl_context) as ws:
                     self._mark_connected()
+                    print(f"WS Connected to {self.url}")
                     async for raw in ws:
                         self._record_message()
+                        # print(f"DEBUG RAW: {raw[:100]}")
                         envelope = json.loads(raw)
                         yield envelope
             except Exception as exc:
                 self._record_failure(exc)
+                print(f"WS Error: {exc}")
                 await asyncio.sleep(self.reconnect_sleep_seconds)
