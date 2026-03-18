@@ -8,6 +8,11 @@ from cfte.normalizers.instruments import parse_instrument_key
 MAX_VENUE_STALENESS_MS = 2_000
 MAX_VENUE_WINDOW_SKEW_MS = 2_000
 
+_EXCLUSION_REASON_LABELS_VI: dict[str, str] = {
+    "stale_window": "Dữ liệu cửa sổ đã cũ so với sàn tham chiếu",
+    "misaligned_window": "Cửa sổ dữ liệu lệch, không thể so sánh an toàn",
+}
+
 
 @dataclass(slots=True)
 class VenueFlow:
@@ -185,7 +190,8 @@ def render_venue_comparison_vi(result: VenueComparisonResult) -> str:
     if result.excluded_venues:
         lines.append("Sàn bị loại khỏi so sánh:")
         for status in result.excluded_venues:
+            reason_label = _EXCLUSION_REASON_LABELS_VI.get(status.reason, status.reason)
             lines.append(
-                f"- {status.venue}: {status.reason}, cửa sổ={status.window_start_ts}->{status.window_end_ts}"
+                f"- {status.venue}: {reason_label}, cửa sổ={status.window_start_ts}->{status.window_end_ts}"
             )
     return "\n".join(lines)

@@ -30,3 +30,6 @@ def test_render_trader_card_vietnamese_first_labels():
     assert "Cách vào lệnh" in rendered
     assert "Mục tiêu" in rendered
     assert "Trạng thái luận điểm" in rendered
+    assert "Tích lũy âm thầm" in rendered
+    assert "Ưu tiên kịch bản tăng" in rendered
+    assert "Đưa vào danh sách theo dõi" in rendered

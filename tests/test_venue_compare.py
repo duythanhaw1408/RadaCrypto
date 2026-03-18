@@ -55,6 +55,20 @@ def test_render_venue_comparison_vi_is_vietnamese_user_facing():
     assert "Cửa sổ so sánh hợp lệ" in summary
 
 
+def test_render_venue_comparison_vi_translates_excluded_reason_labels():
+    result = compare_trade_flows(
+        [
+            _trade("binance", 12000, venue_ts=BASE_TS + 4000),
+            _trade("binance", 10000, venue_ts=BASE_TS + 4500),
+            _trade("bybit", 9000, venue_ts=BASE_TS + 4300),
+            _trade("okx", 7000, venue_ts=BASE_TS),
+        ]
+    )
+    summary = render_venue_comparison_vi(result)
+
+    assert "Dữ liệu cửa sổ đã cũ so với sàn tham chiếu" in summary
+    assert "stale_window" not in summary
+
 
 def test_compare_trade_flows_requires_two_venues():
     with pytest.raises(ValueError):
