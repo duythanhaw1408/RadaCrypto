@@ -52,3 +52,9 @@ PYTHONPATH=src python scripts/replay_binance_public.py
 
 ---
 *Ghi chú: Giữ kiến trúc local-first và replay-first làm ưu tiên hàng đầu trong mọi điều chỉnh.*
+
+
+## 7. Stage 5 Reliability Addendum
+- Thêm `cfte bootstrap` để chuẩn hóa thư mục runtime, SQLite schema và health artifact trước khi vận hành hằng ngày.
+- `cfte doctor` / `cfte health` giờ kiểm tra rõ Python version, dependency cốt lõi, profile và artifact vận hành.
+- `run-live` có watchdog timeout + runtime artifact JSON để chẩn đoán lỗi loop nhanh hơn sau mỗi phiên chạy cá nhân.

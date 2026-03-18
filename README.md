@@ -42,12 +42,16 @@ python3 -m pip install -e .
 python scripts/init_sqlite_db.py
 ```
 
-### 2. Kiểm tra (Doctor)
+### 2. Bootstrap + Doctor
 
-Đảm bảo các tệp cấu hình và dữ liệu cơ bản đã sẵn sàng:
+Khuyến nghị chạy bootstrap một lần sau mỗi lần pull/update để làm sạch các lỗi môi trường thường gặp:
 ```bash
+cfte bootstrap
 cfte doctor
 ```
+
+- `bootstrap`: tạo thư mục cần thiết, khởi tạo SQLite schema và lưu `data/review/health_status.json`.
+- `doctor`: kiểm tra Python runtime, dependency cốt lõi, profile, SQLite và các artifact vận hành.
 
 ### 3. Quy trình hàng ngày (Daily Workflow)
 
@@ -55,7 +59,8 @@ Sử dụng bộ hồ sơ cá nhân (`--profile`) để tự động hóa tham s
 
 | Lệnh | Ý nghĩa | Ví dụ |
 | :--- | :--- | :--- |
-| **doctor** | Kiểm tra hệ thống | `cfte doctor` |
+| **bootstrap** | Chuẩn bị môi trường chạy hằng ngày | `cfte bootstrap` |
+| **doctor** | Kiểm tra hệ thống + health report | `cfte doctor` |
 | **run-scan** | Quét nhanh cơ hội | `cfte --profile configs/profiles/personal_binance.yaml run-scan` |
 | **run-live** | Bám sát thị trường | `cfte --profile configs/profiles/personal_binance.yaml run-live` |
 | **review-thesis** | Dashboard luận điểm | `cfte review-thesis` |
@@ -87,3 +92,30 @@ Luồng vận hành mới tập trung vào review lặp lại và tuning tối t
 5. `cfte tune-profile` khi muốn xem riêng gợi ý ngưỡng threshold theo setup.
 
 Các workflow GitHub Actions daily/weekly sẽ sinh artifact review JSON ổn định để bạn tải xuống và đối chiếu trong pilot 7–14 ngày.
+
+
+## Stage 5 — Daily Reliability & Product Hardening
+
+Các bổ sung vận hành cá nhân cho chặng 5:
+
+- `cfte health` giờ sinh báo cáo rõ trạng thái **healthy / degraded / bad config** bằng tiếng Việt và lưu artifact `data/review/health_status.json`.
+- `cfte run-live` có watchdog `watchdog_idle_seconds`, heartbeat `heartbeat_interval`, và luôn lưu runtime artifact `data/review/live_runtime.json` để bạn biết loop dừng vì timeout, runtime error hay hoàn tất bình thường.
+- Các profile cá nhân có thêm khóa `review.health_report_path`, `review.live_runtime_path`, `live.watchdog_idle_seconds`, `live.heartbeat_interval` để giảm sửa tay khi chạy lặp lại.
+- Khi update môi trường, hãy chạy lại tuần tự: `python3 -m pip install -e .` -> `cfte bootstrap` -> `cfte doctor`.
+
+### Quy trình daily ngắn gọn
+
+```bash
+python3 -m pip install -e .
+cfte bootstrap
+cfte doctor
+cfte run-scan
+cfte run-live --max-events 500
+cfte review-day
+```
+
+### Cách đọc degraded state
+
+- **BAD CONFIG**: lỗi chặn chạy ổn định, thường là Python version hoặc dependency lõi.
+- **DEGRADED**: vẫn chạy được nhưng thiếu artifact, replay mặc định, hoặc môi trường chưa đủ sạch.
+- **Runtime artifact**: kiểm tra `status`, `last_error`, `stale_gap_seconds`, `processed_events` để biết loop live chết ở đâu.

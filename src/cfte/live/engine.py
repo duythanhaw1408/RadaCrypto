@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import asyncio
+import time
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import AsyncGenerator
 
 from cfte.books.binance_depth import BinanceDepthReconciler
 from cfte.collectors.binance_public import BinancePublicCollector, build_public_streams, try_fetch_depth_snapshot
@@ -16,6 +17,7 @@ from cfte.normalizers.binance import (
     normalize_depth_diff,
     normalize_trade,
 )
+from cfte.cli.reliability import LiveRuntimeArtifact, persist_live_runtime_artifact
 from cfte.storage.sqlite_writer import ThesisSQLiteStore
 from cfte.storage.thesis_log import ThesisLogWriter
 from cfte.live.outcome_monitor import OutcomeMonitor
@@ -40,6 +42,9 @@ class LiveThesisLoop:
         use_agg_trade: bool = True,
         horizons: list[str] | None = None,
         thesis_log_path: Path | None = None,
+        watchdog_idle_seconds: float = 45.0,
+        heartbeat_interval: int = 250,
+        runtime_report_path: Path | None = None,
     ) -> None:
         self.symbol = symbol.upper()
         self.instrument_key = f"BINANCE:{self.symbol}:SPOT"
@@ -49,12 +54,17 @@ class LiveThesisLoop:
         self.ux = {}  # Will be set by run-live
         self.store = ThesisSQLiteStore(db_path)
         self.thesis_log = ThesisLogWriter(thesis_log_path) if thesis_log_path is not None else None
+        self.watchdog_idle_seconds = watchdog_idle_seconds
+        self.heartbeat_interval = max(1, heartbeat_interval)
+        self.runtime_report_path = runtime_report_path
         self.health = LiveEngineHealth(venue="binance")
         self.thesis_state: dict[str, ThesisLifecycleRecord] = {}
         self._last_alert_score: dict[str, float] = {}
         self._depth = BinanceDepthReconciler(instrument_key=self.instrument_key)
         self._trades: list[NormalizedTrade] = []
         self._stop_event = asyncio.Event()
+        self._last_message_monotonic: float | None = None
+        self._last_trade_ts: int | None = None
 
     async def _init_book(self) -> bool:
         snapshot, error = try_fetch_depth_snapshot(symbol=self.symbol)
@@ -70,9 +80,16 @@ class LiveThesisLoop:
         return True
 
     async def run_forever(self, max_events: int | None = None):
+        started_at = datetime.now(tz=timezone.utc).isoformat()
         print(f"Khởi chạy loop cho {self.symbol}...")
         if not await self._init_book():
             print("Lỗi khởi tạo sổ lệnh.")
+            self._persist_runtime_artifact(
+                status="bootstrap_failed",
+                started_at=started_at,
+                processed=0,
+                event_counts={},
+            )
             return
 
         await self.store.migrate_schema()
@@ -89,11 +106,24 @@ class LiveThesisLoop:
         self.health.reconnect_count += 1
         print(f"Đã kết nối Binance Stream: {streams}")
 
+        status = "completed"
         try:
-            async for envelope in collector.stream_forever():
-                if self._stop_event.is_set():
+            iterator = collector.stream_forever().__aiter__()
+            while not self._stop_event.is_set():
+                try:
+                    envelope = await asyncio.wait_for(iterator.__anext__(), timeout=self.watchdog_idle_seconds)
+                except asyncio.TimeoutError:
+                    status = "watchdog_timeout"
+                    self.health.last_error = (
+                        f"Watchdog không nhận được dữ liệu mới trong {self.watchdog_idle_seconds:.1f}s"
+                    )
+                    print(f"[WATCHDOG] {self.health.last_error}. Chủ động dừng loop để dễ phục hồi.")
+                    break
+                except StopAsyncIteration:
                     break
 
+                self.health.message_count = collector.health_snapshot().message_count
+                self._last_message_monotonic = time.monotonic()
                 data = envelope.get("data", {})
                 if not isinstance(data, dict):
                     continue
@@ -114,21 +144,60 @@ class LiveThesisLoop:
 
                 if isinstance(normalized, NormalizedTrade):
                     self._trades.append(normalized)
+                    self._last_trade_ts = normalized.venue_ts
                     await self._process_trade_event(normalized)
 
                 processed += 1
-                if processed % 1000 == 0:
-                    print(f"💓 Hệ thống đang chạy... Đã xử lý {processed} sự kiện.")
-                
+                if processed % self.heartbeat_interval == 0:
+                    gap = self._stale_gap_seconds()
+                    print(
+                        f"💓 Hệ thống đang chạy... Đã xử lý {processed} sự kiện | "
+                        f"message={self.health.message_count} | gap={gap:.1f}s"
+                    )
+
                 if max_events and processed >= max_events:
                     break
         except Exception as exc:
+            status = "runtime_error"
             print(f"Bắt lỗi trong loop: {exc}")
             self.health.last_error = str(exc)
             self.health.connected = False
         finally:
             monitor.stop()
+            monitor_task.cancel()
             self.health.connected = False
+            self._persist_runtime_artifact(
+                status=status,
+                started_at=started_at,
+                processed=processed,
+                event_counts=event_counts,
+            )
+
+    def _stale_gap_seconds(self) -> float:
+        if self._last_message_monotonic is None:
+            return 0.0
+        return max(0.0, time.monotonic() - self._last_message_monotonic)
+
+    def _persist_runtime_artifact(self, *, status: str, started_at: str, processed: int, event_counts: dict[str, int]) -> None:
+        if self.runtime_report_path is None:
+            return
+        artifact = LiveRuntimeArtifact(
+            symbol=self.symbol,
+            status=status,
+            started_at=started_at,
+            finished_at=datetime.now(tz=timezone.utc).isoformat(),
+            processed_events=processed,
+            event_counts=event_counts,
+            reconnect_count=max(0, self.health.reconnect_count),
+            message_count=self.health.message_count,
+            idle_timeout_seconds=self.watchdog_idle_seconds,
+            heartbeat_interval=self.heartbeat_interval,
+            stale_gap_seconds=self._stale_gap_seconds() if self._last_message_monotonic is not None else None,
+            last_error=self.health.last_error,
+            last_trade_ts=self._last_trade_ts,
+        )
+        saved = persist_live_runtime_artifact(self.runtime_report_path, artifact)
+        print(f"Đã lưu runtime artifact tại: {saved}")
 
     async def _process_trade_event(self, trade: NormalizedTrade):
         from cfte.thesis.cards import render_trader_card

@@ -109,3 +109,48 @@ def test_binance_health_snapshot_reports_degraded_state():
     assert snapshot.reconnect_count == 1
     assert snapshot.last_error is not None
     assert 'ws reset by peer' in snapshot.to_operator_summary()
+
+
+def test_live_thesis_loop_persists_runtime_artifact_on_watchdog_timeout(tmp_path):
+    import asyncio
+    import json
+    from unittest.mock import patch
+
+    runtime_path = tmp_path / 'live_runtime.json'
+    db_path = tmp_path / 'state.db'
+    import sqlite3
+    conn = sqlite3.connect(db_path)
+    for sql_name in ['001_state.sql', '002_indexes.sql']:
+        conn.executescript((Path('sql/sqlite') / sql_name).read_text(encoding='utf-8'))
+    conn.commit()
+    conn.close()
+
+    class _SilentCollector:
+        def __init__(self, streams):
+            self._message_count = 0
+        async def stream_forever(self):
+            while True:
+                await asyncio.sleep(0.05)
+                if False:
+                    yield {}
+        def health_snapshot(self):
+            from cfte.collectors.health import CollectorHealthSnapshot
+            return CollectorHealthSnapshot('binance', 'running', True, 1, 0, self._message_count, None, None)
+
+    loop = BinancePublicCollector  # keep import used in module scope
+    live = __import__('cfte.live.engine', fromlist=['LiveThesisLoop']).LiveThesisLoop(
+        symbol='BTCUSDT',
+        db_path=db_path,
+        runtime_report_path=runtime_path,
+        watchdog_idle_seconds=0.01,
+        heartbeat_interval=1,
+    )
+
+    with patch('cfte.live.engine.try_fetch_depth_snapshot', return_value=({'lastUpdateId': 1, 'bids': [['100', '1']], 'asks': [['101', '1']]}, None)):
+        with patch('cfte.live.engine.BinancePublicCollector', _SilentCollector):
+            asyncio.run(live.run_forever(max_events=1))
+
+    artifact = json.loads(runtime_path.read_text(encoding='utf-8'))
+    assert artifact['status'] == 'watchdog_timeout'
+    assert artifact['idle_timeout_seconds'] == 0.01
+    assert 'Watchdog' in artifact['last_error']
