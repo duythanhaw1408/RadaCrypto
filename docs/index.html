@@ -237,11 +237,18 @@ function renderStats(data) {
 
 function renderSignals(data) {
   const replay = data.replay;
-  if (!replay || !replay.signals) {
-    document.getElementById('tab-signals').innerHTML = '<div class="empty">Chưa có tín hiệu scan. Chờ GitHub Actions chạy cycle tiếp theo.</div>';
+  if (!replay) {
+    document.getElementById('tab-signals').innerHTML = '<div class="empty">Chưa có dữ liệu scan. Chờ GitHub Actions chạy cycle tiếp theo.</div>';
     return;
   }
-  const signals = (replay.signals || []).sort((a,b) => (b.score||0) - (a.score||0));
+  // Thử lấy 'signals' hoặc 'top_signals' (tùy version engine)
+  const signals = [...(replay.signals || replay.top_signals || [])].sort((a,b) => (b.score||0) - (a.score||0));
+  
+  if (signals.length === 0) {
+    document.getElementById('tab-signals').innerHTML = '<div class="empty">Không có tín hiệu nổi bật trong đợt scan này.</div>';
+    return;
+  }
+
   const actionable = signals.filter(s => (s.score||0) >= 70);
   const watching = signals.filter(s => (s.score||0) >= 40 && (s.score||0) < 70);
   const detected = signals.filter(s => (s.score||0) < 40);
@@ -262,29 +269,49 @@ function renderSignals(data) {
     html += signalTable(detected);
     html += '</div>';
   }
-  document.getElementById('tab-signals').innerHTML = html || '<div class="empty">Không có tín hiệu</div>';
+  document.getElementById('tab-signals').innerHTML = html;
 }
 
 function signalTable(signals) {
   return `<table>
-    <tr><th>Setup</th><th>Hướng</th><th>Score</th><th>Confidence</th><th>Cơ sở</th></tr>
+    <tr><th>Setup</th><th>Hướng</th><th>Score</th><th>Conf</th><th>Cơ sở</th></tr>
     ${signals.map(s => `<tr>
       <td><strong>${SETUP_VI[s.setup]||s.setup}</strong></td>
       <td>${dirBadge(s.direction||'')}</td>
       <td>${scoreBar(s.score||0)}</td>
       <td>${((s.confidence||0)*100).toFixed(0)}%</td>
-      <td style="font-size:12px;color:var(--muted);max-width:300px">${s.rationale||s.basis||''}</td>
+      <td style="font-size:12px;color:var(--muted);max-width:300px">${s.rationale||s.summary_vi||''}</td>
     </tr>`).join('')}
   </table>`;
 }
 
 function renderTheses(data) {
-  const log = data.thesisLog || [];
+  let log = data.thesisLog || [];
+  
+  // Nếu là kết quả từ 'run-scan', log sẽ là mảng chứa các object tổng hợp
+  // Ta cần "phẳng hóa" các signals bên trong nếu thấy structure đó
+  if (log.length > 0 && log[0].flow === 'scan' && log[0].signals) {
+     const flattened = [];
+     log.forEach(scan => {
+        if (scan.signals) {
+          scan.signals.forEach(s => {
+            flattened.push({
+              ...s,
+              event_ts: s.event_ts || scan.timestamp || Date.now(),
+              to_stage: s.stage || 'DETECTED'
+            });
+          });
+        }
+     });
+     log = flattened;
+  }
+
   if (log.length === 0) {
     document.getElementById('tab-theses').innerHTML = '<div class="empty">Chưa có dữ liệu luận điểm</div>';
     return;
   }
-  const entries = [...log].reverse().slice(0, 30);
+  
+  const entries = [...log].reverse().slice(0, 50);
   document.getElementById('tab-theses').innerHTML = `<div class="section-card">
     <h3>📊 Lịch sử Thesis (${log.length} entries)</h3>
     <table>
@@ -293,7 +320,7 @@ function renderTheses(data) {
         <td style="font-family:monospace;font-size:12px">${(t.thesis_id||'').slice(0,8)}</td>
         <td>${SETUP_VI[t.setup]||t.setup||''}</td>
         <td>${dirBadge(t.direction||'')}</td>
-        <td>${stageBadge(t.to_stage||t.stage||'')}</td>
+        <td>${stageBadge(t.to_stage || t.stage || 'DETECTED')}</td>
         <td>${scoreBar(t.score||0)}</td>
         <td style="color:var(--muted);font-size:12px">${timeAgo(t.event_ts||t.timestamp)}</td>
       </tr>`).join('')}
