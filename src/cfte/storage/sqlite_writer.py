@@ -207,6 +207,36 @@ class ThesisSQLiteStore:
             rows = db.execute(query, (limit,)).fetchall()
             return [dict(row) for row in rows]
 
+    async def get_db_diagnostics(self) -> dict[str, Any]:
+        """
+        Returns stats about the database for health checks.
+        """
+        async with aiosqlite.connect(self.db_path) as db:
+            db.row_factory = aiosqlite.Row
+            
+            # Thesis count
+            async with db.execute("SELECT COUNT(*) as cnt FROM thesis") as cursor:
+                row = await cursor.fetchone()
+                thesis_count = row["cnt"]
+            
+            # Outcome count
+            async with db.execute("SELECT COUNT(*) as cnt FROM thesis_outcome") as cursor:
+                row = await cursor.fetchone()
+                outcome_count = row["cnt"]
+                
+            # Event count
+            async with db.execute("SELECT COUNT(*) as cnt FROM thesis_event") as cursor:
+                row = await cursor.fetchone()
+                event_count = row["cnt"]
+            
+            return {
+                "file_path": str(self.db_path),
+                "file_size_kb": self.db_path.stat().st_size / 1024 if self.db_path.exists() else 0,
+                "thesis_count": thesis_count,
+                "outcome_count": outcome_count,
+                "event_count": event_count
+            }
+
     async def get_daily_summary_stats(self, date_str: str | None = None) -> dict[str, Any]:
         if not date_str:
             date_str = time.strftime("%Y-%m-%d")

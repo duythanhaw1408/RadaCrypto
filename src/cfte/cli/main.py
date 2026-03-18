@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+import time
 import yaml
 
 
@@ -23,6 +24,8 @@ DEFAULT_REVIEW_JOURNAL = Path("data/review/review_journal.jsonl")
 DEFAULT_TUNING_REPORT = Path("data/review/tuning_report.json")
 DEFAULT_HEALTH_REPORT = Path("data/review/health_status.json")
 DEFAULT_LIVE_RUNTIME_REPORT = Path("data/review/live_runtime.json")
+
+VERSION = "v1-internal-rc2"
 
 
 @dataclass(frozen=True, slots=True)
@@ -511,11 +514,45 @@ def command_scorecard(context: ShellContext) -> int:
     return 0
 
 
+def command_watchdog(context: ShellContext) -> int:
+    from cfte.storage.sqlite_writer import ThesisSQLiteStore
+    
+    print(_format_header("watchdog", context.profile))
+    store = ThesisSQLiteStore(DEFAULT_STATE_DB)
+    
+    async def _show():
+        recent = await store.get_recent_thesis(limit=1)
+        if not recent:
+            print("⚠️ Chưa có luận điểm nào được ghi nhận.")
+            return
+
+        last_t = recent[0]
+        opened_dt = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(last_t["opened_ts"] / 1000))
+        print(f"✅ Luận điểm gần nhất: [{last_t['thesis_id'][:8]}] {last_t['instrument_key']}")
+        print(f" - Thời gian: {opened_dt}")
+        print(f" - Trạng thái: {last_t['stage']}")
+        
+        # Check if DB is actively updated
+        now = int(time.time() * 1000)
+        ms_diff = now - last_t["opened_ts"]
+        if ms_diff > 3600000: # 1h
+            print("⚠️ Cảnh báo: Đã hơn 1h chưa có luận điểm mới. Hãy kiểm tra kết nối loop.")
+        else:
+            print("👍 Hệ thống có vẻ đang hoạt động bình thường.")
+
+    asyncio.run(_show())
+    return 0
+
+
 def command_health(context: ShellContext) -> int:
+    import shutil
     from cfte.cli.reliability import build_runtime_report, persist_runtime_report, render_runtime_report_vi
+    from cfte.storage.sqlite_writer import ThesisSQLiteStore
     from cfte.collectors.health import CollectorHealthSnapshot
 
     print(_format_header('health', context.profile))
+    print(f"Phiên bản: {VERSION}")
+
     report = build_runtime_report(
         profile_path=context.profile_path,
         profile=context.profile,
@@ -524,6 +561,25 @@ def command_health(context: ShellContext) -> int:
     )
     print(render_runtime_report_vi(report))
 
+    print("\n[Hệ thống tệp]")
+    total, used, free = shutil.disk_usage("/")
+    print(f" - Ổ đĩa: {free // (2**30)} GB còn trống (trên {total // (2**30)} GB)")
+
+    print("\n[Cơ sở dữ liệu SQLite]")
+    if DEFAULT_STATE_DB.exists():
+        store = ThesisSQLiteStore(DEFAULT_STATE_DB)
+        async def _db_stats():
+            diag = await store.get_db_diagnostics()
+            print(f" - Đường dẫn: {diag['file_path']}")
+            print(f" - Kích thước: {diag['file_size_kb']:.2f} KB")
+            print(f" - Số luận điểm: {diag['thesis_count']}")
+            print(f" - Số kết quả (outcome): {diag['outcome_count']}")
+            print(f" - Số sự kiện (event): {diag['event_count']}")
+        asyncio.run(_db_stats())
+    else:
+        print(f" - [WARN] Không tìm thấy database tại {DEFAULT_STATE_DB}")
+
+    print("\n[Trạng thái Collector]")
     snapshot = CollectorHealthSnapshot(
         venue='binance',
         state='idle' if report.overall_status == 'healthy' else 'degraded',
@@ -619,7 +675,8 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("doctor", help="Kiểm tra trạng thái hệ thống và tệp cấu hình (Health check).")
     sub.add_parser("health", help="Kiểm tra kết nối và tình trạng dữ liệu hiện tại.")
     sub.add_parser("review-thesis", help="Xem danh sách các luận điểm đang lưu trong SQLite.")
-    sub.add_parser("scorecard", help="Xem bảng điểm hiệu suất theo từng loại setup.")
+    sub.add_parser("scorecard", help="Xem bảng điểm hiệu suất theo từng loại setup (Edge tracking).")
+    sub.add_parser("watchdog", help="Kiểm tra nhanh tình trạng hoạt động của hệ thống (Pulse check).")
     log_review = sub.add_parser("log-review", help="Ghi quyết định cá nhân: vào lệnh, bỏ qua hay phớt lờ một thesis.")
     log_review.add_argument("--thesis-id", required=True)
     log_review.add_argument("--decision", choices=["taken", "skipped", "ignored"], required=True)
@@ -698,6 +755,8 @@ def main() -> int:
         return command_review_log(context, start_date=args.start_date, end_date=args.end_date)
     if args.cmd == "tune-profile":
         return command_tune_profile(context)
+    if args.cmd == "watchdog":
+        return command_watchdog(context)
 
     parser.print_help()
     return 0
