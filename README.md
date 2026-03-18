@@ -20,7 +20,7 @@ Local-first, replay-first starter repo for a crypto flow thesis engine.
    source .venv/bin/activate
 
 2. Install
-   pip install -e .
+   python3 -m pip install -e .
 
 3. Copy env
    cp .env.example .env
