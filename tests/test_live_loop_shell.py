@@ -115,6 +115,7 @@ def test_live_thesis_loop_persists_runtime_artifact_on_watchdog_timeout(tmp_path
     import asyncio
     import json
     from unittest.mock import patch
+    from cfte.live.engine import LiveThesisLoop as _LiveThesisLoop
 
     runtime_path = tmp_path / 'live_runtime.json'
     db_path = tmp_path / 'state.db'
@@ -137,13 +138,13 @@ def test_live_thesis_loop_persists_runtime_artifact_on_watchdog_timeout(tmp_path
             from cfte.collectors.health import CollectorHealthSnapshot
             return CollectorHealthSnapshot('binance', 'running', True, 1, 0, self._message_count, None, None)
 
-    loop = BinancePublicCollector  # keep import used in module scope
-    live = __import__('cfte.live.engine', fromlist=['LiveThesisLoop']).LiveThesisLoop(
+    live = _LiveThesisLoop(
         symbol='BTCUSDT',
         db_path=db_path,
         runtime_report_path=runtime_path,
         watchdog_idle_seconds=0.01,
         heartbeat_interval=1,
+        max_retries=1,
     )
 
     with patch('cfte.live.engine.try_fetch_depth_snapshot', return_value=({'lastUpdateId': 1, 'bids': [['100', '1']], 'asks': [['101', '1']]}, None)):

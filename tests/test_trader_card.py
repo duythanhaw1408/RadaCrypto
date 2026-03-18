@@ -21,15 +21,19 @@ def test_render_trader_card_vietnamese_first_labels():
 
     rendered = render_trader_card(signal)
 
-    assert "Thiết lập" in rendered
-    assert "Xu hướng" in rendered
-    assert "Độ tin cậy" in rendered
-    assert "Lý do lúc này" in rendered
-    assert "Yếu tố mâu thuẫn" in rendered
-    assert "Điểm vô hiệu" in rendered
-    assert "Cách vào lệnh" in rendered
-    assert "Mục tiêu" in rendered
-    assert "Trạng thái luận điểm" in rendered
-    assert "Tích lũy âm thầm" in rendered
-    assert "Ưu tiên kịch bản tăng" in rendered
-    assert "Đưa vào danh sách theo dõi" in rendered
+    # Current compact card format uses inline labels
+    assert "Tích lũy âm thầm" in rendered  # setup label
+    assert "LONG 🔼" in rendered  # direction label
+    assert "Đưa vào danh sách theo dõi" in rendered  # stage label
+    assert "Điểm:" in rendered  # score label
+    assert "Tin cậy:" in rendered  # confidence label
+    assert "Độ phủ:" in rendered  # coverage label
+    assert "Cơ sở:" in rendered  # why_now label
+    assert "Rủi ro:" in rendered  # conflicts label
+    assert "Vô hiệu:" in rendered  # invalidation label
+    assert "Vào lệnh:" in rendered  # entry_style label
+    assert "Mục tiêu:" in rendered  # targets label
+    assert "Delta mua dương" in rendered
+    assert "Spread giãn" in rendered
+    assert "TP1" in rendered
+    assert "TP2" in rendered

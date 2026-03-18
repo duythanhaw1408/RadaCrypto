@@ -45,6 +45,7 @@ class LiveThesisLoop:
         watchdog_idle_seconds: float = 45.0,
         heartbeat_interval: int = 250,
         runtime_report_path: Path | None = None,
+        max_retries: int = 5,
     ) -> None:
         self.symbol = symbol.upper()
         self.instrument_key = f"BINANCE:{self.symbol}:SPOT"
@@ -57,6 +58,7 @@ class LiveThesisLoop:
         self.watchdog_idle_seconds = watchdog_idle_seconds
         self.heartbeat_interval = max(1, heartbeat_interval)
         self.runtime_report_path = runtime_report_path
+        self.max_retries = max(1, max_retries)
         self.health = LiveEngineHealth(venue="binance")
         self.thesis_state: dict[str, ThesisLifecycleRecord] = {}
         self._last_alert_score: dict[str, float] = {}
@@ -84,9 +86,8 @@ class LiveThesisLoop:
         print(f"Khởi chạy loop cho {self.symbol}...")
         
         retry_count = 0
-        max_retries = 5
         
-        while retry_count < max_retries:
+        while retry_count < self.max_retries:
             try:
                 if not await self._init_book():
                     print("Lỗi khởi tạo sổ lệnh. Sẽ thử lại sau 10 giây...")
@@ -200,7 +201,7 @@ class LiveThesisLoop:
                 await asyncio.sleep(10)
                 retry_count += 1
 
-        if retry_count >= max_retries:
+        if retry_count >= self.max_retries:
             print("Đã đạt giới hạn số lần thử lại. Dừng hệ thống.")
 
     async def _process_trade_event(self, trade: NormalizedTrade):
@@ -292,6 +293,38 @@ class LiveThesisLoop:
                         )
 
             self.thesis_state[signal.thesis_id] = next_state
+
+    def _stale_gap_seconds(self) -> float:
+        if self._last_message_monotonic is None:
+            return 0.0
+        return time.monotonic() - self._last_message_monotonic
+
+    def _persist_runtime_artifact(
+        self,
+        *,
+        status: str,
+        started_at: str,
+        processed: int,
+        event_counts: dict[str, int],
+    ) -> None:
+        if self.runtime_report_path is None:
+            return
+        artifact = LiveRuntimeArtifact(
+            symbol=self.symbol,
+            status=status,
+            started_at=started_at,
+            finished_at=datetime.now(tz=timezone.utc).isoformat(),
+            processed_events=processed,
+            event_counts=event_counts,
+            reconnect_count=max(0, self.health.reconnect_count),
+            message_count=self.health.message_count,
+            idle_timeout_seconds=self.watchdog_idle_seconds,
+            heartbeat_interval=self.heartbeat_interval,
+            stale_gap_seconds=self._stale_gap_seconds(),
+            last_error=self.health.last_error,
+            last_trade_ts=self._last_trade_ts,
+        )
+        persist_live_runtime_artifact(self.runtime_report_path, artifact)
 
     def stop(self):
         self._stop_event.set()
