@@ -1,0 +1,22 @@
+{
+  "label": "2026-03-18",
+  "summary_vi": "Tổng kết ngày 2026-03-18\n- Luận điểm mới: 0 | score TB: 0.00 | confidence TB: 0.00\n- Outcome đã chốt: 0 | hit rate theo hướng: 0.0% | edge TB: +0.00%\n- Setup xuất hiện nhiều nhất: chưa có\n- Trạng thái mở mới: chưa có\n- Trạng thái đóng trong ngày: chưa có\n- Review cá nhân: vào=0, bỏ=0, phớt lờ=0\n- Hữu ích / nhiễu: hữu ích=0, trung tính=0, nhiễu=0",
+  "start_ts": 1773792000000,
+  "end_ts": 1773878400000,
+  "opened_count": 0,
+  "avg_score": 0.0,
+  "avg_confidence": 0.0,
+  "stage_dist": {},
+  "setup_dist": {},
+  "closed_stage_dist": {},
+  "outcomes_count": 0,
+  "avg_return": 0.0,
+  "avg_edge": 0.0,
+  "positive_outcomes": 0,
+  "review_summary": {
+    "total_reviews": 0,
+    "decision_counts": {},
+    "usefulness_counts": {},
+    "setup_rows": []
+  }
+}

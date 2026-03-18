@@ -1,0 +1,98 @@
+{
+  "overall_status": "degraded",
+  "generated_at": "2026-03-18T15:20:37.273715+00:00",
+  "checks": [
+    {
+      "key": "python_version",
+      "level": "critical",
+      "status": "ok",
+      "summary_vi": "Python 3.12.13 đạt yêu cầu >=3.11",
+      "detail": null
+    },
+    {
+      "key": "dependencies",
+      "level": "critical",
+      "status": "ok",
+      "summary_vi": "Dependency runtime cốt lõi đã sẵn sàng",
+      "detail": null
+    },
+    {
+      "key": "profile_path",
+      "level": "critical",
+      "status": "ok",
+      "summary_vi": "Tìm thấy hồ sơ cá nhân tại configs/profiles/personal_binance.yaml",
+      "detail": null
+    },
+    {
+      "key": "replay_events",
+      "level": "warning",
+      "status": "ok",
+      "summary_vi": "Dữ liệu replay mặc định sẵn sàng tại fixtures/replay/btcusdt_normalized.jsonl",
+      "detail": null
+    },
+    {
+      "key": "default_symbol",
+      "level": "critical",
+      "status": "ok",
+      "summary_vi": "Symbol mặc định: BTCUSDT",
+      "detail": null
+    },
+    {
+      "key": "state_db",
+      "level": "critical",
+      "status": "ok",
+      "summary_vi": "SQLite state DB sẵn sàng tại data/state/state.db",
+      "detail": null
+    },
+    {
+      "key": "replay_summary",
+      "level": "warning",
+      "status": "ok",
+      "summary_vi": "Artifact replay_summary sẵn sàng",
+      "detail": "2026-03-18T13:24:06.323989+00:00"
+    },
+    {
+      "key": "daily_summary",
+      "level": "warning",
+      "status": "ok",
+      "summary_vi": "Artifact daily_summary sẵn sàng",
+      "detail": "2026-03-18T13:24:06.349767+00:00"
+    },
+    {
+      "key": "weekly_summary",
+      "level": "warning",
+      "status": "warn",
+      "summary_vi": "Artifact weekly_summary chưa được tạo",
+      "detail": "data/review/weekly_review.json"
+    },
+    {
+      "key": "review_journal",
+      "level": "warning",
+      "status": "warn",
+      "summary_vi": "Artifact review_journal chưa được tạo",
+      "detail": "data/review/review_journal.jsonl"
+    },
+    {
+      "key": "tuning_report",
+      "level": "warning",
+      "status": "warn",
+      "summary_vi": "Artifact tuning_report chưa được tạo",
+      "detail": "data/review/tuning_report.json"
+    },
+    {
+      "key": "health_report",
+      "level": "warning",
+      "status": "ok",
+      "summary_vi": "Artifact health_report sẵn sàng",
+      "detail": "2026-03-18T15:20:37.265588+00:00"
+    }
+  ],
+  "artifacts": {
+    "replay_summary": "data/replay/summary_btcusdt.json",
+    "daily_summary": "data/review/daily_summary.json",
+    "weekly_summary": "data/review/weekly_review.json",
+    "review_journal": "data/review/review_journal.jsonl",
+    "tuning_report": "data/review/tuning_report.json",
+    "health_report": "data/review/health_status.json"
+  }
+}

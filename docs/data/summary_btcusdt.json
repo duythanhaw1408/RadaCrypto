@@ -1,0 +1,137 @@
+{
+  "instrument_key": "BINANCE:BTCUSDT:SPOT",
+  "event_count": 6,
+  "feature_windows": 3,
+  "thesis_count": 12,
+  "fingerprint": "9a18fdfa97b2d374d5f83cb0b8fac980d8a11a9c622be4d86c88f9e91a376904",
+  "top_signals": [
+    {
+      "thesis_id": "7ae8b3d148a48c72",
+      "instrument_key": "BINANCE:BTCUSDT:SPOT",
+      "setup": "stealth_accumulation",
+      "direction": "LONG_BIAS",
+      "stage": "DETECTED",
+      "score": 60.0,
+      "confidence": 0.76,
+      "coverage": 0.8,
+      "why_now": [
+        "Delta mua dương: 100.08",
+        "Bid L1 áp đảo: 0.57",
+        "Giá khớp giữ trên microprice"
+      ],
+      "conflicts": [
+        "Spread giãn, khó giữ nhịp"
+      ],
+      "invalidation": "Mất bid hỗ trợ dưới 100.00",
+      "entry_style": "Canh hồi về bid và giữ microprice",
+      "targets": [
+        "TP1: 1 ATR giả lập",
+        "TP2: 2 ATR giả lập"
+      ],
+      "timeframe": "1h",
+      "regime_bucket": "NEUTRAL"
+    },
+    {
+      "thesis_id": "fe14cc55871fe08b",
+      "instrument_key": "BINANCE:BTCUSDT:SPOT",
+      "setup": "breakout_ignition",
+      "direction": "LONG_BIAS",
+      "stage": "DETECTED",
+      "score": 28.0,
+      "confidence": 0.69,
+      "coverage": 0.8,
+      "why_now": [
+        "Dòng tiền chủ động theo hướng mua: 100.08",
+        "Giá khớp nằm trên microprice"
+      ],
+      "conflicts": [
+        "Xung lực chưa đủ mạnh cho breakout"
+      ],
+      "invalidation": "Thất bại giữ trên microprice 100.06",
+      "entry_style": "Theo breakout có xác nhận volume và giữ cấu trúc bid",
+      "targets": [
+        "TP1: Mở rộng 1R",
+        "TP2: Mở rộng 2R"
+      ],
+      "timeframe": "1h",
+      "regime_bucket": "NEUTRAL"
+    },
+    {
+      "thesis_id": "bc009df5672b14b1",
+      "instrument_key": "BINANCE:BTCUSDT:SPOT",
+      "setup": "failed_breakout",
+      "direction": "SHORT_BIAS",
+      "stage": "DETECTED",
+      "score": 10.0,
+      "confidence": 0.62,
+      "coverage": 0.8,
+      "why_now": [
+        "Spread còn giao dịch được: 10.00 bps"
+      ],
+      "conflicts": [
+        "Lực bán phản công chưa rõ",
+        "Giá chưa thất bại rõ khỏi vùng breakout"
+      ],
+      "invalidation": "Giá quay lại trên ask 100.10 và giữ được",
+      "entry_style": "Ưu tiên vào khi retest thất bại vùng breakout cũ",
+      "targets": [
+        "TP1: Quay về mid",
+        "TP2: Quét thanh khoản đáy gần nhất"
+      ],
+      "timeframe": "1h",
+      "regime_bucket": "NEUTRAL"
+    },
+    {
+      "thesis_id": "e44fe9d054bebd83",
+      "instrument_key": "BINANCE:BTCUSDT:SPOT",
+      "setup": "distribution",
+      "direction": "SHORT_BIAS",
+      "stage": "DETECTED",
+      "score": 0.0,
+      "confidence": 0.55,
+      "coverage": 0.8,
+      "why_now": [],
+      "conflicts": [
+        "Delta mua còn chiếm ưu thế",
+        "Bid L1 chưa suy yếu",
+        "Giá khớp chưa thủng microprice"
+      ],
+      "invalidation": "Giá reclaim lên trên ask 100.10",
+      "entry_style": "Canh failed reclaim và lower-high",
+      "targets": [
+        "TP1: 1 ATR giả lập",
+        "TP2: 2 ATR giả lập"
+      ],
+      "timeframe": "1h",
+      "regime_bucket": "NEUTRAL"
+    },
+    {
+      "thesis_id": "7ae8b3d148a48c72",
+      "instrument_key": "BINANCE:BTCUSDT:SPOT",
+      "setup": "stealth_accumulation",
+      "direction": "LONG_BIAS",
+      "stage": "ACTIONABLE",
+      "score": 88.0,
+      "confidence": 0.9,
+      "coverage": 0.8,
+      "why_now": [
+        "Delta mua dương: 20.03",
+        "Bid L1 áp đảo: 0.57",
+        "Nhịp trade tăng: 2.00/s",
+        "Hấp thụ chủ động cao: 180.22",
+        "Giá khớp giữ trên microprice"
+      ],
+      "conflicts": [
+        "Spread giãn, khó giữ nhịp"
+      ],
+      "invalidation": "Mất bid hỗ trợ dưới 100.00",
+      "entry_style": "Canh hồi về bid và giữ microprice",
+      "targets": [
+        "TP1: 1 ATR giả lập",
+        "TP2: 2 ATR giả lập"
+      ],
+      "timeframe": "1h",
+      "regime_bucket": "NEUTRAL"
+    }
+  ]
+}
