@@ -30,10 +30,10 @@ jobs:
         python scripts/init_sqlite_db.py
     - name: Run Doctor
       run: |
-        PYTHONPATH=src python -m cfte.cli.main doctor --profile configs/profiles/personal_binance.yaml
+        PYTHONPATH=src python -m cfte.cli.main doctor
     - name: Run Replay Determinism
       run: |
-        PYTHONPATH=src python -m cfte.cli.main replay --profile configs/profiles/personal_binance.yaml
+        PYTHONPATH=src python -m cfte.cli.main replay
     - name: Run Health Check
       run: |
-        PYTHONPATH=src python -m cfte.cli.main health --profile configs/profiles/personal_binance.yaml
+        PYTHONPATH=src python -m cfte.cli.main health
