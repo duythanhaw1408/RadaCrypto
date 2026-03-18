@@ -1,0 +1,23 @@
+profile: personal-default
+locale: vi-VN
+
+trader:
+  display_name: Trader cá nhân
+  timezone: Asia/Ho_Chi_Minh
+
+defaults:
+  symbol: BTCUSDT
+  replay_events: fixtures/replay/btcusdt_normalized.jsonl
+  summary_out: data/replay/summary_btcusdt.json
+
+scan:
+  actionable_threshold: 75
+  max_cards: 3
+
+live:
+  symbol: BTCUSDT
+  raw_dir: data/raw
+  max_events: 25
+
+review:
+  summary_path: data/replay/summary_btcusdt.json
