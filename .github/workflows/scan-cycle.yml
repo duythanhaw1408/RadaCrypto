@@ -78,6 +78,29 @@ jobs:
         "
         fi
 
+        # Export TPFM Layers from SQLite
+        python3 -c "
+        import sqlite3, json, os
+        db_path = 'data/state/state.db'
+        if not os.path.exists(db_path): exit(0)
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        
+        # M5 snapshots
+        m5 = [dict(r) for r in conn.execute('SELECT * FROM tpfm_m5_snapshot ORDER BY window_end_ts DESC LIMIT 50').fetchall()]
+        json.dump(m5, open('docs/data/tpfm_m5.json','w'), ensure_ascii=False)
+        
+        # 30m regimes
+        m30 = [dict(r) for r in conn.execute('SELECT * FROM tpfm_m30_regime ORDER BY window_end_ts DESC LIMIT 50').fetchall()]
+        json.dump(m30, open('docs/data/tpfm_m30.json','w'), ensure_ascii=False)
+        
+        # 4h structural
+        h4 = [dict(r) for r in conn.execute('SELECT * FROM tpfm_4h_structural ORDER BY window_end_ts DESC LIMIT 10').fetchall()]
+        json.dump(h4, open('docs/data/tpfm_4h.json','w'), ensure_ascii=False)
+        
+        conn.close()
+        "
+
         python3 -c "
         import json
         from datetime import datetime, timezone
