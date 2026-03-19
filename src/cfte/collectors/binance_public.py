@@ -122,10 +122,9 @@ class BinancePublicCollector:
                 import websockets
                 import ssl
                 
-                # Create unverified SSL context for macOS compatibility in personal use
-                ssl_context = ssl.create_default_context()
-                ssl_context.check_hostname = False
-                ssl_context.verify_mode = ssl.CERT_NONE
+                # Create secure SSL context
+                import certifi
+                ssl_context = ssl.create_default_context(cafile=certifi.where())
 
                 self._connect_attempts += 1
                 async with websockets.connect(self.url, ping_interval=20, ping_timeout=20, ssl=ssl_context) as ws:

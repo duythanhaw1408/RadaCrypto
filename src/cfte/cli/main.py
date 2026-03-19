@@ -579,16 +579,35 @@ def command_health(context: ShellContext) -> int:
     else:
         print(f" - [WARN] Không tìm thấy database tại {DEFAULT_STATE_DB}")
 
-    print("\n[Trạng thái Collector]")
+    print("\n[Trạng thái Collector - Audit thực tế]")
+    import requests
+    import ssl
+    import certifi
+    
+    conn_ok = False
+    state = 'degraded'
+    error_msg = None
+    
+    try:
+        # Kiểm tra kết nối HTTPS thật qua Binance API để verify SSL/Network
+        r = requests.get("https://api.binance.com/api/v3/ping", timeout=5, verify=certifi.where())
+        r.raise_for_status()
+        conn_ok = True
+        state = 'idle'
+        print(" ✅ Kết nối Binance API (HTTPS/SSL): OK")
+    except Exception as e:
+        error_msg = str(e)
+        print(f" ❌ [LỖI] Không thể kết nối Binance API: {error_msg}")
+
     snapshot = CollectorHealthSnapshot(
         venue='binance',
-        state='idle' if report.overall_status == 'healthy' else 'degraded',
-        connected=False,
-        connect_attempts=0,
+        state=state,
+        connected=conn_ok,
+        connect_attempts=1 if conn_ok else 0,
         reconnect_count=0,
         message_count=0,
         last_disconnect_reason=None,
-        last_error=None,
+        last_error=error_msg,
     )
     print(snapshot.to_operator_summary())
     saved = persist_runtime_report(_profile_path(context.profile, 'review', 'health_report_path', DEFAULT_HEALTH_REPORT), report)

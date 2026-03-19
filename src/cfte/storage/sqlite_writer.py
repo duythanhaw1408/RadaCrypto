@@ -4,6 +4,7 @@ import aiosqlite
 import json
 import sqlite3
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Final
 
@@ -306,8 +307,11 @@ class ThesisSQLiteStore:
 
     async def get_daily_summary_stats(self, date_str: str | None = None) -> dict[str, Any]:
         if not date_str:
-            date_str = time.strftime("%Y-%m-%d")
-        start_ts = int(time.mktime(time.strptime(date_str, "%Y-%m-%d")) * 1000)
+            date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        
+        # Parse date_str as UTC midnight
+        dt = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        start_ts = int(dt.timestamp() * 1000)
         end_ts = start_ts + 86400000
         return await self.get_period_summary(start_ts=start_ts, end_ts=end_ts, label=date_str)
 

@@ -355,6 +355,7 @@ class LiveThesisLoop:
                         opened_ts=next_state.opened_ts
                     )
 
+                for event in events:
                     await self.store.append_event(event)
                     print(f"📝 [EVENT] {signal.thesis_id[:8]} -> {event.to_stage}: {event.summary_vi}")
                     if self.thesis_log is not None:
