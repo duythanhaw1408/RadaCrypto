@@ -8,6 +8,7 @@ from pathlib import Path
 
 from cfte.books.binance_depth import BinanceDepthReconciler
 from cfte.collectors.binance_public import BinancePublicCollector, build_public_streams, try_fetch_depth_snapshot
+from cfte.collectors.binance_futures import BinanceFuturesCollector
 from cfte.collectors.health import CollectorHealthSnapshot, build_error_surface
 from cfte.features.tape import build_tape_snapshot
 from cfte.models.events import NormalizedTrade
@@ -23,6 +24,10 @@ from cfte.storage.thesis_log import ThesisLogWriter
 from cfte.live.outcome_monitor import OutcomeMonitor
 from cfte.thesis.engines import evaluate_setups
 from cfte.thesis.state import ThesisLifecycleRecord, apply_signal_update
+from cfte.tpfm.engine import TPFMStateEngine
+from cfte.tpfm.cards import render_tpfm_m5_card
+from cfte.tpfm.ai_explainer import TPFMAIExplainer
+from cfte.models.events import TapeSnapshot, NormalizedTrade
 
 
 @dataclass(slots=True)
@@ -67,6 +72,16 @@ class LiveThesisLoop:
         self._stop_event = asyncio.Event()
         self._last_message_monotonic: float | None = None
         self._last_trade_ts: int | None = None
+        
+        # TPFM State
+        self.tpfm = TPFMStateEngine(symbol=self.symbol)
+        self._tpfm_window_start_ts: int | None = None
+        self._tpfm_trades: list[NormalizedTrade] = []
+        self._tpfm_snapshots: list[TapeSnapshot] = []
+        self._tpfm_m5_buffer: list[TPFMSnapshot] = []
+        self._tpfm_m30_buffer: list[TPFM30mRegime] = []
+        self.ai_explainer = TPFMAIExplainer()
+        self.futures_collector = BinanceFuturesCollector(symbol=self.symbol)
 
     async def _init_book(self) -> bool:
         snapshot, error = try_fetch_depth_snapshot(symbol=self.symbol)
@@ -222,6 +237,75 @@ class LiveThesisLoop:
             window_end_ts=trade.venue_ts,
         )
 
+        # TPFM M5 Window Management
+        if self._tpfm_window_start_ts is None:
+            self._tpfm_window_start_ts = trade.venue_ts
+        
+        self._tpfm_trades.append(trade)
+        self._tpfm_snapshots.append(snapshot)
+        
+        # Check if 5 minutes have passed (300,000 ms)
+        if trade.venue_ts - self._tpfm_window_start_ts >= 300000:
+            print(f"📊 [TPFM] Đang tổng hợp snapshot M5 cho {self.symbol}...")
+            # Calculate M5 Snapshot (Phase T1-T5 Refined)
+            futures_context = self.futures_collector.get_live_context()
+            
+            tpfm_snap = self.tpfm.calculate_m5_snapshot(
+                window_start_ts=self._tpfm_window_start_ts,
+                window_end_ts=trade.venue_ts,
+                trades=self._tpfm_trades,
+                snapshots=self._tpfm_snapshots,
+                active_theses=list(self.thesis_state.values()),
+                futures_context=futures_context
+            )
+            
+            # Update counts from state
+            active_list = list(self.thesis_state.values())
+            tpfm_snap.active_thesis_count = len(active_list)
+            tpfm_snap.actionable_count = len([t for t in active_list if t.signal.stage == "ACTIONABLE"])
+            
+            # Persist
+            await self.store.save_tpfm_snapshot(tpfm_snap)
+            print(f"✅ [TPFM] Đã lưu M5: {tpfm_snap.matrix_cell}")
+            
+            # PHASE 2: Escalation Card
+            if tpfm_snap.should_escalate:
+                print(render_tpfm_m5_card(tpfm_snap))
+
+            # PHASE 3: 30m Regime Synthesis
+            self._tpfm_m5_buffer.append(tpfm_snap)
+            if len(self._tpfm_m5_buffer) >= 6:
+                print(f"🌀 [TPFM] Đang tổng hợp REGIME 30m cho {self.symbol}...")
+                regime = self.tpfm.calculate_30m_regime(self._tpfm_m5_buffer)
+                await self.store.save_tpfm_m30_regime(regime)
+                
+                # Output Summary
+                print(f"📝 [REGIME] {regime.dominant_regime} | Persistence: {regime.regime_persistence_score:.2f}")
+                print(f"🛤️ Path: {' -> '.join([c.split('__')[0] for c in regime.transition_path])}")
+                
+                # PHASE 4: 4h Structural Report
+                self._tpfm_m30_buffer.append(regime)
+                if len(self._tpfm_m30_buffer) >= 8:
+                    print(f"🏛️ [TPFM] Đang tổng hợp cấu trúc 4h cho {self.symbol}...")
+                    structural_report = self.tpfm.calculate_4h_structural(self._tpfm_m30_buffer)
+                    
+                    # Call AI Explainer
+                    analysis = self.ai_explainer.explain_4h_structural(structural_report)
+                    structural_report.ai_analysis_vi = analysis
+                    
+                    await self.store.save_tpfm_4h_report(structural_report)
+                    
+                    print(f"🤖 [AI ANALYSIS]\n{analysis}")
+                    
+                    self._tpfm_m30_buffer = []
+
+                self._tpfm_m5_buffer = []
+
+            # Reset window
+            self._tpfm_window_start_ts = trade.venue_ts
+            self._tpfm_trades = []
+            self._tpfm_snapshots = []
+
         signals = evaluate_setups(snapshot)
         for signal in signals:
             prev_record = self.thesis_state.get(signal.thesis_id)
@@ -271,8 +355,8 @@ class LiveThesisLoop:
                         opened_ts=next_state.opened_ts
                     )
 
-                for event in events:
                     await self.store.append_event(event)
+                    print(f"📝 [EVENT] {signal.thesis_id[:8]} -> {event.to_stage}: {event.summary_vi}")
                     if self.thesis_log is not None:
                         self.thesis_log.append_record(
                             {

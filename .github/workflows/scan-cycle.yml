@@ -54,6 +54,7 @@ jobs:
     - name: Run CFTE Scan Cycle
       env:
         PYTHONPATH: src
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       run: |
         # Chạy 50 events live để lấy data mới nhất trước khi scan
         python scripts/run_cycle.py \

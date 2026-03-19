@@ -50,6 +50,72 @@ class ThesisSQLiteStore:
                 )
                 """
             )
+            db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS tpfm_m5_snapshot (
+                    snapshot_id TEXT PRIMARY KEY,
+                    symbol TEXT NOT NULL,
+                    window_start_ts INTEGER NOT NULL,
+                    window_end_ts INTEGER NOT NULL,
+                    initiative_score REAL,
+                    initiative_polarity TEXT,
+                    inventory_score REAL,
+                    inventory_polarity TEXT,
+                    energy_score REAL,
+                    energy_state TEXT,
+                    response_efficiency_score REAL,
+                    response_efficiency_state TEXT,
+                    matrix_cell TEXT,
+                    micro_conclusion TEXT,
+                    tradability_score REAL,
+                    delta_quote REAL,
+                    cvd_slope REAL,
+                    trade_burst REAL,
+                    active_thesis_count INTEGER,
+                    actionable_count INTEGER,
+                    health_state TEXT
+                )
+                """
+            )
+            db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS tpfm_m30_regime (
+                    regime_id TEXT PRIMARY KEY,
+                    symbol TEXT NOT NULL,
+                    window_start_ts INTEGER NOT NULL,
+                    window_end_ts INTEGER NOT NULL,
+                    m5_count INTEGER,
+                    dominant_cell TEXT,
+                    dominant_regime TEXT,
+                    transition_path TEXT,
+                    regime_persistence_score REAL,
+                    net_delta_quote REAL,
+                    avg_trade_burst REAL,
+                    macro_conclusion_code TEXT,
+                    macro_posture TEXT,
+                    health_state TEXT
+                )
+                """
+            )
+            db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS tpfm_4h_structural (
+                    structural_id TEXT PRIMARY KEY,
+                    symbol TEXT NOT NULL,
+                    window_start_ts INTEGER NOT NULL,
+                    window_end_ts INTEGER NOT NULL,
+                    m30_count INTEGER,
+                    dominant_regime_share TEXT,
+                    dominant_cell_share TEXT,
+                    structural_bias TEXT,
+                    transition_map TEXT,
+                    net_delta_quote REAL,
+                    avg_persistence REAL,
+                    ai_analysis_vi TEXT,
+                    health_state TEXT
+                )
+                """
+            )
             db.commit()
 
     async def save_thesis(
@@ -373,3 +439,99 @@ class ThesisSQLiteStore:
         next_stage: Stage = "RESOLVED" if is_positive else "INVALIDATED"
         await self.update_thesis_stage(thesis_id=thesis_id, next_stage=next_stage, closed_ts=updated_at)
         return next_stage
+    async def save_tpfm_snapshot(self, snapshot: Any) -> None:
+        with sqlite3.connect(self.db_path) as db:
+            db.execute(
+                """
+                INSERT INTO tpfm_m5_snapshot (
+                    snapshot_id, symbol, window_start_ts, window_end_ts,
+                    initiative_score, initiative_polarity, inventory_score, inventory_polarity,
+                    energy_score, energy_state, response_efficiency_score, response_efficiency_state,
+                    matrix_cell, micro_conclusion, tradability_score, delta_quote, cvd_slope,
+                    trade_burst, active_thesis_count, actionable_count, health_state
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    snapshot.snapshot_id,
+                    snapshot.symbol,
+                    snapshot.window_start_ts,
+                    snapshot.window_end_ts,
+                    snapshot.initiative_score,
+                    snapshot.initiative_polarity,
+                    snapshot.inventory_score,
+                    snapshot.inventory_polarity,
+                    snapshot.energy_score,
+                    snapshot.energy_state,
+                    snapshot.response_efficiency_score,
+                    snapshot.response_efficiency_state,
+                    snapshot.matrix_cell,
+                    snapshot.micro_conclusion,
+                    snapshot.tradability_score,
+                    snapshot.delta_quote,
+                    snapshot.cvd_slope,
+                    snapshot.trade_burst,
+                    snapshot.active_thesis_count,
+                    snapshot.actionable_count,
+                    snapshot.health_state,
+                ),
+            )
+            db.commit()
+
+    async def save_tpfm_m30_regime(self, regime: Any) -> None:
+        with sqlite3.connect(self.db_path) as db:
+            db.execute(
+                """
+                INSERT INTO tpfm_m30_regime (
+                    regime_id, symbol, window_start_ts, window_end_ts,
+                    m5_count, dominant_cell, dominant_regime, transition_path,
+                    regime_persistence_score, net_delta_quote, avg_trade_burst,
+                    macro_conclusion_code, macro_posture, health_state
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    regime.regime_id,
+                    regime.symbol,
+                    regime.window_start_ts,
+                    regime.window_end_ts,
+                    regime.m5_count,
+                    regime.dominant_cell,
+                    regime.dominant_regime,
+                    json.dumps(regime.transition_path),
+                    regime.regime_persistence_score,
+                    regime.net_delta_quote,
+                    regime.avg_trade_burst,
+                    regime.macro_conclusion_code,
+                    regime.macro_posture,
+                    regime.health_state,
+                ),
+            )
+            db.commit()
+
+    async def save_tpfm_4h_report(self, report: Any) -> None:
+        with sqlite3.connect(self.db_path) as db:
+            db.execute(
+                """
+                INSERT INTO tpfm_4h_structural (
+                    structural_id, symbol, window_start_ts, window_end_ts,
+                    m30_count, dominant_regime_share, dominant_cell_share,
+                    structural_bias, transition_map, net_delta_quote,
+                    avg_persistence, ai_analysis_vi, health_state
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    report.structural_id,
+                    report.symbol,
+                    report.window_start_ts,
+                    report.window_end_ts,
+                    report.m30_count,
+                    json.dumps(report.dominant_regime_share),
+                    json.dumps(report.dominant_cell_share),
+                    report.structural_bias,
+                    json.dumps(report.transition_map),
+                    report.net_delta_quote,
+                    report.avg_persistence,
+                    report.ai_analysis_vi,
+                    report.health_state,
+                ),
+            )
+            db.commit()
