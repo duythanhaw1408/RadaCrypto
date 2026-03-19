@@ -151,12 +151,12 @@ def run_replay_research(events_path: Path, summary_out: Path) -> int:
     return 0
 
 
-def _load_replay_result(events_path: Path):
+def _load_replay_result(events_path: Path, db_path: Path | None = None):
     from cfte.replay.adapters import load_replay_events
     from cfte.replay.runner import run_replay
 
     events = load_replay_events(events_path)
-    return run_replay(events)
+    return run_replay(events, db_path=db_path)
 
 
 def command_replay(context: ShellContext, events_path: Path, summary_out: Path) -> int:
@@ -167,11 +167,16 @@ def command_replay(context: ShellContext, events_path: Path, summary_out: Path) 
 
 def command_run_scan(context: ShellContext, events_path: Path, limit: int | None) -> int:
     from cfte.replay.runner import persist_replay_summary
+    from cfte.storage.sqlite_writer import ThesisSQLiteStore
     from cfte.storage.thesis_log import ThesisLogWriter
     from cfte.thesis.cards import render_trader_card
 
     print(_format_header("run-scan", context.profile))
-    result = _load_replay_result(events_path)
+    
+    # Ensure schema is up to date for TPFM
+    asyncio.run(ThesisSQLiteStore(DEFAULT_STATE_DB).migrate_schema())
+    
+    result = _load_replay_result(events_path, db_path=DEFAULT_STATE_DB)
     actionable_threshold = float(context.profile.scan.get("actionable_threshold", 75.0))
     candidates = [signal for signal in result.thesis_events if signal.score >= actionable_threshold]
     target_limit = limit or context.profile.scan.get("max_cards", 3)

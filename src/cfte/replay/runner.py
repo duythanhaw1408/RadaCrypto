@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+print("🚀 [TRACE] Replay Runner Module Loading...")
+
 import hashlib
 import json
 from dataclasses import asdict, dataclass
@@ -12,6 +14,8 @@ from cfte.thesis.lifecycle import ACTIVE_STAGES
 from cfte.replay.adapters import ReplayBookSnapshot, ReplayEvent
 from cfte.thesis.engines import evaluate_setups
 from cfte.thesis.state import ThesisEventRecord, ThesisLifecycleRecord, apply_signal_update, close_signal_state
+from cfte.tpfm.engine import TPFMStateEngine
+from cfte.storage.sqlite_writer import ThesisSQLiteStore
 
 
 @dataclass(slots=True)
@@ -50,7 +54,7 @@ def _fingerprint_signals(signals: list[ThesisSignal]) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
-def run_replay(events: list[ReplayEvent]) -> ReplayRunResult:
+def run_replay(events: list[ReplayEvent], db_path: str | Path | None = None) -> ReplayRunResult:
     if not events:
         raise ValueError("Replay event list is empty")
 
@@ -63,6 +67,14 @@ def run_replay(events: list[ReplayEvent]) -> ReplayRunResult:
     thesis_state: dict[str, ThesisLifecycleRecord] = {}
     thesis_event_history: list[ThesisEventRecord] = []
     feature_windows = 0
+    tpfm = TPFMStateEngine()
+    store = ThesisSQLiteStore(db_path) if db_path else None
+    
+    tpfm_trades: list[NormalizedTrade] = []
+    tpfm_snapshots: list[TapeSnapshot] = []
+    tpfm_window_start_ts: int | None = None
+    tpfm_m5_buffer = []
+    tpfm_m30_buffer = []
 
     for event in ordered_events:
         if event.event_type == "book_snapshot":
@@ -111,6 +123,63 @@ def run_replay(events: list[ReplayEvent]) -> ReplayRunResult:
                 )
                 thesis_state[signal.thesis_id] = next_state
                 thesis_event_history.extend(state_events)
+
+            # TPFM Integration in Replay
+            if tpfm_window_start_ts is None:
+                tpfm_window_start_ts = payload.venue_ts
+            
+            tpfm_trades.append(payload)
+            tpfm_snapshots.append(snapshot)
+            
+            # Check if 5 minutes have passed (300,000 ms)
+            if payload.venue_ts - tpfm_window_start_ts >= 300000:
+                m5_snap = tpfm.calculate_m5_snapshot(
+                    window_start_ts=tpfm_window_start_ts,
+                    window_end_ts=payload.venue_ts,
+                    trades=tpfm_trades,
+                    snapshots=tpfm_snapshots,
+                    active_theses=list(thesis_state.values()),
+                    futures_context=None # No futures in historical replay for now
+                )
+                
+                # Persist M5 if store exists
+                if store:
+                    import asyncio
+                    # Since run_replay is synchronous, we run the 'async' (but actually sync sqlite3) method
+                    asyncio.run(store.save_tpfm_snapshot(m5_snap))
+                
+                tpfm_m5_buffer.append(m5_snap)
+                if len(tpfm_m5_buffer) >= 6:
+                    regime = tpfm.calculate_30m_regime(tpfm_m5_buffer)
+                    if store:
+                        asyncio.run(store.save_tpfm_m30_regime(regime))
+                    
+                    tpfm_m30_buffer.append(regime)
+                    if len(tpfm_m30_buffer) >= 8:
+                        struct = tpfm.calculate_4h_structural(tpfm_m30_buffer)
+                        if store:
+                            asyncio.run(store.save_tpfm_4h_report(struct))
+                        tpfm_m30_buffer = []
+                
+                # Reset 5m window
+                tpfm_window_start_ts = payload.venue_ts
+                tpfm_trades = []
+                tpfm_snapshots = []
+
+    # Final TPFM flush at end of replay (Phase T1-T5 Refinement)
+    if tpfm_trades and store:
+        m5_snap = tpfm.calculate_m5_snapshot(
+            window_start_ts=tpfm_window_start_ts or ordered_events[0].venue_ts,
+            window_end_ts=ordered_events[-1].venue_ts,
+            trades=tpfm_trades,
+            snapshots=tpfm_snapshots,
+            active_theses=list(thesis_state.values()),
+            futures_context=None
+        )
+        import asyncio
+        try:
+            asyncio.run(store.save_tpfm_snapshot(m5_snap))
+        except Exception: pass
 
     if instrument_key is None:
         raise ValueError("No instrument_key found in replay events")
