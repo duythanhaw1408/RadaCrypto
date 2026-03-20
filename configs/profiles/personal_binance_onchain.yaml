@@ -13,11 +13,15 @@ defaults:
 scan:
   actionable_threshold: 65
   max_cards: 10
+  trade_window_seconds: 60
+  max_window_trades: 400
 
 live:
   symbol: SOLUSDT
   raw_dir: data/raw/onchain
   max_events: 500
+  trade_window_seconds: 60
+  max_window_trades: 400
 
 review:
   summary_path: "data/replay/summary_sol.json"
@@ -28,6 +32,7 @@ outcomes:
 ux:
   alert_on_stage_change: true
   alert_on_score_delta: 5.0 # On-chain needs more sensitivity
+  alert_score_floor: 65.0
 
 # Placeholder for future on-chain data providers
 onchain:

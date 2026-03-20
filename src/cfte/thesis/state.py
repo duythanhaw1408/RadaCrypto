@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 
 from cfte.models.events import Stage, ThesisSignal
-from cfte.thesis.lifecycle import ACTIVE_STAGES, reduce_thesis_stage, summarize_lifecycle_transition
+from cfte.thesis.lifecycle import ACTIVE_STAGES, reduce_thesis_stage, stage_label_vi, summarize_lifecycle_transition
 
 
 @dataclass(slots=True)
@@ -43,6 +43,19 @@ def _build_stage_event(signal: ThesisSignal, current_stage: Stage, next_stage: S
     )
 
 
+def _build_open_event(signal: ThesisSignal, event_ts: int) -> ThesisEventRecord:
+    return ThesisEventRecord(
+        thesis_id=signal.thesis_id,
+        event_type="opened",
+        from_stage=signal.stage,
+        to_stage=signal.stage,
+        event_ts=event_ts,
+        summary_vi=f"Khởi tạo luận điểm ở trạng thái '{stage_label_vi(signal.stage)}'.",
+        score=signal.score,
+        confidence=signal.confidence,
+    )
+
+
 def apply_signal_update(
     state: ThesisLifecycleRecord | None,
     signal: ThesisSignal,
@@ -50,7 +63,7 @@ def apply_signal_update(
 ) -> tuple[ThesisLifecycleRecord, list[ThesisEventRecord]]:
     if state is None:
         next_state = ThesisLifecycleRecord(signal=signal, opened_ts=event_ts, updated_ts=event_ts)
-        return next_state, [_build_stage_event(signal=signal, current_stage=signal.stage, next_stage=signal.stage, event_ts=event_ts)]
+        return next_state, [_build_open_event(signal=signal, event_ts=event_ts)]
 
     current_stage = state.signal.stage
     desired_stage = signal.stage
@@ -63,7 +76,12 @@ def apply_signal_update(
     events: list[ThesisEventRecord] = []
 
     if current_stage not in ACTIVE_STAGES:
-        return next_state, events
+        return ThesisLifecycleRecord(
+            signal=state.signal,
+            opened_ts=state.opened_ts,
+            updated_ts=event_ts,
+            closed_ts=state.closed_ts,
+        ), events
 
     if desired_stage not in ACTIVE_STAGES:
         resolved_stage = reduce_thesis_stage(current_stage=current_stage, next_stage=desired_stage)

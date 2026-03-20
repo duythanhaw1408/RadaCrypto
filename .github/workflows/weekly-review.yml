@@ -42,9 +42,9 @@ jobs:
       env:
         PYTHONPATH: src
       run: |
-        python -m cfte.cli.main review-week
-        python -m cfte.cli.main scorecard
-        python -m cfte.cli.main tune-profile
+        python -m cfte.cli.main --profile configs/profiles/personal_binance.yaml review-week
+        python -m cfte.cli.main --profile configs/profiles/personal_binance.yaml scorecard
+        python -m cfte.cli.main --profile configs/profiles/personal_binance.yaml tune-profile
 
     - name: Upload weekly report
       uses: actions/upload-artifact@v4

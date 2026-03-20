@@ -14,6 +14,9 @@ Setup = Literal[
 ]
 
 
+LiquidationBias = Literal["NONE", "LONGS_FLUSHED", "SHORTS_FLUSHED", "MIXED"]
+
+
 @dataclass(slots=True)
 class NormalizedTrade:
     event_id: str
@@ -85,6 +88,11 @@ class TapeSnapshot:
     mid_px: float
     last_trade_px: float
     trade_count: int
+    futures_delta: float = 0.0
+    liquidation_vol: float = 0.0
+    liquidation_bias: LiquidationBias = "NONE"
+    venue_confirmation_state: str = "UNCONFIRMED"
+    leader_venue: str = "UNKNOWN"
     metadata: dict = field(default_factory=dict)
 
 
@@ -105,3 +113,25 @@ class ThesisSignal:
     targets: list[str]
     timeframe: str = "1h"
     regime_bucket: str = "NEUTRAL"
+    flow_state: str = ""
+    matrix_cell: str = ""
+    matrix_alias_vi: str = ""
+    tradability_grade: str = ""
+    decision_posture: str = ""
+    decision_summary_vi: str = ""
+    flow_alignment_score: float = 0.0
+
+
+@dataclass(slots=True)
+class ThesisOutcome:
+    thesis_id: str
+    horizon: str
+    status: str
+    target_ts: int
+    realized_px: float | None = None
+    realized_high: float | None = None
+    realized_low: float | None = None
+    fill_px: float | None = None
+    mae_bps: float | None = None
+    mfe_bps: float | None = None
+    exit_ts: int | None = None

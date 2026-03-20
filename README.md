@@ -119,3 +119,51 @@ cfte review-day
 - **BAD CONFIG**: lỗi chặn chạy ổn định, thường là Python version hoặc dependency lõi.
 - **DEGRADED**: vẫn chạy được nhưng thiếu artifact, replay mặc định, hoặc môi trường chưa đủ sạch.
 - **Runtime artifact**: kiểm tra `status`, `last_error`, `stale_gap_seconds`, `processed_events` để biết loop live chết ở đâu.
+
+## Phase 6 — Launch Operating Model
+
+Kiến trúc hiện tại coi `TPFM (Flow Intelligence)` là nguồn chân lý. `Thesis/Setup` vẫn tồn tại để tương thích người dùng cũ, nhưng quyết định vận hành nên bám vào `flow state`, `transition`, `forced flow`, và `runtime health`.
+
+### Launch Checklist
+
+Trước khi mở pilot hoặc public launch:
+
+- [ ] Chạy `cfte bootstrap` để cập nhật schema và artifact mặc định.
+- [ ] Chạy `cfte doctor` và xác nhận hệ thống ở trạng thái `HEALTHY` hoặc ít nhất không có `BAD CONFIG`.
+- [ ] Chạy `cfte --profile configs/profiles/personal_binance.yaml run-live --min-runtime-seconds 330 --run-until-first-m5`.
+- [ ] Kiểm tra `data/review/live_runtime.json` có đủ `first_m5_seen_at`, `latest_tpfm`, `latest_flow_grade`.
+- [ ] Kiểm tra `cfte watchdog` hiển thị được `Matrix gần nhất`, `Flow contract`, và `Transition gần nhất`.
+- [ ] Chạy `cfte review-day` và xác nhận report có `flow state scorecard`, `forced flow scorecard`, `transition scorecard`.
+- [ ] Chạy `cfte review-week` và `cfte tune-profile` để xác nhận tuning ưu tiên `flow state`.
+
+### Pilot Checklist
+
+Trong 7-14 ngày đầu:
+
+- [ ] Không dùng threshold mặc định làm chân lý; theo dõi `tuning_report.json` mỗi tuần.
+- [ ] Mỗi ngày ghi ít nhất 5-10 dòng `log-review` để flow calibration có dữ liệu thật.
+- [ ] Đối chiếu `first_m5_seen_at` với thời gian thị trường thực để phát hiện cycle quá ngắn.
+- [ ] Nếu `latest_flow_grade` thường xuyên là `D`, ưu tiên đứng ngoài thay vì cố nới threshold.
+- [ ] Nếu `latest_transition.transition_family` thiên về `TRAP` hoặc `FORCED`, giảm tần suất vào lệnh đuổi.
+- [ ] Kiểm tra `degraded_flags` sau mỗi phiên live; nếu còn lặp lại nhiều ngày thì chưa nên launch rộng.
+
+### Rollback Checklist
+
+Khi cần quay về trạng thái an toàn:
+
+1. Backup `data/state/state.db`.
+2. Backup `data/review/live_runtime.json`, `data/review/weekly_review.json`, `data/review/tuning_report.json`.
+3. Quay về tag hoặc nhánh ổn định gần nhất.
+4. Chạy lại `cfte bootstrap` rồi `cfte doctor`.
+5. Chỉ mở pilot lại khi `run-live -> review-day -> watchdog` đã pass trọn chu kỳ.
+
+### Scheduled Cycle Contract
+
+Cycle mặc định qua `scripts/run_cycle.py` hiện được xem là hợp lệ khi:
+
+- `run-live` chạy đủ `min_runtime_seconds`
+- phiên live sinh được `first_m5_seen_at`
+- runtime artifact có `latest_tpfm.matrix_cell`
+- watchdog không báo thiếu flow contract
+
+Nếu thiếu một trong các điều kiện trên, cycle nên bị xem là `degraded` hoặc `fail`, không nên dùng để cập nhật dashboard hay tuning.

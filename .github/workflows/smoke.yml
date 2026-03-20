@@ -23,11 +23,14 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install -e . 2>&1 || true
-        python -m pip install PyYAML requests websockets aiosqlite
+        python -m pip install -e .
+        python -m pip install PyYAML requests websockets aiosqlite pytest pytest-asyncio certifi
     - name: Initialize DB
       run: |
         python scripts/init_sqlite_db.py
+    - name: Run Tests
+      run: |
+        PYTHONPATH=src python -m pytest -q
     - name: Run Doctor
       run: |
         PYTHONPATH=src python -m cfte.cli.main doctor

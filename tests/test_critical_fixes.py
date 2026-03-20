@@ -2,6 +2,7 @@ import pytest
 import ssl
 import certifi
 import json
+import sqlite3
 from unittest.mock import patch, MagicMock, AsyncMock
 from datetime import datetime, timezone
 from pathlib import Path
@@ -124,3 +125,21 @@ async def test_sqlite_writer_utc_consistency(tmp_path):
             
             expected_start = int(datetime(2026, 3, 19, 0, 0, 0, tzinfo=timezone.utc).timestamp() * 1000)
             assert kwargs['start_ts'] == expected_start
+
+
+@pytest.mark.asyncio
+async def test_sqlite_writer_bootstraps_core_tables_on_fresh_db(tmp_path):
+    db_path = tmp_path / "fresh.db"
+    store = ThesisSQLiteStore(db_path)
+
+    await store.migrate_schema()
+
+    with sqlite3.connect(db_path) as db:
+        tables = {
+            row[0]
+            for row in db.execute(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('thesis', 'thesis_event', 'thesis_outcome')"
+            ).fetchall()
+        }
+
+    assert tables == {"thesis", "thesis_event", "thesis_outcome"}

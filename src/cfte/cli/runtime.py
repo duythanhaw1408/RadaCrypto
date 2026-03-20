@@ -21,6 +21,7 @@ class LiveThesisLoop:
         self.instrument_key = instrument_key
         self.trade_window_size = trade_window_size
         self.order_book = LocalBook(instrument_key)
+        self.previous_book_snapshot: LocalBook | None = None
         self.trades: list[NormalizedTrade] = []
         self.previous_cvd = 0.0
 
@@ -42,8 +43,10 @@ class LiveThesisLoop:
             window_start_ts=self.trades[0].venue_ts,
             window_end_ts=trade.venue_ts,
             previous_cvd=self.previous_cvd,
+            before_book=self.previous_book_snapshot,
         )
         self.previous_cvd = snapshot.cvd
+        self.previous_book_snapshot = self.order_book.clone()
         return LiveEvaluation(event_type="trade", venue_ts=trade.venue_ts, signals=evaluate_setups(snapshot))
 
 

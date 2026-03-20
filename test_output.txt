@@ -1,0 +1,296 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.14.2, pytest-7.4.3, pluggy-1.6.0
+rootdir: /Users/nguyenduythanh/Downloads/crypto-flow-thesis-engine-starter/crypto-flow-thesis-engine-starter
+configfile: pyproject.toml
+plugins: anyio-4.12.1, asyncio-0.21.1
+asyncio: mode=Mode.STRICT
+collected 11 items
+
+tests/tpfm/test_state_engine.py .FFFFFFFF..                              [100%]
+
+=================================== FAILURES ===================================
+_____________ TestTPFMStateEngine.test_context_basis_and_oi_flags ______________
+
+self = <test_state_engine.TestTPFMStateEngine testMethod=test_context_basis_and_oi_flags>
+
+    def test_context_basis_and_oi_flags(self):
+        snap = self.engine._empty_snapshot(0, 300000)
+        ctx = {
+            "available": True,
+            "fresh": True,
+            "futures_delta": 2000000, # Large move
+            "oi_delta": 1000000,      # OI expanding
+            "basis_bps": 15.0         # High basis
+        }
+        snap.delta_quote = 100000      # Spot leading by relative measure? No, wait.
+                                       # abs(futures) > abs(spot) * 1.5 -> FUTURES_LED
+    
+        self.engine._apply_context_overlay(snap, ctx)
+    
+>       self.assertEqual(snap.futures_bias_proxy, "FUTURES_LED")
+E       AssertionError: 'NEUTRAL_FUTURES' != 'FUTURES_LED'
+E       - NEUTRAL_FUTURES
+E       + FUTURES_LED
+
+tests/tpfm/test_state_engine.py:163: AssertionError
+_ TestTPFMStateEngine.test_context_overlay_marks_alt_lead_as_inference_and_risk _
+
+self = <test_state_engine.TestTPFMStateEngine testMethod=test_context_overlay_marks_alt_lead_as_inference_and_risk>
+
+    def test_context_overlay_marks_alt_lead_as_inference_and_risk(self):
+        snap = self.engine._empty_snapshot(0, 300000)
+        snap.delta_quote = 120000
+        snap.tradability_score = 0.5
+    
+        ctx = {
+            "available": True,
+            "fresh": True,
+            "futures_delta": 100000,
+            "oi_delta": 200,
+            "basis_bps": 1.0,
+            "venue_confirmation_state": "ALT_LEAD",
+            "leader_venue": "bybit",
+            "lagger_venue": "binance",
+            "venue_vwap_spread_bps": 1.8,
+        }
+    
+        self.engine._apply_context_overlay(snap, ctx)
+        self.engine._finalize_output_contract(snap)
+    
+        self.assertEqual(snap.venue_confirmation_state, "ALT_LEAD")
+        self.assertTrue(any("bybit" in item.lower() for item in snap.inferred_facts))
+>       self.assertIn("BINANCE KHÔNG DẪN NHỊP LIÊN SÀN", snap.risk_flags)
+E       AssertionError: 'BINANCE KHÔNG DẪN NHỊP LIÊN SÀN' not found in ['Độ chắc của trục matrix còn thấp.']
+
+tests/tpfm/test_state_engine.py:260: AssertionError
+_ TestTPFMStateEngine.test_context_overlay_surfaces_liquidation_and_venue_confirmation _
+
+self = <test_state_engine.TestTPFMStateEngine testMethod=test_context_overlay_surfaces_liquidation_and_venue_confirmation>
+
+    def test_context_overlay_surfaces_liquidation_and_venue_confirmation(self):
+        snap = self.engine._empty_snapshot(0, 300000)
+        snap.delta_quote = 250000
+        snap.tradability_score = 0.5
+    
+        ctx = {
+            "available": True,
+            "fresh": True,
+            "futures_delta": 200000,
+            "oi_delta": 500,
+            "basis_bps": 3.0,
+            "venue_confirmation_state": "CONFIRMED",
+            "leader_venue": "binance",
+            "venue_vwap_spread_bps": 1.4,
+            "liquidation_context_available": True,
+            "liquidation_bias": "SHORTS_FLUSHED",
+            "liquidation_count": 3,
+            "liquidation_quote": 90000,
+        }
+    
+        self.engine._apply_context_overlay(snap, ctx)
+        self.engine._finalize_output_contract(snap)
+    
+        self.assertEqual(snap.venue_confirmation_state, "CONFIRMED")
+        self.assertEqual(snap.leader_venue, "binance")
+>       self.assertEqual(snap.liquidation_bias, "SHORTS_FLUSHED")
+E       AssertionError: 'UNKNOWN' != 'SHORTS_FLUSHED'
+E       - UNKNOWN
+E       + SHORTS_FLUSHED
+
+tests/tpfm/test_state_engine.py:233: AssertionError
+____________ TestTPFMStateEngine.test_context_refinement_confluence ____________
+
+self = <test_state_engine.TestTPFMStateEngine testMethod=test_context_refinement_confluence>
+
+    def test_context_refinement_confluence(self):
+        # Scenario: Spot BUY (+1M), Futures BUY (+800k)
+        snap = self.engine._empty_snapshot(0, 300000)
+        snap.delta_quote = 1000000
+        snap.tradability_score = 0.5
+        snap.agreement_score = 0.5
+    
+        ctx = {
+            "available": True,
+            "fresh": True,
+            "futures_delta": 800000,
+            "oi_delta": 1000,
+            "basis_bps": 2.0
+        }
+    
+        self.engine._apply_context_overlay(snap, ctx)
+    
+>       self.assertEqual(snap.context_score, 1.0)
+E       AssertionError: 0.0 != 1.0
+
+tests/tpfm/test_state_engine.py:123: AssertionError
+______ TestTPFMStateEngine.test_context_refinement_divergence_absorption _______
+
+self = <test_state_engine.TestTPFMStateEngine testMethod=test_context_refinement_divergence_absorption>
+
+    def test_context_refinement_divergence_absorption(self):
+        # Scenario: Spot BUY (+1M), Futures SELL (-2.5M) -> ABSORPTION
+        snap = self.engine._empty_snapshot(0, 300000)
+        snap.delta_quote = 1000000
+        snap.tradability_score = 0.5
+    
+        ctx = {
+            "available": True,
+            "fresh": True,
+            "futures_delta": -2500000,
+            "oi_delta": -500,
+            "basis_bps": -5.0
+        }
+    
+        self.engine._apply_context_overlay(snap, ctx)
+    
+>       self.assertEqual(snap.context_score, -1.0) # Divergence
+E       AssertionError: 0.0 != -1.0
+
+tests/tpfm/test_state_engine.py:144: AssertionError
+_______ TestTPFMStateEngine.test_inventory_axis_is_centered_around_half ________
+
+self = <test_state_engine.TestTPFMStateEngine testMethod=test_inventory_axis_is_centered_around_half>
+
+    def test_inventory_axis_is_centered_around_half(self):
+        trades = [
+            NormalizedTrade(event_id=f"e{i}", venue="binance", instrument_key="BTCUSDT", venue_ts=i * 1_000, price=50000, qty=1.0, quote_qty=50000, taker_side="BUY")
+            for i in range(10)
+        ]
+        snapshots = [
+            MagicMock(
+                mid_px=50000,
+                last_trade_px=50000,
+                imbalance_l1=0.5,
+                absorption_proxy=10000,
+                spread_bps=1.0,
+                microprice=50000,
+                metadata={},
+            )
+            for _ in range(10)
+        ]
+    
+>       snap = self.engine.calculate_m5_snapshot(0, 10_000, trades, snapshots)
+
+tests/tpfm/test_state_engine.py:101: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/cfte/tpfm/engine.py:307: in calculate_m5_snapshot
+    self._derive_decision_view(snapshot)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <cfte.tpfm.engine.TPFMStateEngine object at 0x1030b2250>
+snapshot = TPFMSnapshot(snapshot_id='ef4fa57d-15c3-4277-a5c3-0ddde780bca6', symbol='BTCUSDT', venue='binance', window_start_ts=0,...n chưa đủ độ tin cậy hoặc quá hỗn loạn.', invalid_if='Dòng tiền mua nguội đi hoặc thất bại giữ breakout.', metadata={})
+
+    def _derive_decision_view(self, snapshot: TPFMSnapshot) -> None:
+        """Maps flow state to a clear trader decision posture"""
+        # Logic is now partially handled by _matrix_contract in calculate_m5_snapshot
+        # and enrichment here
+        if snapshot.tradability_grade in {"A", "B"}:
+            snapshot.action_plan_vi = f"{snapshot.decision_posture}: {snapshot.action_plan_vi}"
+        else:
+            snapshot.action_plan_vi = "WAIT: Dòng tiền chưa đủ độ tin cậy hoặc quá hỗn loạn."
+            snapshot.decision_posture = "WAIT"
+>       snapshot.oi_value = float(context.get("oi_value", 0.0))
+E       NameError: name 'context' is not defined
+
+src/cfte/tpfm/engine.py:402: NameError
+___ TestTPFMStateEngine.test_missing_futures_delta_is_exposed_as_blind_spot ____
+
+self = <test_state_engine.TestTPFMStateEngine testMethod=test_missing_futures_delta_is_exposed_as_blind_spot>
+
+    def test_missing_futures_delta_is_exposed_as_blind_spot(self):
+        trades = [
+            NormalizedTrade(event_id=f"e{i}", venue="binance", instrument_key="BTCUSDT", venue_ts=i * 500, price=50000 + i, qty=1.0, quote_qty=50000 + i, taker_side="BUY")
+            for i in range(12)
+        ]
+        snapshots = [
+            MagicMock(
+                mid_px=50000 + i,
+                last_trade_px=50001 + i,
+                imbalance_l1=0.7,
+                absorption_proxy=12000,
+                spread_bps=1.0,
+                microprice=49999 + i,
+                metadata={"recent_quote_share": 0.9},
+            )
+            for i in range(12)
+        ]
+>       snap = self.engine.calculate_m5_snapshot(
+            0,
+            6_000,
+            trades,
+            snapshots,
+            futures_context={"available": True, "fresh": True, "futures_delta_available": False, "oi_delta": 1000, "basis_bps": 2.0},
+        )
+
+tests/tpfm/test_state_engine.py:196: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/cfte/tpfm/engine.py:307: in calculate_m5_snapshot
+    self._derive_decision_view(snapshot)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <cfte.tpfm.engine.TPFMStateEngine object at 0x1039305a0>
+snapshot = TPFMSnapshot(snapshot_id='b054420e-535f-469e-874f-c05d8282527e', symbol='BTCUSDT', venue='binance', window_start_ts=0,...ền chưa đủ độ tin cậy hoặc quá hỗn loạn.', invalid_if='Initiative mất dương hoặc inventory không còn đỡ.', metadata={})
+
+    def _derive_decision_view(self, snapshot: TPFMSnapshot) -> None:
+        """Maps flow state to a clear trader decision posture"""
+        # Logic is now partially handled by _matrix_contract in calculate_m5_snapshot
+        # and enrichment here
+        if snapshot.tradability_grade in {"A", "B"}:
+            snapshot.action_plan_vi = f"{snapshot.decision_posture}: {snapshot.action_plan_vi}"
+        else:
+            snapshot.action_plan_vi = "WAIT: Dòng tiền chưa đủ độ tin cậy hoặc quá hỗn loạn."
+            snapshot.decision_posture = "WAIT"
+>       snapshot.oi_value = float(context.get("oi_value", 0.0))
+E       NameError: name 'context' is not defined
+
+src/cfte/tpfm/engine.py:402: NameError
+__________________ TestTPFMStateEngine.test_pos_init_pos_inv ___________________
+
+self = <test_state_engine.TestTPFMStateEngine testMethod=test_pos_init_pos_inv>
+
+    def test_pos_init_pos_inv(self):
+        # Scenario: Strong Buy Pressure + Support + High Activity
+        trades = [
+            NormalizedTrade(event_id=f"e{i}", venue="binance", instrument_key="BTCUSDT", venue_ts=i*500, price=50000 + i, qty=1.0, quote_qty=50000 + i, taker_side="BUY")
+            for i in range(20) # 20 trades in a short burst
+        ]
+        snapshots = [
+            MagicMock(mid_px=50000 + i, imbalance_l1=0.8, absorption_proxy=10000, spread_bps=1.0, microprice=49999 + i)
+            for i in range(20)
+        ]
+    
+        # First snap (establishes baseline)
+>       self.engine.calculate_m5_snapshot(0, 10000, trades, snapshots)
+
+tests/tpfm/test_state_engine.py:23: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/cfte/tpfm/engine.py:307: in calculate_m5_snapshot
+    self._derive_decision_view(snapshot)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <cfte.tpfm.engine.TPFMStateEngine object at 0x1035eb950>
+snapshot = TPFMSnapshot(snapshot_id='220ad358-acf1-488a-96fb-459904885b99', symbol='BTCUSDT', venue='binance', window_start_ts=0,...ền chưa đủ độ tin cậy hoặc quá hỗn loạn.', invalid_if='Initiative mất dương hoặc inventory không còn đỡ.', metadata={})
+
+    def _derive_decision_view(self, snapshot: TPFMSnapshot) -> None:
+        """Maps flow state to a clear trader decision posture"""
+        # Logic is now partially handled by _matrix_contract in calculate_m5_snapshot
+        # and enrichment here
+        if snapshot.tradability_grade in {"A", "B"}:
+            snapshot.action_plan_vi = f"{snapshot.decision_posture}: {snapshot.action_plan_vi}"
+        else:
+            snapshot.action_plan_vi = "WAIT: Dòng tiền chưa đủ độ tin cậy hoặc quá hỗn loạn."
+            snapshot.decision_posture = "WAIT"
+>       snapshot.oi_value = float(context.get("oi_value", 0.0))
+E       NameError: name 'context' is not defined
+
+src/cfte/tpfm/engine.py:402: NameError
+=========================== short test summary info ============================
+FAILED tests/tpfm/test_state_engine.py::TestTPFMStateEngine::test_context_basis_and_oi_flags
+FAILED tests/tpfm/test_state_engine.py::TestTPFMStateEngine::test_context_overlay_marks_alt_lead_as_inference_and_risk
+FAILED tests/tpfm/test_state_engine.py::TestTPFMStateEngine::test_context_overlay_surfaces_liquidation_and_venue_confirmation
+FAILED tests/tpfm/test_state_engine.py::TestTPFMStateEngine::test_context_refinement_confluence
+FAILED tests/tpfm/test_state_engine.py::TestTPFMStateEngine::test_context_refinement_divergence_absorption
+FAILED tests/tpfm/test_state_engine.py::TestTPFMStateEngine::test_inventory_axis_is_centered_around_half
+FAILED tests/tpfm/test_state_engine.py::TestTPFMStateEngine::test_missing_futures_delta_is_exposed_as_blind_spot
+FAILED tests/tpfm/test_state_engine.py::TestTPFMStateEngine::test_pos_init_pos_inv
+========================= 8 failed, 3 passed in 0.50s ==========================

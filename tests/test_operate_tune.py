@@ -1,8 +1,9 @@
 import json
 import sqlite3
 from pathlib import Path
+from unittest.mock import patch
 
-from cfte.cli.main import build_context, command_log_review, command_review_day, command_review_week, command_tune_profile
+from cfte.cli.main import DEFAULT_STATE_DB, build_context, command_log_review, command_review_day, command_review_week, command_tune_profile
 from cfte.models.events import ThesisSignal
 from cfte.storage.measurement import render_daily_summary_vi
 from cfte.storage.review_journal import build_tuning_suggestions, summarize_review_journal
@@ -69,9 +70,9 @@ def test_log_review_and_daily_weekly_outputs(tmp_path, capsys):
     profile_path = _write_profile(tmp_path)
     context = build_context(profile_path)
 
-    state_dir = Path('data/state')
+    state_dir = tmp_path / 'state'
     state_dir.mkdir(parents=True, exist_ok=True)
-    db_path = state_dir / 'state.db'
+    db_path = state_dir / 'state_test.db'
     if db_path.exists():
         db_path.unlink()
     conn = sqlite3.connect(db_path)
@@ -80,12 +81,13 @@ def test_log_review_and_daily_weekly_outputs(tmp_path, capsys):
     conn.commit()
     conn.close()
     _seed_thesis(db_path)
-
-    rc = command_log_review(context, thesis_id='thesis-1', decision='taken', usefulness='useful', note='đúng plan', review_ts='2024-03-11T08:00:00')
-    assert rc == 0
-    command_review_day(context, date_str='2024-03-11', summary_path=tmp_path / 'summary.json')
-    command_review_week(context, end_date_str='2024-03-11')
-    command_tune_profile(context)
+    
+    with patch("cfte.cli.main.DEFAULT_STATE_DB", db_path):
+        rc = command_log_review(context, thesis_id='thesis-1', decision='taken', usefulness='useful', note='đúng plan', review_ts='2024-03-11T08:00:00')
+        assert rc == 0
+        command_review_day(context, date_str='2024-03-11', summary_path=tmp_path / 'summary.json')
+        command_review_week(context, end_date_str='2024-03-11')
+        command_tune_profile(context)
     out = capsys.readouterr().out
 
     assert 'Đã ghi review cá nhân' in out
@@ -108,6 +110,9 @@ def test_render_daily_summary_includes_review_counts():
         'outcomes_count': 1,
         'positive_outcomes': 1,
         'avg_edge': 1.2,
+        'fill_count': 1,
+        'avg_mae': 5.0,
+        'avg_mfe': 10.0,
         'setup_dist': {'breakout_ignition': 2},
         'stage_dist': {'ACTIONABLE': 2},
         'closed_stage_dist': {'RESOLVED': 1},

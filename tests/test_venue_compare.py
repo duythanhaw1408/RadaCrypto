@@ -1,6 +1,10 @@
 import pytest
 
-from cfte.features.venue_compare import compare_trade_flows, render_venue_comparison_vi
+from cfte.features.venue_compare import (
+    build_venue_confirmation_context,
+    compare_trade_flows,
+    render_venue_comparison_vi,
+)
 from cfte.models.events import NormalizedTrade
 
 
@@ -35,6 +39,9 @@ def test_compare_trade_flows_builds_leader_lagger_foundation():
     assert result.leader_venue == "binance"
     assert result.lagger_venue == "okx"
     assert result.vwap_spread_bps > 0
+    assert result.aligned_window_ms > 0
+    assert result.leader_confidence > 0
+    assert result.discovery_phase != "UNKNOWN"
     assert result.excluded_venues == []
 
 
@@ -53,6 +60,7 @@ def test_render_venue_comparison_vi_is_vietnamese_user_facing():
     assert "Sàn dẫn nhịp" in summary
     assert "Độ lệch VWAP" in summary
     assert "Cửa sổ so sánh hợp lệ" in summary
+    assert "Độ tin cậy leader" in summary
 
 
 def test_render_venue_comparison_vi_translates_excluded_reason_labels():
@@ -150,3 +158,50 @@ def test_compare_trade_flows_rejects_when_misalignment_leaves_only_one_usable_ve
 
     with pytest.raises(ValueError, match="at least two aligned fresh venues"):
         compare_trade_flows(trades)
+
+
+def test_build_venue_confirmation_context_marks_binance_lead_as_confirmed():
+    result = compare_trade_flows(
+        [
+            _trade("binance", 12000, venue_ts=BASE_TS),
+            _trade("binance", 10000, venue_ts=BASE_TS + 100),
+            _trade("bybit", 8000, price=40005, venue_ts=BASE_TS + 120),
+            _trade("okx", 7000, price=40003, venue_ts=BASE_TS + 150),
+        ]
+    )
+
+    context = build_venue_confirmation_context(result, primary_venue="binance", max_confirmed_vwap_spread_bps=5.0)
+
+    assert context["venue_confirmation_state"] == "CONFIRMED"
+    assert context["leader_venue"] == "binance"
+    assert context["leader_confidence"] > 0.45
+    assert context["aligned_window_ms"] > 0
+
+
+def test_build_venue_confirmation_context_marks_alt_lead_when_primary_lags():
+    result = compare_trade_flows(
+        [
+            _trade("binance", 6000, venue_ts=BASE_TS),
+            _trade("bybit", 12000, price=40004, venue_ts=BASE_TS + 50),
+            _trade("okx", 7000, price=40002, venue_ts=BASE_TS + 90),
+        ]
+    )
+
+    context = build_venue_confirmation_context(result, primary_venue="binance", max_confirmed_vwap_spread_bps=5.0)
+
+    assert context["venue_confirmation_state"] == "ALT_LEAD"
+    assert context["leader_venue"] == "bybit"
+
+
+def test_build_venue_confirmation_context_marks_large_vwap_spread_as_divergent():
+    result = compare_trade_flows(
+        [
+            _trade("binance", 12000, price=40000, venue_ts=BASE_TS),
+            _trade("bybit", 8000, price=40150, venue_ts=BASE_TS + 50),
+            _trade("okx", 7000, price=39900, venue_ts=BASE_TS + 90),
+        ]
+    )
+
+    context = build_venue_confirmation_context(result, primary_venue="binance", max_confirmed_vwap_spread_bps=5.0)
+
+    assert context["venue_confirmation_state"] == "DIVERGENT"

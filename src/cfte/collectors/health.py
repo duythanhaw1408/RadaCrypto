@@ -23,25 +23,48 @@ class CollectorHealthSnapshot:
     message_count: int
     last_disconnect_reason: CollectorErrorSurface | None
     last_error: CollectorErrorSurface | None
+    latency_ms: int | None = None
+    is_stale: bool = False
+    last_message_ts: int | None = None
+    idle_gap_seconds: float | None = None
+    notes: tuple[str, ...] = ()
 
     def to_operator_summary(self) -> str:
+        status_tag = "[OK]"
+        if self.is_stale:
+            status_tag = "[STALE]"
+        elif not self.connected:
+            status_tag = "[DISCONNECTED]"
+
         state_label = {
             "idle": "chưa kết nối",
             "running": "đang chạy",
             "degraded": "đang suy giảm",
         }[self.state]
+        
+        latency_str = f"latency={self.latency_ms}ms" if self.latency_ms is not None else "latency=N/A"
+        freshness_str = (
+            f"idle_gap={self.idle_gap_seconds:.1f}s"
+            if self.idle_gap_seconds is not None
+            else "idle_gap=N/A"
+        )
+        
         if self.last_error is not None:
-            # Phòng thủ nếu last_error không phải object (vốn là nguyên nhân gây crash CI trước đây)
             msg = getattr(self.last_error, 'message', str(self.last_error))
             detail = f"Lỗi gần nhất: {msg}."
         elif self.last_disconnect_reason is not None:
             detail = f"Lý do reconnect gần nhất: {self.last_disconnect_reason.message}."
         else:
             detail = "Chưa ghi nhận lỗi collector."
+
+        notes_detail = ""
+        if self.notes:
+            notes_detail = f" Ghi chú: {'; '.join(self.notes)}."
+            
         return (
-            f"Collector {self.venue.upper()} {state_label}; "
+            f"{status_tag} Collector {self.venue.upper()} {state_label}; {latency_str}; {freshness_str}; "
             f"kết nối={self.connected}; lần thử={self.connect_attempts}; "
-            f"reconnect={self.reconnect_count}; message={self.message_count}. {detail}"
+            f"reconnect={self.reconnect_count}; message={self.message_count}. {detail}{notes_detail}"
         )
 
 

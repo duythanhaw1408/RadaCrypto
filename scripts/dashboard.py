@@ -318,7 +318,7 @@ function renderM5(data) {
   }
   
   let html = `<table>
-    <thead><tr><th>Thời gian</th><th>Matrix Cell</th><th>Initiative</th><th>Inventory</th><th>Energy</th><th>Efficiency</th><th>Tradability</th><th>Context</th></tr></thead>
+    <thead><tr><th>Thời gian</th><th>Matrix Cell</th><th>Initiative</th><th>Inventory</th><th>Energy</th><th>Tradability</th><th>V. Confirmation</th><th>Liq. Bias</th><th>Context</th></tr></thead>
     <tbody>
     ${list.map(s => `<tr>
       <td style="font-weight:600">${timeShort(s.window_end_ts)}</td>
@@ -326,8 +326,9 @@ function renderM5(data) {
       <td>${pill(s.initiative_polarity)}</td>
       <td>${pill(s.inventory_polarity)}</td>
       <td>${badge('badge-neutral', s.energy_state)}</td>
-      <td>${badge('badge-neutral', s.response_efficiency_state)}</td>
       <td>${tBar(s.tradability_score)}</td>
+      <td><span class="badge-pro ${s.venue_confirmation_state === 'CONFIRMED' ? 'badge-pos' : s.venue_confirmation_state === 'DIVERGENT' ? 'badge-neg' : 'badge-neutral'}">${s.venue_confirmation_state}</span></td>
+      <td>${s.liquidation_bias !== 'NEUTRAL' ? badge(s.liquidation_bias.includes('FLUSHED')?'badge-neg':'badge-pos', s.liquidation_bias) : '<span style="color:var(--muted)">-</span>'}</td>
       <td><div style="font-size:10px; color:var(--muted)">${s.micro_conclusion || 'Normal'}</div></td>
     </tr>`).join('')}
     </tbody>

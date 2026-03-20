@@ -2,9 +2,13 @@ from __future__ import annotations
 
 import asyncio
 import json
+import time
 from dataclasses import dataclass, field
 
 from cfte.collectors.health import CollectorErrorSurface, CollectorHealthSnapshot, CollectorState, build_error_surface
+
+import ssl
+import certifi
 
 OKX_WS_BASE = "wss://ws.okx.com:8443/ws/v5/public"
 OKX_VENUE = "okx"
@@ -29,6 +33,7 @@ class OkxPublicCollector:
     _connect_attempts: int = field(default=0, init=False, repr=False)
     _reconnect_count: int = field(default=0, init=False, repr=False)
     _message_count: int = field(default=0, init=False, repr=False)
+    _last_message_ts: int | None = field(default=None, init=False, repr=False)
     _last_disconnect_reason: CollectorErrorSurface | None = field(default=None, init=False, repr=False)
     _last_error: CollectorErrorSurface | None = field(default=None, init=False, repr=False)
 
@@ -36,6 +41,11 @@ class OkxPublicCollector:
         return {"op": "subscribe", "args": self.args}
 
     def health_snapshot(self) -> CollectorHealthSnapshot:
+        idle_gap_seconds = None
+        is_stale = False
+        if self._last_message_ts is not None:
+            idle_gap_seconds = max(0.0, time.time() - (self._last_message_ts / 1000.0))
+            is_stale = idle_gap_seconds > 15.0
         return CollectorHealthSnapshot(
             venue=OKX_VENUE,
             state=self._state,
@@ -45,6 +55,9 @@ class OkxPublicCollector:
             message_count=self._message_count,
             last_disconnect_reason=self._last_disconnect_reason,
             last_error=self._last_error,
+            is_stale=is_stale,
+            last_message_ts=self._last_message_ts,
+            idle_gap_seconds=idle_gap_seconds,
         )
 
     def _mark_connected(self) -> None:
@@ -54,6 +67,7 @@ class OkxPublicCollector:
 
     def _record_message(self) -> None:
         self._message_count += 1
+        self._last_message_ts = int(time.time() * 1000)
 
     def _record_failure(self, exc: Exception) -> None:
         error = build_error_surface(exc)
@@ -67,9 +81,43 @@ class OkxPublicCollector:
         while True:
             try:
                 import websockets
+                ssl_context = ssl.create_default_context(cafile=certifi.where())
+                ssl_context.check_hostname = True
+                ssl_context.verify_mode = ssl.CERT_REQUIRED
 
                 self._connect_attempts += 1
-                async with websockets.connect(self.ws_base, ping_interval=20, ping_timeout=20) as ws:
+                async with websockets.connect(
+                    self.ws_base, 
+                    ssl=ssl_context, 
+                    ping_interval=None, # We handle OKX ping manually
+                ) as ws:
+                    self._mark_connected()
+                    await ws.send(json.dumps(self.subscription_message()))
+                    
+                    # OKX requires manual 'ping' string
+                    async def _heartbeat():
+                        while self._connected:
+                            try:
+                                await ws.send("ping")
+                                await asyncio.sleep(20)
+                            except:
+                                break
+                    
+                    hb_task = asyncio.create_task(_heartbeat())
+                    try:
+                        async for raw in ws:
+                            if raw == "pong":
+                                continue
+                            self._record_message()
+                            yield json.loads(raw)
+                    finally:
+                        hb_task.cancel()
+            except Exception as exc:
+                self._record_failure(exc)
+                await asyncio.sleep(self.reconnect_sleep_seconds)
+
+                self._connect_attempts += 1
+                async with websockets.connect(self.ws_base, ssl=ssl_context, ping_interval=20, ping_timeout=20) as ws:
                     self._mark_connected()
                     await ws.send(json.dumps(self.subscription_message()))
                     async for raw in ws:

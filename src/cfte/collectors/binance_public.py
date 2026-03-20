@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import time
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -80,6 +81,7 @@ class BinancePublicCollector:
     _connect_attempts: int = field(default=0, init=False, repr=False)
     _reconnect_count: int = field(default=0, init=False, repr=False)
     _message_count: int = field(default=0, init=False, repr=False)
+    _last_message_ts: int | None = field(default=None, init=False, repr=False)
     _last_disconnect_reason: CollectorErrorSurface | None = field(default=None, init=False, repr=False)
     _last_error: CollectorErrorSurface | None = field(default=None, init=False, repr=False)
 
@@ -89,6 +91,11 @@ class BinancePublicCollector:
         return f"{self.ws_base}?streams={joined}"
 
     def health_snapshot(self) -> CollectorHealthSnapshot:
+        idle_gap_seconds = None
+        is_stale = False
+        if self._last_message_ts is not None:
+            idle_gap_seconds = max(0.0, time.time() - (self._last_message_ts / 1000.0))
+            is_stale = idle_gap_seconds > 15.0
         return CollectorHealthSnapshot(
             venue=BINANCE_VENUE,
             state=self._state,
@@ -98,6 +105,9 @@ class BinancePublicCollector:
             message_count=self._message_count,
             last_disconnect_reason=self._last_disconnect_reason,
             last_error=self._last_error,
+            is_stale=is_stale,
+            last_message_ts=self._last_message_ts,
+            idle_gap_seconds=idle_gap_seconds,
         )
 
     def _mark_connected(self) -> None:
@@ -107,6 +117,7 @@ class BinancePublicCollector:
 
     def _record_message(self) -> None:
         self._message_count += 1
+        self._last_message_ts = int(time.time() * 1000)
 
     def _record_failure(self, exc: Exception) -> None:
         error = build_error_surface(exc)

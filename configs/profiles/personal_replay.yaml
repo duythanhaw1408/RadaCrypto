@@ -13,11 +13,15 @@ defaults:
 scan:
   actionable_threshold: 80
   max_cards: 20
+  trade_window_seconds: 60
+  max_window_trades: 400
 
 live:
   symbol: ETHUSDT
   raw_dir: data/raw/research
   max_events: 50
+  trade_window_seconds: 60
+  max_window_trades: 400
 
 review:
   summary_path: data/replay/research_eth.json
@@ -28,3 +32,4 @@ outcomes:
 ux:
   alert_on_stage_change: true
   alert_on_score_delta: 20.0 # Replay needs less noise
+  alert_score_floor: 70.0

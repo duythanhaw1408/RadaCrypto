@@ -65,7 +65,7 @@ def load_personal_profile(profile_path: Path) -> PersonalProfile:
         live=dict(data.get("live", {})),
         review=dict(data.get("review", {})),
         outcomes=dict(data.get("outcomes", {"horizons": ["1h", "4h", "24h"]})),
-        ux=dict(data.get("ux", {"alert_on_stage_change": True, "alert_on_score_delta": 10.0})),
+        ux=dict(data.get("ux", {"alert_on_stage_change": True, "alert_on_score_delta": 10.0, "alert_score_floor": 65.0})),
     )
 
 
@@ -105,7 +105,83 @@ def _health_artifact_paths(context: ShellContext) -> dict[str, Path]:
         'review_journal': Path(str(review.get('review_journal_path', DEFAULT_REVIEW_JOURNAL))),
         'tuning_report': Path(str(review.get('tuning_report_path', DEFAULT_TUNING_REPORT))),
         'health_report': Path(str(review.get('health_report_path', DEFAULT_HEALTH_REPORT))),
+        'live_runtime': Path(str(review.get('live_runtime_path', DEFAULT_LIVE_RUNTIME_REPORT))),
     }
+
+
+def _render_live_runtime_status_lines(payload: dict[str, Any]) -> list[str]:
+    collector_health = payload.get("collector_health", {})
+    context_health = payload.get("context_health", {})
+    latest_tpfm = payload.get("latest_tpfm", {})
+    latest_transition = payload.get("latest_transition", {})
+    degraded_flags = [str(flag) for flag in payload.get("degraded_flags", []) if str(flag).strip()]
+
+    lines = [
+        f" - Trạng thái phiên: {payload.get('status', 'unknown')}",
+        (
+            " - Futures: "
+            f"stale={payload.get('futures_is_stale', False)}"
+            f", latency={payload.get('futures_ws_latency_ms', 'N/A')}ms"
+        ),
+    ]
+
+    if isinstance(context_health, dict):
+        lines.append(
+            " - Context: "
+            f"futures_fresh={context_health.get('futures_context_fresh', 'N/A')}, "
+            f"venue={context_health.get('venue_confirmation_state', 'N/A')}, "
+            f"leader={context_health.get('leader_venue', 'N/A') or 'N/A'}"
+        )
+
+    if isinstance(latest_tpfm, dict) and latest_tpfm:
+        blind_spots = latest_tpfm.get("blind_spot_flags", [])
+        lines.append(
+            " - Matrix gần nhất: "
+            f"{latest_tpfm.get('matrix_alias_vi', 'N/A')} | "
+            f"grade={latest_tpfm.get('tradability_grade', 'N/A')} | "
+            f"cell={latest_tpfm.get('matrix_cell', 'N/A')}"
+        )
+        if latest_tpfm.get("flow_state_code"):
+            lines.append(
+                " - Flow contract: "
+                f"{latest_tpfm.get('flow_state_code', 'N/A')} | "
+                f"posture={latest_tpfm.get('decision_posture', 'N/A')}"
+            )
+        if blind_spots:
+            lines.append(f" - Blind spot: {', '.join(str(item) for item in blind_spots[:4])}")
+
+    raw_first_m5_seen_at = payload.get("first_m5_seen_at")
+    first_m5_seen_at = str(raw_first_m5_seen_at).strip() if raw_first_m5_seen_at is not None else ""
+    if first_m5_seen_at:
+        lines.append(f" - M5 đầu tiên: {first_m5_seen_at}")
+
+    flow_grade = str(payload.get("latest_flow_grade", "")).strip()
+    if flow_grade:
+        lines.append(f" - Flow grade gần nhất: {flow_grade}")
+
+    if isinstance(latest_transition, dict) and latest_transition:
+        alias = str(latest_transition.get("alias_vi", "")).strip()
+        family = str(latest_transition.get("transition_family", "")).strip()
+        if alias:
+            lines.append(
+                " - Transition gần nhất: "
+                f"{alias}"
+                + (f" | family={family}" if family else "")
+            )
+
+    if isinstance(collector_health, dict) and collector_health:
+        degraded_collectors = [
+            name
+            for name, snap in collector_health.items()
+            if isinstance(snap, dict) and (snap.get("is_stale") or snap.get("state") == "degraded")
+        ]
+        if degraded_collectors:
+            lines.append(f" - Collector suy giảm: {', '.join(sorted(degraded_collectors))}")
+
+    if degraded_flags:
+        lines.append(f" - Cờ suy giảm: {', '.join(degraded_flags[:5])}")
+
+    return lines
 
 
 def doctor(context: ShellContext) -> int:
@@ -143,34 +219,73 @@ def doctor(context: ShellContext) -> int:
     return 0 if report.overall_status != 'bad_config' else 1
 
 
-def run_replay_research(events_path: Path, summary_out: Path) -> int:
+def _profile_trade_window_seconds(section: dict[str, Any]) -> float:
+    return float(section.get("trade_window_seconds", 60.0))
+
+
+def _profile_max_window_trades(section: dict[str, Any]) -> int:
+    legacy = section.get("trade_window_size")
+    value = section.get("max_window_trades", legacy if legacy is not None else 400)
+    return int(value)
+
+
+def run_replay_research(
+    events_path: Path,
+    summary_out: Path,
+    *,
+    trade_window_seconds: float = 60.0,
+    max_window_trades: int = 400,
+) -> int:
     from cfte.replay.adapters import load_replay_events
     from cfte.replay.runner import persist_replay_summary, render_replay_summary_vi, run_replay
 
     events = load_replay_events(events_path)
-    result = run_replay(events)
+    result = run_replay(
+        events,
+        trade_window_seconds=trade_window_seconds,
+        max_window_trades=max_window_trades,
+    )
     persist_replay_summary(result, summary_out)
     print(render_replay_summary_vi(result))
     print(f"Đã lưu tóm tắt replay tại: {summary_out}")
     return 0
 
 
-def _load_replay_result(events_path: Path, db_path: Path | None = None):
+def _load_replay_result(
+    events_path: Path,
+    db_path: Path | None = None,
+    *,
+    trade_window_seconds: float = 60.0,
+    max_window_trades: int = 400,
+):
     from cfte.replay.adapters import load_replay_events
     from cfte.replay.runner import run_replay
 
     events = load_replay_events(events_path)
-    return run_replay(events, db_path=db_path)
+    return run_replay(
+        events,
+        db_path=db_path,
+        trade_window_seconds=trade_window_seconds,
+        max_window_trades=max_window_trades,
+    )
 
 
 def command_replay(context: ShellContext, events_path: Path, summary_out: Path) -> int:
+    trade_window_seconds = _profile_trade_window_seconds(context.profile.scan)
+    max_window_trades = _profile_max_window_trades(context.profile.scan)
     print(_format_header("replay", context.profile))
     print(f"Đang chạy replay từ: {events_path}")
-    return run_replay_research(events_path=events_path, summary_out=summary_out)
+    print(f"Cửa sổ replay: {trade_window_seconds:.0f}s / {max_window_trades} trades")
+    return run_replay_research(
+        events_path=events_path,
+        summary_out=summary_out,
+        trade_window_seconds=trade_window_seconds,
+        max_window_trades=max_window_trades,
+    )
 
 
 def command_run_scan(context: ShellContext, events_path: Path, limit: int | None) -> int:
-    from cfte.replay.runner import persist_replay_summary
+    from cfte.replay.runner import persist_replay_summary, select_top_signals
     from cfte.storage.sqlite_writer import ThesisSQLiteStore
     from cfte.storage.thesis_log import ThesisLogWriter
     from cfte.thesis.cards import render_trader_card
@@ -180,9 +295,14 @@ def command_run_scan(context: ShellContext, events_path: Path, limit: int | None
     # Ensure schema is up to date for TPFM
     asyncio.run(ThesisSQLiteStore(DEFAULT_STATE_DB).migrate_schema())
     
-    result = _load_replay_result(events_path, db_path=DEFAULT_STATE_DB)
+    result = _load_replay_result(
+        events_path,
+        db_path=DEFAULT_STATE_DB,
+        trade_window_seconds=_profile_trade_window_seconds(context.profile.scan),
+        max_window_trades=_profile_max_window_trades(context.profile.scan),
+    )
     actionable_threshold = float(context.profile.scan.get("actionable_threshold", 75.0))
-    candidates = [signal for signal in result.thesis_events if signal.score >= actionable_threshold]
+    candidates = [signal for signal in select_top_signals(result.thesis_events, limit=20) if signal.score >= actionable_threshold]
     target_limit = limit or context.profile.scan.get("max_cards", 3)
     shown = candidates[:target_limit]
 
@@ -204,6 +324,11 @@ def command_run_scan(context: ShellContext, events_path: Path, limit: int | None
 
     print(f"Đã quét replay cho {result.instrument_key} với {result.feature_windows} cửa sổ đặc trưng.")
     print(f"Ngưỡng ưu tiên từ hồ sơ cá nhân: {actionable_threshold:.2f} điểm.")
+    print(
+        "Cửa sổ dòng tiền áp dụng: "
+        f"{_profile_trade_window_seconds(context.profile.scan):.0f}s / "
+        f"{_profile_max_window_trades(context.profile.scan)} trades."
+    )
     if not shown:
         print("Chưa có thiết lập nào vượt ngưỡng ưu tiên. Hãy tiếp tục theo dõi watchlist.")
         return 0
@@ -248,13 +373,25 @@ def command_bootstrap(context: ShellContext) -> int:
     return 0 if report.overall_status != 'bad_config' else 1
 
 
-def command_run_live(context: ShellContext, symbol: str | None, max_events: int | None, use_trade: bool) -> int:
+def command_run_live(
+    context: ShellContext,
+    symbol: str | None,
+    max_events: int | None,
+    use_trade: bool,
+    min_runtime: int | None,
+    run_until_first_m5: bool,
+) -> int:
     from cfte.live.engine import LiveThesisLoop
 
     print(_format_header("run-live", context.profile))
     live_defaults = context.profile.live
     target_symbol = symbol or live_defaults.get("symbol") or context.profile.defaults.get("symbol") or "BTCUSDT"
     target_max_events = int(max_events or live_defaults.get("max_events", 25))
+    configured_min_runtime = live_defaults.get("min_runtime") or live_defaults.get("min_runtime_seconds")
+    target_min_runtime_seconds = min_runtime
+    if target_min_runtime_seconds is None and configured_min_runtime is not None:
+        target_min_runtime_seconds = float(configured_min_runtime)
+    target_run_until_first_m5 = run_until_first_m5 or bool(live_defaults.get("run_until_first_m5", False))
     db_path = DEFAULT_STATE_DB
     thesis_log_path = _profile_path(context.profile, "live", "thesis_log", DEFAULT_THESIS_LOG)
 
@@ -262,6 +399,15 @@ def command_run_live(context: ShellContext, symbol: str | None, max_events: int 
     print(f"- Cơ sở dữ liệu trạng thái: {db_path}")
     print(f"- Giới hạn sự kiện: {target_max_events}")
     print(f"- Thesis log live: {thesis_log_path}")
+    print(
+        "- Cửa sổ dòng tiền: "
+        f"{_profile_trade_window_seconds(live_defaults):.0f}s / "
+        f"{_profile_max_window_trades(live_defaults)} trades"
+    )
+    if target_min_runtime_seconds is not None:
+        print(f"- Runtime tối thiểu: {target_min_runtime_seconds:.0f}s")
+    if target_run_until_first_m5:
+        print("- Điều kiện thoát: chỉ dừng sau khi đã có snapshot M5 đầu tiên")
 
     runtime_report_path = _profile_path(context.profile, 'review', 'live_runtime_path', DEFAULT_LIVE_RUNTIME_REPORT)
     print(f"- Runtime artifact: {runtime_report_path}")
@@ -275,11 +421,19 @@ def command_run_live(context: ShellContext, symbol: str | None, max_events: int 
         watchdog_idle_seconds=float(live_defaults.get('watchdog_idle_seconds', 45.0)),
         heartbeat_interval=int(live_defaults.get('heartbeat_interval', 250)),
         runtime_report_path=runtime_report_path,
+        trade_window_seconds=_profile_trade_window_seconds(live_defaults),
+        max_window_trades=_profile_max_window_trades(live_defaults),
     )
     loop.ux = context.profile.ux
 
     try:
-        asyncio.run(loop.run_forever(max_events=target_max_events))
+        asyncio.run(
+            loop.run_forever(
+                max_events=target_max_events,
+                min_runtime_seconds=target_min_runtime_seconds,
+                run_until_first_m5=target_run_until_first_m5,
+            )
+        )
     except KeyboardInterrupt:
         print("\nĐã nhận tín hiệu dừng từ người dùng.")
     except Exception as exc:
@@ -333,7 +487,14 @@ def _weekly_period(end_date_str: str | None, timezone_str: str = "UTC") -> tuple
 
 
 def command_review_day(context: ShellContext, date_str: str | None = None, summary_path: Path | None = None) -> int:
-    from cfte.storage.measurement import SummaryDocument, persist_summary_document, render_daily_summary_vi
+    from cfte.storage.measurement import (
+        SummaryDocument,
+        persist_summary_document,
+        render_daily_summary_vi,
+        render_flow_state_scorecard_vi,
+        render_forced_flow_scorecard_vi,
+        render_transition_scorecard_vi,
+    )
     from cfte.storage.review_journal import ReviewJournal, render_review_journal_vi, summarize_review_journal
     from cfte.storage.sqlite_writer import ThesisSQLiteStore
 
@@ -343,14 +504,24 @@ def command_review_day(context: ShellContext, date_str: str | None = None, summa
     async def _show() -> None:
         await store.migrate_schema()
         stats = await store.get_daily_summary_stats(date_str, timezone_str=_get_trader_timezone(context.profile))
+        matrix_scorecard = await store.get_matrix_scorecard(start_ts=stats["start_ts"], end_ts=stats["end_ts"])
+        flow_state_scorecard = await store.get_flow_state_scorecard(start_ts=stats["start_ts"], end_ts=stats["end_ts"])
+        forced_flow_scorecard = await store.get_forced_flow_scorecard(start_ts=stats["start_ts"], end_ts=stats["end_ts"])
+        transition_scorecard = await store.get_transition_scorecard(start_ts=stats["start_ts"], end_ts=stats["end_ts"])
         journal_path = _profile_path(context.profile, "review", "review_journal_path", DEFAULT_REVIEW_JOURNAL)
         review_summary = summarize_review_journal(
             ReviewJournal(journal_path).read_records(),
             start_ts=stats["start_ts"],
             end_ts=stats["end_ts"],
         )
-        text = render_daily_summary_vi(stats, review_summary)
+        text = render_daily_summary_vi(stats, review_summary, matrix_scorecard, flow_state_scorecard, forced_flow_scorecard)
         print(text)
+        print()
+        print(render_flow_state_scorecard_vi(flow_state_scorecard))
+        print()
+        print(render_forced_flow_scorecard_vi(forced_flow_scorecard))
+        print()
+        print(render_transition_scorecard_vi(transition_scorecard))
         if review_summary.get("total_reviews", 0):
             print()
             print(render_review_journal_vi(review_summary))
@@ -358,7 +529,18 @@ def command_review_day(context: ShellContext, date_str: str | None = None, summa
         output_path = _profile_path(context.profile, "review", "daily_summary_path", DEFAULT_DAILY_SUMMARY)
         saved_path = persist_summary_document(
             output_path,
-            SummaryDocument(label=stats["label"], summary_vi=text, payload={**stats, "review_summary": review_summary}),
+            SummaryDocument(
+                label=stats["label"],
+                summary_vi=text,
+                payload={
+                    **stats, 
+                    "review_summary": review_summary, 
+                    "matrix_scorecard": matrix_scorecard,
+                    "flow_state_scorecard": flow_state_scorecard,
+                    "forced_flow_scorecard": forced_flow_scorecard,
+                    "transition_scorecard": transition_scorecard
+                },
+            ),
         )
         print(f"Đã lưu daily summary tại: {saved_path}")
 
@@ -386,10 +568,19 @@ def command_review_week(context: ShellContext, end_date_str: str | None = None) 
     from cfte.storage.measurement import (
         SummaryDocument,
         persist_summary_document,
+        render_flow_state_scorecard_vi,
+        render_forced_flow_scorecard_vi,
+        render_matrix_scorecard_vi,
         render_setup_scorecard_vi,
+        render_transition_scorecard_vi,
         render_weekly_review_vi,
     )
     from cfte.storage.review_journal import (
+        ReviewJournal,
+        build_flow_state_tuning_suggestions,
+        build_forced_flow_tuning_suggestions,
+        build_matrix_tuning_suggestions,
+        build_transition_tuning_suggestions,
         ReviewJournal,
         build_tuning_suggestions,
         render_review_journal_vi,
@@ -407,19 +598,53 @@ def command_review_week(context: ShellContext, end_date_str: str | None = None) 
         label, start_ts, end_ts = _weekly_period(end_date_str, timezone_str=tz_str)
         stats = await store.get_period_summary(start_ts=start_ts, end_ts=end_ts, label=label)
         scorecard = await store.get_setup_scorecard()
+        matrix_scorecard = await store.get_matrix_scorecard(start_ts=start_ts, end_ts=end_ts)
+        flow_state_scorecard = await store.get_flow_state_scorecard(start_ts=start_ts, end_ts=end_ts)
+        forced_flow_scorecard = await store.get_forced_flow_scorecard(start_ts=start_ts, end_ts=end_ts)
+        transition_scorecard = await store.get_transition_scorecard(start_ts=start_ts, end_ts=end_ts)
         journal_path = _profile_path(context.profile, "review", "review_journal_path", DEFAULT_REVIEW_JOURNAL)
         review_summary = summarize_review_journal(ReviewJournal(journal_path).read_records(), start_ts=start_ts, end_ts=end_ts)
         threshold = float(context.profile.scan.get("actionable_threshold", 75.0))
         tuning_suggestions = build_tuning_suggestions(scorecard, review_summary, base_threshold=threshold)
-        review_text = render_weekly_review_vi(stats, scorecard, review_summary, tuning_suggestions)
+        flow_state_tuning_suggestions = build_flow_state_tuning_suggestions(flow_state_scorecard, base_threshold=threshold)
+        forced_flow_tuning_suggestions = build_forced_flow_tuning_suggestions(forced_flow_scorecard, base_threshold=threshold)
+        matrix_tuning_suggestions = build_matrix_tuning_suggestions(matrix_scorecard, base_threshold=threshold)
+        transition_tuning_suggestions = build_transition_tuning_suggestions(transition_scorecard, base_threshold=threshold)
+        review_text = render_weekly_review_vi(
+            stats,
+            scorecard,
+            review_summary,
+            tuning_suggestions,
+            matrix_scorecard,
+            transition_scorecard,
+            flow_state_scorecard,
+            forced_flow_scorecard,
+            flow_state_tuning_suggestions,
+            forced_flow_tuning_suggestions,
+            transition_tuning_suggestions,
+        )
         print(review_text)
+        print()
+        print(render_flow_state_scorecard_vi(flow_state_scorecard))
+        print()
+        print(render_transition_scorecard_vi(transition_scorecard))
+        print()
+        print(render_forced_flow_scorecard_vi(forced_flow_scorecard))
+        print()
+        print(render_matrix_scorecard_vi(matrix_scorecard))
         print()
         print(render_setup_scorecard_vi(scorecard))
         if review_summary.get("total_reviews", 0):
             print()
             print(render_review_journal_vi(review_summary))
         print()
-        tuning_text = render_tuning_report_vi(tuning_suggestions)
+        tuning_text = render_tuning_report_vi(
+            tuning_suggestions,
+            matrix_tuning_suggestions,
+            transition_tuning_suggestions,
+            flow_state_tuning_suggestions,
+            forced_flow_tuning_suggestions,
+        )
         print(tuning_text)
 
         output_path = _profile_path(context.profile, "review", "weekly_summary_path", DEFAULT_WEEKLY_SUMMARY)
@@ -429,12 +654,35 @@ def command_review_week(context: ShellContext, end_date_str: str | None = None) 
             SummaryDocument(
                 label=label,
                 summary_vi=review_text,
-                payload={"stats": stats, "scorecard": scorecard, "review_summary": review_summary, "tuning_suggestions": tuning_suggestions},
+                payload={
+                    "stats": stats,
+                    "scorecard": scorecard,
+                    "matrix_scorecard": matrix_scorecard,
+                    "flow_state_scorecard": flow_state_scorecard,
+                    "forced_flow_scorecard": forced_flow_scorecard,
+                    "transition_scorecard": transition_scorecard,
+                    "review_summary": review_summary,
+                    "tuning_suggestions": tuning_suggestions,
+                    "flow_state_tuning_suggestions": flow_state_tuning_suggestions,
+                    "forced_flow_tuning_suggestions": forced_flow_tuning_suggestions,
+                    "matrix_tuning_suggestions": matrix_tuning_suggestions,
+                    "transition_tuning_suggestions": transition_tuning_suggestions,
+                },
             ),
         )
         tuning_saved_path = persist_summary_document(
             tuning_path,
-            SummaryDocument(label=label, summary_vi=tuning_text, payload={"tuning_suggestions": tuning_suggestions}),
+            SummaryDocument(
+                label=label,
+                summary_vi=tuning_text,
+                payload={
+                    "tuning_suggestions": tuning_suggestions,
+                    "flow_state_tuning_suggestions": flow_state_tuning_suggestions,
+                    "forced_flow_tuning_suggestions": forced_flow_tuning_suggestions,
+                    "matrix_tuning_suggestions": matrix_tuning_suggestions,
+                    "transition_tuning_suggestions": transition_tuning_suggestions,
+                },
+            ),
         )
         print(f"\nĐã lưu weekly review tại: {saved_path}")
         print(f"Đã lưu tuning report tại: {tuning_saved_path}")
@@ -502,7 +750,16 @@ def command_review_log(context: ShellContext, start_date: str | None = None, end
 
 def command_tune_profile(context: ShellContext) -> int:
     from cfte.storage.measurement import SummaryDocument, persist_summary_document
-    from cfte.storage.review_journal import build_tuning_suggestions, render_tuning_report_vi, ReviewJournal, summarize_review_journal
+    from cfte.storage.review_journal import (
+        ReviewJournal,
+        build_flow_state_tuning_suggestions,
+        build_forced_flow_tuning_suggestions,
+        build_matrix_tuning_suggestions,
+        build_transition_tuning_suggestions,
+        build_tuning_suggestions,
+        render_tuning_report_vi,
+        summarize_review_journal,
+    )
     from cfte.storage.sqlite_writer import ThesisSQLiteStore
 
     print(_format_header("tune-profile", context.profile))
@@ -511,16 +768,44 @@ def command_tune_profile(context: ShellContext) -> int:
     async def _run() -> None:
         await store.migrate_schema()
         scorecard = await store.get_setup_scorecard()
+        matrix_scorecard = await store.get_matrix_scorecard()
+        flow_state_scorecard = await store.get_flow_state_scorecard()
+        forced_flow_scorecard = await store.get_forced_flow_scorecard()
+        transition_scorecard = await store.get_transition_scorecard()
         journal_path = _profile_path(context.profile, "review", "review_journal_path", DEFAULT_REVIEW_JOURNAL)
         review_summary = summarize_review_journal(ReviewJournal(journal_path).read_records())
         threshold = float(context.profile.scan.get("actionable_threshold", 75.0))
         tuning_suggestions = build_tuning_suggestions(scorecard, review_summary, base_threshold=threshold)
-        text = render_tuning_report_vi(tuning_suggestions)
+        flow_state_tuning_suggestions = build_flow_state_tuning_suggestions(flow_state_scorecard, base_threshold=threshold)
+        forced_flow_tuning_suggestions = build_forced_flow_tuning_suggestions(forced_flow_scorecard, base_threshold=threshold)
+        matrix_tuning_suggestions = build_matrix_tuning_suggestions(matrix_scorecard, base_threshold=threshold)
+        transition_tuning_suggestions = build_transition_tuning_suggestions(transition_scorecard, base_threshold=threshold)
+        text = render_tuning_report_vi(
+            tuning_suggestions,
+            matrix_tuning_suggestions,
+            transition_tuning_suggestions,
+            flow_state_tuning_suggestions,
+            forced_flow_tuning_suggestions,
+        )
         print(text)
         tuning_path = _profile_path(context.profile, "review", "tuning_report_path", DEFAULT_TUNING_REPORT)
         saved_path = persist_summary_document(
             tuning_path,
-            SummaryDocument(label=context.profile.name, summary_vi=text, payload={"tuning_suggestions": tuning_suggestions, "review_summary": review_summary}),
+            SummaryDocument(
+                label=context.profile.name,
+                summary_vi=text,
+                payload={
+                    "tuning_suggestions": tuning_suggestions,
+                    "flow_state_tuning_suggestions": flow_state_tuning_suggestions,
+                    "forced_flow_tuning_suggestions": forced_flow_tuning_suggestions,
+                    "matrix_tuning_suggestions": matrix_tuning_suggestions,
+                    "transition_tuning_suggestions": transition_tuning_suggestions,
+                    "matrix_scorecard": matrix_scorecard,
+                    "flow_state_scorecard": flow_state_scorecard,
+                    "forced_flow_scorecard": forced_flow_scorecard,
+                    "review_summary": review_summary,
+                },
+            ),
         )
         print(f"Đã lưu tuning report tại: {saved_path}")
 
@@ -545,12 +830,24 @@ def command_scorecard(context: ShellContext) -> int:
 
 
 def command_watchdog(context: ShellContext) -> int:
+    from cfte.cli.reliability import load_json_artifact
     from cfte.storage.sqlite_writer import ThesisSQLiteStore
     
     print(_format_header("watchdog", context.profile))
     store = ThesisSQLiteStore(DEFAULT_STATE_DB)
+    runtime_path = _profile_path(context.profile, "review", "live_runtime_path", DEFAULT_LIVE_RUNTIME_REPORT)
     
     async def _show():
+        runtime_payload = load_json_artifact(runtime_path)
+        if runtime_payload:
+            print("📡 Runtime live gần nhất:")
+            for line in _render_live_runtime_status_lines(runtime_payload):
+                print(line)
+            print()
+        else:
+            print(f"⚠️ Chưa có runtime artifact tại {runtime_path}.")
+            print()
+
         recent = await store.get_recent_thesis(limit=1)
         if not recent:
             print("⚠️ Chưa có luận điểm nào được ghi nhận.")
@@ -576,7 +873,7 @@ def command_watchdog(context: ShellContext) -> int:
 
 def command_health(context: ShellContext) -> int:
     import shutil
-    from cfte.cli.reliability import build_runtime_report, persist_runtime_report, render_runtime_report_vi
+    from cfte.cli.reliability import build_runtime_report, load_json_artifact, persist_runtime_report, render_runtime_report_vi
     from cfte.storage.sqlite_writer import ThesisSQLiteStore
     from cfte.collectors.health import CollectorHealthSnapshot, build_error_surface
 
@@ -608,6 +905,15 @@ def command_health(context: ShellContext) -> int:
         asyncio.run(_db_stats())
     else:
         print(f" - [WARN] Không tìm thấy database tại {DEFAULT_STATE_DB}")
+
+    runtime_path = _profile_path(context.profile, 'review', 'live_runtime_path', DEFAULT_LIVE_RUNTIME_REPORT)
+    runtime_payload = load_json_artifact(runtime_path)
+    print("\n[Runtime live gần nhất]")
+    if runtime_payload:
+        for line in _render_live_runtime_status_lines(runtime_payload):
+            print(line)
+    else:
+        print(f" - [WARN] Không tìm thấy runtime artifact tại {runtime_path}")
 
     print("\n[Trạng thái Collector - Audit thực tế]")
     import requests
@@ -644,6 +950,8 @@ def command_health(context: ShellContext) -> int:
         message_count=0,
         last_disconnect_reason=None,
         last_error=last_error if not conn_ok else None,
+        latency_ms=0 if conn_ok else None,
+        is_stale=not conn_ok
     )
     print(snapshot.to_operator_summary())
     saved = persist_runtime_report(_profile_path(context.profile, 'review', 'health_report_path', DEFAULT_HEALTH_REPORT), report)
@@ -758,6 +1066,8 @@ def build_parser() -> argparse.ArgumentParser:
     run_live.add_argument("--symbol", default=None)
     run_live.add_argument("--out", default=None)
     run_live.add_argument("--max-events", type=int, default=None)
+    run_live.add_argument("--min-runtime-seconds", type=float, default=None, help="Thời gian chạy tối thiểu (giây).")
+    run_live.add_argument("--run-until-first-m5", action="store_true")
     run_live.add_argument("--use-trade", action="store_true", help="Dùng stream trade thay vì aggTrade.")
 
     review_day = sub.add_parser("review-day", help="Sinh tổng kết ngày từ SQLite và lưu file summary tiếng Việt.")
@@ -794,7 +1104,14 @@ def main() -> int:
         replay_events = _resolve_path(args.events, _profile_path(context.profile, "defaults", "replay_events", DEFAULT_REPLAY_EVENTS))
         return command_run_scan(context, events_path=replay_events, limit=args.limit)
     if args.cmd == "run-live":
-        return command_run_live(context, symbol=args.symbol, max_events=args.max_events, use_trade=args.use_trade)
+        return command_run_live(
+            context,
+            symbol=args.symbol,
+            max_events=args.max_events,
+            use_trade=args.use_trade,
+            min_runtime_seconds=args.min_runtime_seconds,
+            run_until_first_m5=args.run_until_first_m5,
+        )
     if args.cmd == "review-day":
         summary_path = Path(args.summary) if args.summary else None
         return command_review_day(context, date_str=args.date, summary_path=summary_path)

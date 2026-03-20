@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional
+from typing import Dict, List
 
 @dataclass(slots=True)
 class TPFMSnapshot:
@@ -13,8 +15,11 @@ class TPFMSnapshot:
     # Polarity & Scores
     initiative_score: float = 0.0
     initiative_polarity: str = "NEUTRAL_INIT"  # POS_INIT, NEG_INIT, NEUTRAL_INIT
+    initiative_strength: float = 0.0
     inventory_score: float = 0.0
     inventory_polarity: str = "NEUTRAL_INV"   # POS_INV, NEG_INV, NEUTRAL_INV
+    inventory_strength: float = 0.0
+    axis_confidence: float = 0.0
 
     # Energy & Efficiency
     energy_score: float = 0.0
@@ -32,6 +37,10 @@ class TPFMSnapshot:
     # Matrix
     matrix_cell: str = "NEUTRAL_INIT__NEUTRAL_INV"
     micro_conclusion: str = "UNCERTAIN"
+    matrix_alias_vi: str = "Trung tính"
+    continuation_bias: str = "NEUTRAL"
+    preferred_posture: str = "Đứng ngoài và chờ cấu trúc rõ hơn"
+    tradability_grade: str = "D"
 
     # Setup Context
     dominant_setups: List[str] = field(default_factory=list)
@@ -50,8 +59,21 @@ class TPFMSnapshot:
     trade_burst: float = 0.0
     absorption_score: float = 0.0
     imbalance_l1: float = 0.0
+    centered_imbalance_l1: float = 0.0
+    signed_absorption_score: float = 0.0
     microprice_gap_bps: float = 0.0
     spread_bps: float = 0.0
+    
+    # Phase 2 Metrics
+    delta_zscore: float = 0.0
+    aggression_ratio: float = 0.5 # 0.5 is neutral
+    sweep_quote: float = 0.0
+    sweep_buy_quote: float = 0.0
+    sweep_sell_quote: float = 0.0
+    burst_persistence: float = 0.0
+    microprice_drift_bps: float = 0.0
+    replenishment_bid_score: float = 0.0
+    replenishment_ask_score: float = 0.0
 
     # Context Overlay (Phase T5 - Real-world Refinement)
     context_score: float = 0.0
@@ -61,24 +83,124 @@ class TPFMSnapshot:
     # New High-Fidelity Context Fields
     futures_context_available: bool = False
     futures_context_fresh: bool = False
+    futures_delta_available: bool = False
+    futures_delta: float = 0.0
     funding_rate: float = 0.0
     funding_bias: str = "NEUTRAL" # POSITIVE, NEGATIVE, NEUTRAL
     basis_bps: float = 0.0
     basis_divergence_state: str = "ALIGNED" # ALIGNED, DIVERGING_POS, DIVERGING_NEG
     oi_value: float = 0.0
     oi_delta: float = 0.0
+    oi_expansion_ratio: float = 0.0
     oi_state: str = "STABLE" # EXPANDING, CONTRACTING, STABLE
     futures_pressure_bias: str = "NEUTRAL" # BULLISH, BEARISH, NEUTRAL
+    futures_aggression_ratio: float = 0.5
+    spot_futures_relation: str = "NO_FUTURES_CONFIRM"
     context_quality_score: float = 0.0
     context_warning_flags: List[str] = field(default_factory=list)
+    basis_state: str = "BALANCED"
+    venue_confirmation_state: str = "UNCONFIRMED"
+    leader_venue: str = ""
+    lagger_venue: str = ""
+    leader_confidence: float = 0.0
+    aligned_window_ms: int = 0
+    venue_vwap_spread_bps: float = 0.0
+    liquidation_context_available: bool = False
+    liquidation_bias: str = "UNKNOWN"
+    liquidation_count: int = 0
+    liquidation_quote: float = 0.0
 
+    # vNext High-Fidelity Flow Fields
+    flow_state_code: str = "NEUTRAL"
+    forced_flow_state: str = "NONE" # NONE, LIQUIDATION_LED, SQUEEZE_LED, GAP_LED
+    forced_flow_intensity: float = 0.0
+    liquidation_intensity: float = 0.0
+    inventory_defense_state: str = "NONE" # NONE, BID_DEFENSE, ASK_DEFENSE
+    transition_ready: bool = False
+    trap_risk: float = 0.0
+    decision_posture: str = "WAIT" # LONG, SHORT, WAIT, EXIT
+    decision_summary_vi: str = "Đứng ngoài cho tới khi dòng tiền rõ hơn."
+    entry_condition_vi: str = "N/A"
+    confirm_needed_vi: str = "N/A"
+    avoid_if_vi: str = "N/A"
+    review_tags: Dict[str, str] = field(default_factory=dict)
+    review_tags_json: str = "{}"  # Legacy persistence bridge
+
+    # Compatibility aliases for pre-vNext callers
+    entry_condition: str = "N/A"
+    avoid_if: str = "N/A"
+    
     # Health
     degraded: bool = False
     health_state: str = "HEALTHY"
+    blind_spot_flags: List[str] = field(default_factory=list)
 
-    # Escalation
+    # Escalation & Facts
     should_escalate: bool = False
     escalation_reason: List[str] = field(default_factory=list)
+    observed_facts: List[str] = field(default_factory=list)
+    inferred_facts: List[str] = field(default_factory=list)
+    missing_context: List[str] = field(default_factory=list)
+    risk_flags: List[str] = field(default_factory=list)
+    action_plan_vi: str = "Đứng ngoài"
+    invalid_if: str = "Matrix không còn giữ được hướng hiện tại"
+    metadata: Dict[str, object] = field(default_factory=dict)
+    transition_event: FlowTransitionEvent | None = None
+
+    def __iter__(self):
+        yield self
+        yield self.transition_event
+
+
+@dataclass(slots=True)
+class FlowTransitionEvent:
+    """Represents a change in the Matrix Cell / Flow State"""
+    transition_id: str
+    symbol: str
+    venue: str
+    timestamp: int
+    from_cell: str
+    to_cell: str
+    transition_code: str # e.g. NEUTRAL_TO_CONTINUATION, FLIP_TO_SHORT
+    transition_speed: float
+    transition_quality: float
+    persistence_score: float
+    transition_family: str = "STRUCTURE_SHIFT"
+    transition_alias_vi: str = "Chuyển pha cấu trúc"
+    from_flow_state_code: str = "NEUTRAL_BALANCE"
+    to_flow_state_code: str = "NEUTRAL_BALANCE"
+    forced_flow_involved: bool = False
+    trap_risk: float = 0.0
+    from_decision_posture: str = "WAIT"
+    to_decision_posture: str = "WAIT"
+    decision_shift: str = "NONE"
+    metadata: Dict[str, object] = field(default_factory=dict)
+
+
+@dataclass(slots=True)
+class FlowDecisionView:
+    """The final contract for tradeable flow analysis"""
+    decision_id: str
+    snapshot_id: str
+    symbol: str
+    venue: str
+    timestamp: int
+    
+    flow_bias: str # LONG, SHORT, NEUTRAL
+    continuation_bias: str # CONTINUATION, REVERSAL, TRAP
+    posture: str # AGGRESSIVE, CONSERVATIVE, WAIT
+    
+    # Output Contract
+    tradability_grade: str
+    entry_condition: str
+    confirm_needed: str
+    avoid_if: str
+    invalid_if: str
+    tp_path: List[str] = field(default_factory=list)
+    risk_flags: List[str] = field(default_factory=list)
+    review_tags: Dict[str, str] = field(default_factory=dict)
+    
+    metadata: Dict[str, object] = field(default_factory=dict)
 
 
 @dataclass(slots=True)

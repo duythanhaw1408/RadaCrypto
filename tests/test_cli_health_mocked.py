@@ -37,8 +37,12 @@ def test_command_health_success(mock_context):
                 
                 with patch("cfte.cli.reliability.persist_runtime_report"):
                     with patch("pathlib.Path.exists", return_value=True):
-                        # We need to mock asyncio.run because get_db_diagnostics is async
-                        with patch("asyncio.run"):
+                        # Mock asyncio.run to avoid unawaited coroutine warnings
+                        def mock_run(coro):
+                            coro.close()
+                            return None
+                            
+                        with patch("asyncio.run", side_effect=mock_run):
                             code = command_health(mock_context)
                             assert code == 0
                             mock_get.assert_called_once()
@@ -54,7 +58,10 @@ def test_command_health_network_error(mock_context):
                 
                 with patch("cfte.cli.reliability.persist_runtime_report"):
                     with patch("pathlib.Path.exists", return_value=False):
-                        with patch("asyncio.run"):
+                        def mock_run(coro):
+                            coro.close()
+                            return None
+                        with patch("asyncio.run", side_effect=mock_run):
                             code = command_health(mock_context)
                             assert code == 0
                             # This verifies that the build_error_surface logic 
@@ -71,6 +78,9 @@ def test_command_health_bad_config(mock_context):
                 
                 with patch("cfte.cli.reliability.persist_runtime_report"):
                     with patch("pathlib.Path.exists", return_value=False):
-                        with patch("asyncio.run"):
+                        def mock_run(coro):
+                            coro.close()
+                            return None
+                        with patch("asyncio.run", side_effect=mock_run):
                             code = command_health(mock_context)
                             assert code == 1

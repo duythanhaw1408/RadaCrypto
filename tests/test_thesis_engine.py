@@ -117,3 +117,83 @@ def test_thesis_id_changes_by_setup_and_is_deterministic():
         timeframe="1h",
         regime_bucket="NEUTRAL",
     )
+
+
+def test_quality_gate_demotes_stale_breakout_flow():
+    book = LocalBook("BINANCE:BTCUSDT:SPOT")
+    book.apply_snapshot(
+        bids=[(100.0, 15.0)],
+        asks=[(100.1, 2.0)],
+        seq_id=1,
+    )
+    old_trades = [
+        NormalizedTrade(
+            event_id=f"old-{index}",
+            venue="binance",
+            instrument_key="BINANCE:BTCUSDT:SPOT",
+            price=100.12,
+            qty=1.0,
+            quote_qty=100.12,
+            taker_side="BUY",
+            venue_ts=1_000 + (index * 250),
+        )
+        for index in range(175)
+    ]
+    recent_trades = [
+        NormalizedTrade(
+            event_id=f"recent-{index}",
+            venue="binance",
+            instrument_key="BINANCE:BTCUSDT:SPOT",
+            price=100.16,
+            qty=0.05,
+            quote_qty=5.01,
+            taker_side="BUY",
+            venue_ts=55_000 + (index * 500),
+        )
+        for index in range(5)
+    ]
+    snapshot = build_tape_snapshot(
+        instrument_key="BINANCE:BTCUSDT:SPOT",
+        order_book=book,
+        trades=old_trades + recent_trades,
+        window_end_ts=59_000,
+        lookback_seconds=60.0,
+    )
+
+    breakout = next(signal for signal in evaluate_setups(snapshot) if signal.setup == "breakout_ignition")
+
+    assert breakout.stage == "WATCHLIST"
+    assert breakout.score < 78.0
+    assert any("tín hiệu đã nguội" in conflict for conflict in breakout.conflicts)
+
+
+def test_quality_gate_flags_thin_trade_window_and_keeps_signal_detected():
+    book = LocalBook("BINANCE:BTCUSDT:SPOT")
+    book.apply_snapshot(
+        bids=[(100.0, 12.0)],
+        asks=[(100.1, 2.0)],
+        seq_id=1,
+    )
+    snapshot = build_tape_snapshot(
+        instrument_key="BINANCE:BTCUSDT:SPOT",
+        order_book=book,
+        trades=[
+            NormalizedTrade(
+                event_id="t1",
+                venue="binance",
+                instrument_key="BINANCE:BTCUSDT:SPOT",
+                price=100.12,
+                qty=1.0,
+                quote_qty=100.12,
+                taker_side="BUY",
+                venue_ts=1_000,
+            )
+        ],
+        window_end_ts=1_000,
+        lookback_seconds=60.0,
+    )
+
+    accumulation = next(signal for signal in evaluate_setups(snapshot) if signal.setup == "stealth_accumulation")
+
+    assert accumulation.stage == "DETECTED"
+    assert any("còn mỏng cho setup này" in conflict for conflict in accumulation.conflicts)

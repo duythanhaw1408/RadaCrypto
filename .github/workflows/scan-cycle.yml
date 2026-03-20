@@ -23,7 +23,7 @@ permissions:
 jobs:
   scan-cycle:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 18
 
     steps:
     - uses: actions/checkout@v4
@@ -59,9 +59,10 @@ jobs:
         PYTHONPATH: src
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       run: |
-        # Chạy 50 events live để lấy data mới nhất trước khi scan
+        # Chạy 1500 events live để lấy data mới nhất trước khi scan
         python scripts/run_cycle.py \
-          --max-events 50 \
+          --max-events 1500 \
+          --min-runtime-seconds 330 \
           --profile configs/profiles/personal_binance.yaml
 
     - name: Copy data to docs for GitHub Pages
@@ -70,6 +71,7 @@ jobs:
         cp -f data/review/health_status.json docs/data/ 2>/dev/null || true
         cp -f data/review/daily_summary.json docs/data/ 2>/dev/null || true
         cp -f data/review/weekly_review.json docs/data/ 2>/dev/null || true
+        cp -f data/review/live_runtime.json docs/data/ 2>/dev/null || true
         cp -f data/replay/summary_btcusdt.json docs/data/ 2>/dev/null || true
         
         if [ -f data/thesis/thesis_log.jsonl ]; then
@@ -105,12 +107,18 @@ jobs:
         "
 
         python3 -c "
-        import json
+        import json, os
         from datetime import datetime, timezone
+        runtime = {}
+        if os.path.exists('data/review/live_runtime.json'):
+          runtime = json.load(open('data/review/live_runtime.json'))
         status = {
           'last_run': datetime.now(tz=timezone.utc).isoformat(),
           'last_scan_time': datetime.now(tz=timezone.utc).isoformat(),
           'scan_count': ${{ github.run_number }},
+          'first_m5_seen_at': runtime.get('first_m5_seen_at'),
+          'latest_flow_grade': runtime.get('latest_flow_grade'),
+          'latest_transition': runtime.get('latest_transition', {}),
           'workflows': [
             {'name':'CFTE Scan Cycle (4h/lần)','status':'success','last_run':datetime.now(tz=timezone.utc).isoformat(),'duration':'~2m'},
           ]
@@ -134,6 +142,7 @@ jobs:
           data/replay/summary_btcusdt.json
           data/review/daily_summary.json
           data/review/health_status.json
+          data/review/live_runtime.json
           data/thesis/thesis_log.jsonl
         retention-days: 14
 

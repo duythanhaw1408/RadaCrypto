@@ -72,3 +72,11 @@ class LocalBook:
         if total == 0:
             return 0.5
         return bid_qty / total
+
+    def clone(self) -> "LocalBook":
+        return LocalBook(
+            instrument_key=self.instrument_key,
+            bids=dict(self.bids),
+            asks=dict(self.asks),
+            last_seq_id=self.last_seq_id,
+        )

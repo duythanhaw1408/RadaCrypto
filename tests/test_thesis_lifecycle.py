@@ -8,6 +8,8 @@ from cfte.thesis.lifecycle import (
     reduce_thesis_stage,
     summarize_lifecycle_transition,
 )
+from cfte.models.events import ThesisSignal
+from cfte.thesis.state import ThesisLifecycleRecord, apply_signal_update
 
 
 @pytest.mark.parametrize(
@@ -66,3 +68,69 @@ def test_summarize_lifecycle_transition_defaults_to_vietnamese() -> None:
     summary = summarize_lifecycle_transition(current_stage="CONFIRMED", next_stage="INVALIDATED")
 
     assert summary == "Luận điểm chuyển trạng thái từ 'Đã xác nhận' sang 'Đã bị vô hiệu'."
+
+
+def test_apply_signal_update_uses_opened_event_for_new_signal():
+    signal = ThesisSignal(
+        thesis_id="abc",
+        instrument_key="BINANCE:BTCUSDT:SPOT",
+        setup="stealth_accumulation",
+        direction="LONG_BIAS",
+        stage="ACTIONABLE",
+        score=82.0,
+        confidence=0.88,
+        coverage=0.8,
+        why_now=["Delta mua dương"],
+        conflicts=[],
+        invalidation="Mất bid hỗ trợ dưới 70000.0",
+        entry_style="Canh hồi về bid",
+        targets=["TP1", "TP2"],
+    )
+
+    _, events = apply_signal_update(None, signal, event_ts=1234)
+
+    assert len(events) == 1
+    assert events[0].event_type == "opened"
+    assert events[0].summary_vi == "Khởi tạo luận điểm ở trạng thái 'Có thể hành động'."
+
+
+def test_apply_signal_update_keeps_terminal_signal_snapshot_frozen():
+    terminal_signal = ThesisSignal(
+        thesis_id="abc",
+        instrument_key="BINANCE:BTCUSDT:SPOT",
+        setup="distribution",
+        direction="SHORT_BIAS",
+        stage="INVALIDATED",
+        score=38.0,
+        confidence=0.76,
+        coverage=0.8,
+        why_now=["Lực bán phản công sau breakout: -85.65"],
+        conflicts=["Giá chưa thất bại rõ khỏi vùng breakout"],
+        invalidation="Giá quay lại trên ask 70204.14 và giữ được",
+        entry_style="Ưu tiên vào khi retest thất bại vùng breakout cũ",
+        targets=["TP1", "TP2"],
+    )
+    state = ThesisLifecycleRecord(signal=terminal_signal, opened_ts=1000, updated_ts=1100, closed_ts=1200)
+
+    fresh_signal = ThesisSignal(
+        thesis_id="abc",
+        instrument_key="BINANCE:BTCUSDT:SPOT",
+        setup="distribution",
+        direction="SHORT_BIAS",
+        stage="DETECTED",
+        score=99.0,
+        confidence=0.95,
+        coverage=0.8,
+        why_now=["Delta mua dương: 17326.38"],
+        conflicts=[],
+        invalidation="Giá reclaim lên trên ask 70204.14",
+        entry_style="Canh failed reclaim và lower-high",
+        targets=["TP1", "TP2"],
+    )
+
+    next_state, events = apply_signal_update(state, fresh_signal, event_ts=1300)
+
+    assert events == []
+    assert next_state.signal.stage == "INVALIDATED"
+    assert next_state.signal.score == 38.0
+    assert next_state.signal.why_now == ["Lực bán phản công sau breakout: -85.65"]

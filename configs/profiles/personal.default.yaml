@@ -13,6 +13,8 @@ defaults:
 scan:
   actionable_threshold: 75
   max_cards: 3
+  trade_window_seconds: 60
+  max_window_trades: 400
   thesis_log: data/thesis/scan_thesis.jsonl
 
 live:
@@ -21,7 +23,8 @@ live:
   max_events: 25
   watchdog_idle_seconds: 45
   heartbeat_interval: 250
-  trade_window_size: 20
+  trade_window_seconds: 60
+  max_window_trades: 400
   actionable_threshold: 75
   thesis_log: data/thesis/live_thesis.jsonl
 
@@ -35,3 +38,8 @@ review:
   review_journal_path: data/review/review_journal.jsonl
   tuning_report_path: data/review/tuning_report.json
   weekly_summary_path: data/review/weekly_review.json
+
+ux:
+  alert_on_stage_change: true
+  alert_on_score_delta: 10.0
+  alert_score_floor: 65.0

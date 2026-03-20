@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 from cfte.replay.adapters import load_replay_events
-from cfte.replay.runner import render_replay_summary_vi, run_replay
+from cfte.replay.runner import render_replay_summary_vi, run_replay, select_top_signals
 
 
 def test_replay_runner_is_deterministic_for_fixture():
@@ -58,7 +58,7 @@ def test_run_replay_records_lifecycle_history_for_real_stage_progression():
 
     assert [event.to_stage for event in history] == ["DETECTED", "WATCHLIST", "CONFIRMED", "ACTIONABLE", "RESOLVED"]
     assert accumulation.signal.stage == "RESOLVED"
-    assert accumulation.closed_ts == 1_700_000_002_000
+    assert accumulation.closed_ts == max(event.venue_ts for event in events)
     assert history[-1].summary_vi.endswith("'Đã hoàn tất'.")
 
 
@@ -70,7 +70,7 @@ def test_run_replay_reaches_invalidated_terminal_stage_through_real_state_update
             payload=ReplayBookSnapshot(
                 instrument_key="BINANCE:BTCUSDT:SPOT",
                 bids=[(100.0, 8.0)],
-                asks=[(100.5, 3.0)],
+                asks=[(100.1, 3.0)],
                 seq_id=1,
                 venue_ts=1_000,
             ),
@@ -82,9 +82,9 @@ def test_run_replay_reaches_invalidated_terminal_stage_through_real_state_update
                 event_id="t1",
                 venue="binance",
                 instrument_key="BINANCE:BTCUSDT:SPOT",
-                price=100.45,
+                price=100.08,
                 qty=1.0,
-                quote_qty=100.45,
+                quote_qty=100.08,
                 taker_side="BUY",
                 venue_ts=2_000,
             ),
@@ -96,9 +96,9 @@ def test_run_replay_reaches_invalidated_terminal_stage_through_real_state_update
                 event_id="t2",
                 venue="binance",
                 instrument_key="BINANCE:BTCUSDT:SPOT",
-                price=100.48,
+                price=100.09,
                 qty=1.2,
-                quote_qty=120.576,
+                quote_qty=120.108,
                 taker_side="BUY",
                 venue_ts=3_000,
             ),
@@ -110,9 +110,9 @@ def test_run_replay_reaches_invalidated_terminal_stage_through_real_state_update
                 event_id="t3",
                 venue="binance",
                 instrument_key="BINANCE:BTCUSDT:SPOT",
-                price=99.90,
+                price=99.95,
                 qty=2.0,
-                quote_qty=199.8,
+                quote_qty=199.9,
                 taker_side="SELL",
                 venue_ts=4_000,
             ),
@@ -126,5 +126,15 @@ def test_run_replay_reaches_invalidated_terminal_stage_through_real_state_update
 
     assert accumulation.signal.stage == "INVALIDATED"
     assert accumulation.closed_ts == 4_000
-    assert [event.to_stage for event in history] == ["DETECTED", "WATCHLIST", "CONFIRMED", "INVALIDATED"]
+    assert [event.to_stage for event in history] == ["DETECTED", "WATCHLIST", "CONFIRMED", "ACTIONABLE", "INVALIDATED"]
     assert "Đã bị vô hiệu" in history[-1].summary_vi
+
+
+def test_select_top_signals_deduplicates_by_thesis_and_keeps_best_stage():
+    events = load_replay_events("fixtures/replay/btcusdt_normalized.jsonl")
+    result = run_replay(events)
+
+    top = select_top_signals(result.thesis_events, limit=4)
+
+    assert len({signal.thesis_id for signal in top}) == len(top)
+    assert top[0].stage in {"WATCHLIST", "CONFIRMED", "ACTIONABLE"}

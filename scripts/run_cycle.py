@@ -14,7 +14,7 @@ Thiết kế cho scheduled execution (mỗi 1-4 giờ), không phải 24/7 loop.
 Tối ưu cho free-tier có giới hạn thời gian chạy.
 
 Sử dụng:
-  python scripts/run_cycle.py                      # full cycle, 200 events
+  python scripts/run_cycle.py                      # full cycle, chạy live tới khi có M5 đầu tiên
   python scripts/run_cycle.py --skip-live           # skip live, chỉ scan + review
   python scripts/run_cycle.py --max-events 100      # giới hạn live events
   python scripts/run_cycle.py --profile configs/profiles/personal_binance.yaml
@@ -22,6 +22,7 @@ Sử dụng:
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
 import time
@@ -58,12 +59,51 @@ def run_command(label: str, args: list[str]) -> int:
     return code
 
 
+def _runtime_artifact_path(profile_path: str) -> Path:
+    from cfte.cli.main import DEFAULT_LIVE_RUNTIME_REPORT, build_context
+
+    context = build_context(profile_path)
+    review = context.profile.review
+    return Path(str(review.get("live_runtime_path", DEFAULT_LIVE_RUNTIME_REPORT)))
+
+
+def _runtime_has_m5(runtime_path: Path) -> bool:
+    if not runtime_path.exists():
+        return False
+    try:
+        payload = json.loads(runtime_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    first_m5_seen_at = payload.get("first_m5_seen_at")
+    if isinstance(first_m5_seen_at, str) and first_m5_seen_at.strip():
+        return True
+    latest_tpfm = payload.get("latest_tpfm", {})
+    return isinstance(latest_tpfm, dict) and bool(latest_tpfm.get("matrix_cell"))
+
+
+def _build_live_args(args: argparse.Namespace) -> list[str]:
+    live_args = [
+        "run-live",
+        "--symbol", args.symbol,
+        "--max-events", str(args.max_events),
+    ]
+    if args.min_runtime_seconds > 0:
+        live_args.extend(["--min-runtime-seconds", str(args.min_runtime_seconds)])
+    if not args.allow_missing_m5:
+        live_args.append("--run-until-first-m5")
+    return live_args
+
+
 def main():
     parser = argparse.ArgumentParser(description="CFTE cycle runner cho free-tier deployment")
     parser.add_argument("--profile", default="configs/profiles/personal_binance.yaml",
                         help="Path tới profile YAML")
-    parser.add_argument("--max-events", type=int, default=200,
-                        help="Số sự kiện tối đa cho live loop (mặc định: 200)")
+    parser.add_argument("--max-events", type=int, default=1500,
+                        help="Số sự kiện tối đa cho live loop (mặc định: 1500)")
+    parser.add_argument("--min-runtime-seconds", type=float, default=330.0,
+                        help="Thời gian chạy tối thiểu (giây) trước khi được phép thoát (mặc định: 330)")
+    parser.add_argument("--allow-missing-m5", action="store_true",
+                        help="Cho phép chu kỳ kết thúc dù live session chưa sinh snapshot M5")
     parser.add_argument("--skip-live", action="store_true",
                         help="Bỏ qua live loop, chỉ chạy scan + review")
     parser.add_argument("--symbol", default="BTCUSDT",
@@ -73,12 +113,18 @@ def main():
     profile_args = ["--profile", args.profile]
     total_start = time.time()
     results = {}
+    runtime_path = _runtime_artifact_path(args.profile)
 
     print("\n" + "=" * 60)
     print("  🚀 CFTE CYCLE — Crypto Flow Thesis Engine")
     print(f"  Profile: {args.profile}")
     print(f"  Symbol: {args.symbol}")
-    print(f"  Live: {'skip' if args.skip_live else f'{args.max_events} events'}")
+    if args.skip_live:
+        live_mode = "skip"
+    else:
+        exit_mode = "M5 đầu tiên" if not args.allow_missing_m5 else "cho phép thiếu M5"
+        live_mode = f"{args.max_events}+ events | min {args.min_runtime_seconds:.0f}s | {exit_mode}"
+    print(f"  Live: {live_mode}")
     print("=" * 60)
 
     # 1. Bootstrap
@@ -92,11 +138,13 @@ def main():
 
     # 4. Run-live (short burst)
     if not args.skip_live:
-        results["live"] = run_command("RUN-LIVE", profile_args + [
-            "run-live",
-            "--symbol", args.symbol,
-            "--max-events", str(args.max_events),
-        ])
+        results["live"] = run_command("RUN-LIVE", profile_args + _build_live_args(args))
+        if results["live"] == 0 and not args.allow_missing_m5 and not _runtime_has_m5(runtime_path):
+            print(
+                "  ❌ [RUN-LIVE] Phiên live kết thúc nhưng runtime artifact vẫn chưa có snapshot M5. "
+                "Đánh dấu chu kỳ là fail để tránh báo xanh giả."
+            )
+            results["live"] = 1
     else:
         results["live"] = -1  # skipped
         print("\n  ⏭️  Bỏ qua live loop (--skip-live)")

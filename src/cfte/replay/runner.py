@@ -1,16 +1,18 @@
 from __future__ import annotations
 
-print("🚀 [TRACE] Replay Runner Module Loading...")
-
 import hashlib
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
 from cfte.books.local_book import LocalBook
-from cfte.features.tape import build_tape_snapshot
+from cfte.features.tape import (
+    DEFAULT_MAX_WINDOW_TRADES,
+    DEFAULT_TRADE_WINDOW_SECONDS,
+    build_tape_snapshot,
+    slice_trade_window,
+)
 from cfte.models.events import NormalizedDepthDiff, NormalizedTrade, ThesisSignal
-from cfte.thesis.lifecycle import ACTIVE_STAGES
 from cfte.replay.adapters import ReplayBookSnapshot, ReplayEvent
 from cfte.thesis.engines import evaluate_setups
 from cfte.thesis.state import ThesisEventRecord, ThesisLifecycleRecord, apply_signal_update, close_signal_state
@@ -30,6 +32,16 @@ class ReplayRunResult:
     thesis_event_history: list[ThesisEventRecord]
 
 
+_SIGNAL_STAGE_RANK = {
+    "ACTIONABLE": 3,
+    "CONFIRMED": 2,
+    "WATCHLIST": 1,
+    "DETECTED": 0,
+    "INVALIDATED": -1,
+    "RESOLVED": -2,
+}
+
+
 def _fingerprint_signals(signals: list[ThesisSignal]) -> str:
     serialized = [
         {
@@ -47,6 +59,12 @@ def _fingerprint_signals(signals: list[ThesisSignal]) -> str:
             "targets": s.targets,
             "timeframe": s.timeframe,
             "regime_bucket": s.regime_bucket,
+            "flow_state": s.flow_state,
+            "matrix_cell": s.matrix_cell,
+            "matrix_alias_vi": s.matrix_alias_vi,
+            "tradability_grade": s.tradability_grade,
+            "decision_posture": s.decision_posture,
+            "flow_alignment_score": s.flow_alignment_score,
         }
         for s in signals
     ]
@@ -54,7 +72,44 @@ def _fingerprint_signals(signals: list[ThesisSignal]) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
-def run_replay(events: list[ReplayEvent], db_path: str | Path | None = None) -> ReplayRunResult:
+def select_top_signals(signals: list[ThesisSignal], limit: int = 5) -> list[ThesisSignal]:
+    best_by_thesis: dict[str, ThesisSignal] = {}
+    for signal in signals:
+        current = best_by_thesis.get(signal.thesis_id)
+        if current is None:
+            best_by_thesis[signal.thesis_id] = signal
+            continue
+
+        current_rank = (
+            _SIGNAL_STAGE_RANK.get(current.stage, -10),
+            current.flow_alignment_score,
+            current.score,
+            current.confidence,
+        )
+        candidate_rank = (
+            _SIGNAL_STAGE_RANK.get(signal.stage, -10),
+            signal.flow_alignment_score,
+            signal.score,
+            signal.confidence,
+        )
+        if candidate_rank > current_rank:
+            best_by_thesis[signal.thesis_id] = signal
+
+    ranked = sorted(
+        best_by_thesis.values(),
+        key=lambda item: (_SIGNAL_STAGE_RANK.get(item.stage, -10), item.flow_alignment_score, item.score, item.confidence),
+        reverse=True,
+    )
+    return ranked[:limit]
+
+
+def run_replay(
+    events: list[ReplayEvent],
+    db_path: str | Path | None = None,
+    *,
+    trade_window_seconds: float = DEFAULT_TRADE_WINDOW_SECONDS,
+    max_window_trades: int = DEFAULT_MAX_WINDOW_TRADES,
+) -> ReplayRunResult:
     if not events:
         raise ValueError("Replay event list is empty")
 
@@ -72,12 +127,14 @@ def run_replay(events: list[ReplayEvent], db_path: str | Path | None = None) -> 
     if store:
         import asyncio
         asyncio.run(store.migrate_schema())
+    previous_feature_book: LocalBook | None = None
     
     tpfm_trades: list[NormalizedTrade] = []
     tpfm_snapshots: list[TapeSnapshot] = []
     tpfm_window_start_ts: int | None = None
     tpfm_m5_buffer = []
     tpfm_m30_buffer = []
+    latest_tpfm_snapshot = None
 
     for event in ordered_events:
         if event.event_type == "book_snapshot":
@@ -108,6 +165,12 @@ def run_replay(events: list[ReplayEvent], db_path: str | Path | None = None) -> 
             if payload.instrument_key != instrument_key:
                 raise ValueError("Replay event instrument_key mismatch")
             trades.append(payload)
+            trades = slice_trade_window(
+                trades,
+                end_ts=payload.venue_ts,
+                lookback_seconds=trade_window_seconds,
+                max_trades=max_window_trades,
+            )
             feature_windows += 1
             snapshot = build_tape_snapshot(
                 instrument_key=instrument_key,
@@ -115,8 +178,12 @@ def run_replay(events: list[ReplayEvent], db_path: str | Path | None = None) -> 
                 trades=trades,
                 window_start_ts=trades[0].venue_ts,
                 window_end_ts=payload.venue_ts,
+                lookback_seconds=trade_window_seconds,
+                max_window_trades=max_window_trades,
+                before_book=previous_feature_book,
             )
-            evaluated_signals = evaluate_setups(snapshot)
+            previous_feature_book = book.clone()
+            evaluated_signals = evaluate_setups(snapshot, tpfm_snapshot=latest_tpfm_snapshot)
             thesis_events.extend(evaluated_signals)
             for signal in evaluated_signals:
                 next_state, state_events = apply_signal_update(
@@ -136,7 +203,7 @@ def run_replay(events: list[ReplayEvent], db_path: str | Path | None = None) -> 
             
             # Check if 5 minutes have passed (300,000 ms)
             if payload.venue_ts - tpfm_window_start_ts >= 300000:
-                m5_snap = tpfm.calculate_m5_snapshot(
+                m5_snap, transition_event = tpfm.calculate_m5_snapshot(
                     window_start_ts=tpfm_window_start_ts,
                     window_end_ts=payload.venue_ts,
                     trades=tpfm_trades,
@@ -144,12 +211,22 @@ def run_replay(events: list[ReplayEvent], db_path: str | Path | None = None) -> 
                     active_theses=list(thesis_state.values()),
                     futures_context=None # No futures in historical replay for now
                 )
+                latest_tpfm_snapshot = m5_snap
                 
-                # Persist M5 if store exists
-                if store:
-                    import asyncio
-                    # Since run_replay is synchronous, we run the 'async' (but actually sync sqlite3) method
-                    asyncio.run(store.save_tpfm_snapshot(m5_snap))
+                if transition_event and not store:
+                     # Log to stdout if no store, consistent with live print
+                     print(
+                         f"🔄 [REPLAY-TRANSITION] {transition_event.transition_alias_vi}: "
+                         f"{transition_event.from_cell} -> {transition_event.to_cell}"
+                     )
+                
+                if transition_event:
+                    print(
+                        f"🔄 [TRANSITION] {transition_event.transition_alias_vi}: "
+                        f"{transition_event.from_cell} -> {transition_event.to_cell}"
+                    )
+                    if store:
+                        asyncio.run(store.save_flow_transition(transition_event))
                 
                 tpfm_m5_buffer.append(m5_snap)
                 if len(tpfm_m5_buffer) >= 6:
@@ -171,7 +248,7 @@ def run_replay(events: list[ReplayEvent], db_path: str | Path | None = None) -> 
 
     # Final TPFM flush at end of replay (Phase T1-T5 Refinement)
     if tpfm_trades and store:
-        m5_snap = tpfm.calculate_m5_snapshot(
+        m5_snap, _ = tpfm.calculate_m5_snapshot(
             window_start_ts=tpfm_window_start_ts or ordered_events[0].venue_ts,
             window_end_ts=ordered_events[-1].venue_ts,
             trades=tpfm_trades,
@@ -224,7 +301,7 @@ def persist_replay_summary(result: ReplayRunResult, output_path: str | Path) -> 
         "feature_windows": result.feature_windows,
         "thesis_count": result.thesis_count,
         "fingerprint": result.fingerprint,
-        "top_signals": [asdict(s) for s in result.thesis_events[:5]],
+        "top_signals": [asdict(s) for s in select_top_signals(result.thesis_events, limit=5)],
     }
     out.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
     return out

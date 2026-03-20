@@ -26,6 +26,16 @@ def test_parser_exposes_stable_personal_shell_commands():
     assert "health" in help_text
 
 
+def test_run_live_parser_accepts_runtime_controls():
+    parser = build_parser()
+
+    args = parser.parse_args(["run-live", "--min-runtime-seconds", "330", "--run-until-first-m5"])
+
+    assert args.cmd == "run-live"
+    assert args.min_runtime_seconds == 330.0
+    assert args.run_until_first_m5 is True
+
+
 def test_run_scan_outputs_vietnamese_summary(capsys):
     context = build_context(Path("configs/profiles/personal.default.yaml"))
 
