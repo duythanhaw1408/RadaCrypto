@@ -96,23 +96,77 @@ async function loadJournalData() {
 }
 
 function loadLiveMarketData() {
-    // Tạm thời dùng mock data cho Live Market view
+    loadLiveSignals();
+    
+    // Fallback UI for symbol grid
     const grid = document.querySelector('.live-symbols-grid');
     if (grid && grid.children.length === 0) {
         grid.innerHTML = `
-            <div class="symbol-mini-card glass highlight">
-                <span>BTCUSDT</span>
-                <span class="pos">+2.4%</span>
-            </div>
-            <div class="symbol-mini-card glass">
-                <span>ETHUSDT</span>
-                <span class="pos">+1.8%</span>
-            </div>
-             <div class="symbol-mini-card glass">
-                <span>SOLUSDT</span>
-                <span class="neg">-0.5%</span>
-            </div>
+            <div class="symbol-mini-card glass highlight"><span>BTCUSDT</span><span class="pos">+2.4%</span></div>
+            <div class="symbol-mini-card glass"><span>ETHUSDT</span><span class="pos">+1.8%</span></div>
         `;
+    }
+}
+
+async function loadLiveSignals() {
+    const tableBody = document.querySelector('#live-signals-table tbody');
+    if (!tableBody) return;
+
+    try {
+        // Try multiple paths to support both Local and GitHub Pages
+        const paths = ['data/thesis_log.json', '../data/thesis/thesis_log.jsonl', 'data/thesis/thesis_log.jsonl'];
+        let logs = [];
+
+        for (const path of paths) {
+            try {
+                const res = await fetch(path);
+                if (!res.ok) continue;
+                const text = await res.text();
+                // Handle both JSON array and JSONL
+                if (text.trim().startsWith('[')) {
+                    logs = JSON.parse(text);
+                } else {
+                    logs = text.trim().split('\n').map(l => JSON.parse(l));
+                }
+                break;
+            } catch (e) { continue; }
+        }
+
+        if (logs.length === 0) return;
+
+        // Map setup codes to display names
+        const setupMap = {
+            'stealth_accumulation': 'Tích lũy âm thầm',
+            'breakout_ignition': 'Kích hoạt bứt phá',
+            'distribution': 'Phân phối / Xả hàng',
+            'failed_breakout': 'Bứt phá thất bại',
+            'absorption_play': 'Vùng hấp thụ'
+        };
+
+        // Filter for actionable signals or just latest transitions
+        const signals = logs.filter(l => l.event_type === 'stage_transition')
+                           .reverse()
+                           .slice(0, 10);
+
+        tableBody.innerHTML = '';
+        signals.forEach(sig => {
+            const isLong = sig.direction === 'LONG_BIAS' || (sig.summary_vi && sig.summary_vi.includes('Mua'));
+            const grade = sig.score >= 90 ? 'A+' : sig.score >= 80 ? 'A' : sig.score >= 70 ? 'B+' : 'B';
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>#${sig.thesis_id ? sig.thesis_id.substring(0, 4) : '---'}</td>
+                <td>${setupMap[sig.setup] || sig.setup || 'N/A'}</td>
+                <td><span class="badge ${isLong ? 'buy' : 'sell'}">${isLong ? 'LONG' : 'SHORT'}</span></td>
+                <td>${sig.matrix_cell || 'N/A'}</td>
+                <td><span class="grade grade-${grade.toLowerCase().replace('+', 'plus')}">${grade}</span></td>
+                <td>${sig.summary_vi ? sig.summary_vi.split('.')[0] : 'Đang theo dõi'}</td>
+                <td>Cấu trúc vỡ</td>
+            `;
+            tableBody.appendChild(row);
+        });
+    } catch (err) {
+        console.warn("Failed to load live signals:", err);
     }
 }
 
@@ -187,25 +241,5 @@ function initSessionTimer() {
 }
 
 function initMockLiveFeed() {
-    const tableBody = document.querySelector('#live-signals-table tbody');
-    if (!tableBody) return;
-    
-    setInterval(() => {
-        if (tableBody.children.length > 8) return;
-        const id = Math.floor(Math.random() * 9000) + 1000;
-        const setup = "Flow Confirmation";
-        const isLong = Math.random() > 0.5;
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>#${id}</td>
-            <td>${setup}</td>
-            <td><span class="badge ${isLong ? 'buy' : 'sell'}">${isLong ? 'LONG' : 'SHORT'}</span></td>
-            <td>Matrix Meta</td>
-            <td><span class="grade">A</span></td>
-            <td>Theo dõi Vol</td>
-            <td>Vỡ cấu trúc</td>
-        `;
-        if (tableBody.firstChild) tableBody.insertBefore(row, tableBody.firstChild);
-        else tableBody.appendChild(row);
-    }, 30000);
+    // Disabled - switched to real data via loadLiveSignals()
 }
