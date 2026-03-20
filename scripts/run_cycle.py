@@ -147,10 +147,14 @@ def main():
         results["live"] = run_command("RUN-LIVE", profile_args + _build_live_args(args))
         if results["live"] == 0 and not args.allow_missing_m5 and not _runtime_is_ready(runtime_path):
             print(
-                "  ❌ [RUN-LIVE] Phiên live hoàn tất nhưng chưa đạt trạng thái SẴN SÀNG (thiếu M5 hoặc Grade). "
-                "Đánh dấu chu kỳ là fail."
+                "  ℹ️  [RUN-LIVE] Phiên live hoàn tất nhưng chưa đạt trạng thái SẴN SÀNG (thiếu M5 hoặc Grade). "
+                "Đang ở chế độ STRICT nên đánh dấu chu kỳ là fail."
             )
             results["live"] = 1
+        elif results["live"] == 0 and args.allow_missing_m5 and not _runtime_is_ready(runtime_path):
+            print(
+                "  ⚠️  [RUN-LIVE] Cảnh báo: Thiếu dữ liệu M5/Grade nhưng đang ở chế độ ALLOW-MISSING nên vẫn cho phép tiếp tục."
+            )
     else:
         results["live"] = -1  # skipped
         print("\n  ⏭️  Bỏ qua live loop (--skip-live)")
