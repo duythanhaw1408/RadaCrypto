@@ -11,6 +11,7 @@ import ssl
 import certifi
 
 BYBIT_WS_BASE = "wss://stream.bybit.com/v5/public/linear"
+BYBIT_REST_BASE = "https://api.bybit.com"
 BYBIT_VENUE = "bybit"
 
 
@@ -19,8 +20,34 @@ def build_public_topics(symbols: list[str]) -> list[str]:
     for symbol in symbols:
         upper = symbol.upper().replace("-", "")
         topics.append(f"publicTrade.{upper}")
-        topics.append(f"orderbook.1.{upper}")
+        topics.append(f"orderbook.50.{upper}") # Use 50 for better coverage than 1
     return topics
+
+
+def fetch_depth_snapshot(symbol: str, limit: int = 50, rest_base: str = BYBIT_REST_BASE) -> dict[str, object]:
+    """Fetch L2 orderbook from Bybit V5."""
+    import requests
+    url = f"{rest_base}/v5/market/orderbook"
+    params = {"category": "linear", "symbol": symbol.upper(), "limit": limit}
+    resp = requests.get(url, params=params, timeout=5)
+    resp.raise_for_status()
+    data = resp.json()
+    if data.get("retCode") != 0:
+        raise ValueError(f"Bybit API error: {data.get('retMsg')}")
+    return data.get("result", {})
+
+
+def fetch_recent_trades(symbol: str, limit: int = 50, rest_base: str = BYBIT_REST_BASE) -> list[dict[str, object]]:
+    """Fetch recent trades from Bybit V5."""
+    import requests
+    url = f"{rest_base}/v5/market/recent-trade"
+    params = {"category": "linear", "symbol": symbol.upper(), "limit": limit}
+    resp = requests.get(url, params=params, timeout=5)
+    resp.raise_for_status()
+    data = resp.json()
+    if data.get("retCode") != 0:
+        raise ValueError(f"Bybit API error: {data.get('retMsg')}")
+    return data.get("result", {}).get("list", [])
 
 
 @dataclass(slots=True)
@@ -82,36 +109,25 @@ class BybitPublicCollector:
             try:
                 import websockets
                 ssl_context = ssl.create_default_context(cafile=certifi.where())
-                ssl_context.check_hostname = True
-                ssl_context.verify_mode = ssl.CERT_REQUIRED
 
                 self._connect_attempts += 1
                 async with websockets.connect(
                     self.ws_base, 
                     ssl=ssl_context, 
                     ping_interval=20, 
-                    ping_timeout=10,
+                    ping_timeout=20, # Increased timeout
                 ) as ws:
                     self._mark_connected()
                     await ws.send(json.dumps(self.subscription_message()))
+                    print(f"📡 Bybit Stream Connected: {self.ws_base}")
                     async for raw in ws:
                         self._record_message()
                         data = json.loads(raw)
-                        # Bybit can send 'op': 'pong' or heartbeat
+                        # Handle Pong
                         if data.get("op") == "pong" or data.get("ret_msg") == "pong":
                             continue
                         yield data
             except Exception as exc:
                 self._record_failure(exc)
-                await asyncio.sleep(self.reconnect_sleep_seconds)
-
-                self._connect_attempts += 1
-                async with websockets.connect(self.ws_base, ssl=ssl_context, ping_interval=20, ping_timeout=20) as ws:
-                    self._mark_connected()
-                    await ws.send(json.dumps(self.subscription_message()))
-                    async for raw in ws:
-                        self._record_message()
-                        yield json.loads(raw)
-            except Exception as exc:
-                self._record_failure(exc)
+                print(f"📡 Bybit WS Error: {exc}")
                 await asyncio.sleep(self.reconnect_sleep_seconds)

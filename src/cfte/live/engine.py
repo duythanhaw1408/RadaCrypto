@@ -47,7 +47,7 @@ from cfte.tpfm.ai_explainer import TPFMAIExplainer
 from cfte.models.events import NormalizedTrade, TapeSnapshot
 
 # Phase 4 Imports
-from cfte.collectors.bybit_public import BybitPublicCollector, build_public_topics
+from cfte.collectors.bybit_public import BybitPublicCollector, build_public_topics, fetch_depth_snapshot as fetch_bybit_depth
 from cfte.collectors.okx_public import OkxPublicCollector, build_public_args
 from cfte.normalizers.bybit import normalize_public_trade as normalize_bybit_trade
 from cfte.normalizers.okx import normalize_trade as normalize_okx_trade
@@ -296,6 +296,24 @@ class LiveThesisLoop:
 
     async def _init_book(self) -> bool:
         snapshot, error = try_fetch_depth_snapshot(symbol=self.symbol)
+        
+        # Fallback to Bybit if Binance is Geo-blocked (451)
+        if snapshot is None and "451" in str(error):
+            print(f"⚠️ Binance Geo-blocked (451). Thử khởi tạo Book qua Bybit...")
+            try:
+                result = fetch_bybit_depth(symbol=self.symbol)
+                # Map Bybit V5 structure to Binance-like for internal books
+                self._depth.apply_snapshot(
+                    bids=[(float(i[0]), float(i[1])) for i in result.get("b", [])],
+                    asks=[(float(i[0]), float(i[1])) for i in result.get("a", [])],
+                    last_update_id=int(result.get("u", 0)),
+                )
+                self.health.venue = "bybit"
+                return True
+            except Exception as e:
+                self.health.last_error = f"Bybit init failed: {e}"
+                return False
+
         if snapshot is None:
             self.health.last_error = error
             return False
@@ -416,10 +434,17 @@ class LiveThesisLoop:
                     monitor = OutcomeMonitor(self.store)
                     monitor_task = asyncio.create_task(monitor.run_forever())
 
+                    # Primary Collector Assignment
                     streams = build_public_streams([self.symbol], use_agg_trade=self.use_agg_trade)
-                    collector = BinancePublicCollector(streams=streams)
+                    primary_collector = BinancePublicCollector(streams=streams)
+                    use_bybit_primary = (self.health.venue == "bybit")
+
+                    if use_bybit_primary:
+                        print(f"🛡️ Chuyển sang Bybit làm nguồn dữ liệu chính cho {self.symbol}.")
+                        primary_collector = BybitPublicCollector(topics=build_public_topics([self.symbol]))
+
                     self._refresh_collector_health(
-                        spot_collector=collector,
+                        spot_collector=primary_collector if not use_bybit_primary else None,
                         bybit_collector=bybit_collector,
                         okx_collector=okx_collector,
                     )
@@ -429,14 +454,18 @@ class LiveThesisLoop:
                     deferred_exit_notice_sent = False
                     self.health.connected = True
                     self.health.reconnect_count += 1
-                    print(f"Đã kết nối Binance Stream: {streams}")
+                    
+                    if use_bybit_primary:
+                        print(f"Đã kết nối Bybit Stream: {self.symbol}")
+                    else:
+                        print(f"Đã kết nối Binance Stream: {streams}")
 
                     status = "completed"
                     try:
-                        iterator = collector.stream_forever().__aiter__()
+                        iterator = primary_collector.stream_forever().__aiter__()
                         while not self._stop_event.is_set():
                             try:
-                                envelope = await asyncio.wait_for(iterator.__anext__(), timeout=self.watchdog_idle_seconds)
+                                enveloppe_or_msg = await asyncio.wait_for(iterator.__anext__(), timeout=self.watchdog_idle_seconds)
                             except asyncio.TimeoutError:
                                 status = "watchdog_timeout"
                                 self.health.last_error = (
@@ -447,34 +476,56 @@ class LiveThesisLoop:
                             except StopAsyncIteration:
                                 break
 
-                            self.health.message_count = collector.health_snapshot().message_count
+                            self.health.message_count = primary_collector.health_snapshot().message_count
                             self._refresh_collector_health(
-                                spot_collector=collector,
-                                bybit_collector=bybit_collector,
+                                spot_collector=primary_collector if not use_bybit_primary else None,
+                                bybit_collector=primary_collector if use_bybit_primary else bybit_collector,
                                 okx_collector=okx_collector,
                             )
                             self._last_message_monotonic = time.monotonic()
-                            data = envelope.get("data", {})
-                            if not isinstance(data, dict):
-                                continue
-
-                            event_type = str(data.get("e", ""))
-                            event_counts[event_type] = event_counts.get(event_type, 0) + 1
+                            
                             normalized = None
+                            if use_bybit_primary:
+                                # Bybit Normalization (Topic based)
+                                msg = enveloppe_or_msg
+                                if msg.get("topic", "").startswith("publicTrade"):
+                                    for trade in msg.get("data", []):
+                                        normalized = normalize_bybit_trade(trade, f"bybit:{self.symbol}:perp")
+                                        # Handle as multiple if needed, but here we process sequentially
+                                        if normalized:
+                                            self._trades.append(normalized)
+                                            self._venue_trades["bybit"].append(normalized)
+                                            self._last_trade_ts = normalized.venue_ts
+                                            await self._process_trade_event(normalized)
+                                            processed += 1
+                                elif msg.get("topic", "").startswith("orderbook"):
+                                    # Update depth if needed, currently we focus on trades for flow
+                                    pass
+                                continue # Already processed in sub-loop
+                            else:
+                                # Binance Normalization
+                                envelope = enveloppe_or_msg
+                                data = envelope.get("data", {})
+                                if not isinstance(data, dict):
+                                    continue
 
-                            if event_type == "aggTrade":
-                                normalized = normalize_agg_trade(data, instrument_key=self.instrument_key)
-                            elif event_type == "trade":
-                                normalized = normalize_trade(data, instrument_key=self.instrument_key)
-                            elif event_type == "bookTicker":
-                                normalized = normalize_book_ticker(data, instrument_key=self.instrument_key)
-                            elif event_type == "depthUpdate":
-                                norm_depth = normalize_depth_diff(data, instrument_key=self.instrument_key)
-                                self._depth.ingest_diff(norm_depth)
+                                event_type = str(data.get("e", ""))
+                                event_counts[event_type] = event_counts.get(event_type, 0) + 1
+
+                                if event_type == "aggTrade":
+                                    normalized = normalize_agg_trade(data, instrument_key=self.instrument_key)
+                                elif event_type == "trade":
+                                    normalized = normalize_trade(data, instrument_key=self.instrument_key)
+                                elif event_type == "bookTicker":
+                                    normalized = normalize_book_ticker(data, instrument_key=self.instrument_key)
+                                elif event_type == "depthUpdate":
+                                    norm_depth = normalize_depth_diff(data, instrument_key=self.instrument_key)
+                                    self._depth.ingest_diff(norm_depth)
 
                             if isinstance(normalized, NormalizedTrade):
                                 self._trades.append(normalized)
-                                self._venue_trades["binance"].append(normalized)
+                                if not use_bybit_primary:
+                                    self._venue_trades["binance"].append(normalized)
                                 self._last_trade_ts = normalized.venue_ts
                                 await self._process_trade_event(normalized)
 
