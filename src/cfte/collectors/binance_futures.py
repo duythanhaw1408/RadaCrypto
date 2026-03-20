@@ -120,13 +120,16 @@ class BinanceFuturesCollector:
 
     REST_MIRRORS = [
         "https://fapi.binance.com",
+        "https://fapi-gcp.binance.com",
         "https://fapi1.binance.com",
         "https://fapi2.binance.com",
         "https://fapi3.binance.com",
+        "https://fapi.binance.me",
     ]
     
     WS_MIRRORS = [
         "wss://fstream.binance.com/stream",
+        "wss://fstream-gcp.binance.com/stream",
         "wss://fstream1.binance.com/stream",
         "wss://fstream2.binance.com/stream",
         "wss://fstream3.binance.com/stream",

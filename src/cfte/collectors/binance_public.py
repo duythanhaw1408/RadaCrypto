@@ -12,14 +12,17 @@ from cfte.collectors.health import CollectorErrorSurface, CollectorHealthSnapsho
 
 BINANCE_REST_MIRRORS = [
     "https://api.binance.com",
+    "https://api-gcp.binance.com",
     "https://api1.binance.com",
     "https://api2.binance.com",
     "https://api3.binance.com",
     "https://api4.binance.com",
+    "https://api.binance.me",
 ]
 
 BINANCE_WS_MIRRORS = [
     "wss://stream.binance.com:9443/stream",
+    "wss://stream-gcp.binance.com:9443/stream",
     "wss://stream1.binance.com:9443/stream",
     "wss://stream2.binance.com:9443/stream",
     "wss://stream3.binance.com:9443/stream",

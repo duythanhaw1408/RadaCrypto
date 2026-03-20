@@ -931,26 +931,33 @@ def command_health(context: ShellContext) -> int:
     import ssl
     import certifi
     
+    from cfte.collectors.binance_public import BINANCE_REST_MIRRORS
+    
     conn_ok = False
     state = 'degraded'
     last_error = None
     
-    try:
-        # Kiểm tra kết nối HTTPS thật qua Binance API để verify SSL/Network
-        r = requests.get("https://api.binance.com/api/v3/ping", timeout=5, verify=certifi.where())
-        r.raise_for_status()
-        conn_ok = True
+    for mirror in BINANCE_REST_MIRRORS:
+        try:
+            # Kiểm tra kết nối HTTPS thật qua Binance API để verify SSL/Network
+            r = requests.get(f"{mirror}/api/v3/ping", timeout=5, verify=certifi.where())
+            r.raise_for_status()
+            conn_ok = True
+            state = 'idle'
+            print(f" ✅ Kết nối Binance API (HTTPS/SSL) qua {mirror}: OK")
+            break
+        except Exception as e:
+            last_error = build_error_surface(e)
+            if "451" in str(e):
+                print(f" ⚠️ Geo-blocked (451) on {mirror}. Bỏ qua Mirror này...")
+                continue
+            else:
+                print(f" ❌ [LỖI] Không thể kết nối {mirror}: {last_error.message}")
+                break
+    
+    if not conn_ok and last_error and "451" in last_error.message:
+        print(" ⚠️ [CẢNH BÁO] Toàn bộ Binance API mirrors đều chặn IP này (451). Giới hạn môi trường CI.")
         state = 'idle'
-        print(" ✅ Kết nối Binance API (HTTPS/SSL): OK")
-    except Exception as e:
-        last_error = build_error_surface(e)
-        # Nếu là 451 (Unavailable For Legal Reasons), đây là do GitHub Runner IP bị Binance chặn theo vùng địa lý
-        # Chúng ta không nên để nó làm sập toàn bộ Health check CI nếu các phần khác vẫn OK
-        if "451" in str(e):
-            print(f" ⚠️ [CẢNH BÁO] Binance API chặn địa chỉ IP này (451). Đây là giới hạn môi trường CI.")
-            state = 'idle' # Giữ trạng thái idle để không báo lỗi 'degraded' giả
-        else:
-            print(f" ❌ [LỖI] Không thể kết nối Binance API: {last_error.message}")
 
     snapshot = CollectorHealthSnapshot(
         venue='binance',
