@@ -39,161 +39,194 @@
         </header>
 
         <main class="dashboard-content">
-            <!-- Hero Intelligence Block -->
-            <section class="intel-hero">
-                <div class="intel-main-card glass">
-                    <div class="card-header">
-                        <div class="symbol-info">
-                            <h1 class="symbol-name">BTCUSDT</h1>
-                            <span class="timeframe-badge">Vĩnh cửu</span>
-                        </div>
-                        <div class="intel-metrics">
-                            <div class="metric">
-                                <span class="m-label">Độ giao dịch</span>
-                                <span class="m-value grade-a">A+</span>
+            <!-- VIEW: OVERVIEW -->
+            <div id="view-overview" class="app-view active">
+                <!-- Hero Intelligence Block -->
+                <section class="intel-hero">
+                    <div class="intel-main-card glass">
+                        <div class="card-header">
+                            <div class="symbol-info">
+                                <h1 class="symbol-name">BTCUSDT</h1>
+                                <span class="timeframe-badge">Vĩnh cửu</span>
                             </div>
-                            <div class="metric">
-                                <span class="m-label">Bias hôm nay</span>
-                                <span class="m-value bias-long">THUẬN MUA</span>
+                            <div class="intel-metrics">
+                                <div class="metric">
+                                    <span class="m-label">Độ giao dịch</span>
+                                    <span class="m-value grade-a">A+</span>
+                                </div>
+                                <div class="metric">
+                                    <span class="m-label">Bias hôm nay</span>
+                                    <span class="m-value bias-long">THUẬN MUA</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="intelligence-summary">
+                            <div class="status-headline">
+                                <span class="indicator buy"></span>
+                                <h2>Dòng tiền Mua đang dẫn dắt, Inventory Bid hấp thụ tốt</h2>
+                            </div>
+                            <p class="conclusion-text">Thuận pha mua mạnh. Có thể vào lệnh khi giá hồi về vùng Bid mạnh và xác nhận hấp thụ thành công.</p>
+                            
+                            <div class="intel-badges">
+                                <span class="badge">Flow: BÙNG NỔ MUA</span>
+                                <span class="badge">Matrix: ACCUMULATION</span>
+                                <span class="badge">Tư thế: TẤN CÔNG</span>
                             </div>
                         </div>
                     </div>
+                </section>
 
-                    <div class="intelligence-summary">
-                        <div class="status-headline">
-                            <span class="indicator buy"></span>
-                            <h2>Dòng tiền Mua đang dẫn dắt, Inventory Bid hấp thụ tốt</h2>
+                <!-- 4 Pillars -->
+                <section class="logic-pillars">
+                    <div class="pillar-card seen glass">
+                        <div class="pillar-header">
+                            <i class="icon-seen"></i>
+                            <h3>Đã thấy</h3>
                         </div>
-                        <p class="conclusion-text">Thuận pha mua mạnh. Có thể vào lệnh khi giá hồi về vùng Bid mạnh và xác nhận hấp thụ thành công.</p>
-                        
-                        <div class="intel-badges">
-                            <span class="badge">Flow: BÙNG NỔ MUA</span>
-                            <span class="badge">Matrix: ACCUMULATION</span>
-                            <span class="badge">Tư thế: TẤN CÔNG</span>
+                        <ul class="pillar-list">
+                            <li>Delta Spot: <span class="pos">+1.2M</span></li>
+                            <li>Delta Futures: <span class="pos">+4.5M</span></li>
+                            <li>OI: <span class="pos">Tăng (+2%)</span></li>
+                            <li>Xác nhận đa sàn: <span class="pos">Binance/Bybit</span></li>
+                            <li>Áp lực bán: <span class="neg">Thấp (Cạn kiệt)</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="pillar-card infer glass">
+                        <div class="pillar-header">
+                            <i class="icon-infer"></i>
+                            <h3>Suy ra</h3>
+                        </div>
+                        <ul class="pillar-list">
+                            <li>Continuation: <span class="pos">Khả năng cao</span></li>
+                            <li>Absorption: <span class="pos">Bid đang đỡ giá</span></li>
+                            <li>Trap: <span class="neutral">Rủi ro thấp</span></li>
+                            <li>Squeeze: <span class="neutral">Chưa có dấu hiệu</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="pillar-card missing glass">
+                        <div class="pillar-header">
+                            <i class="icon-missing"></i>
+                            <h3>Chưa thấy</h3>
+                        </div>
+                        <ul class="pillar-list">
+                            <li>Futures confirm: <span class="pos">Đã có</span></li>
+                            <li>Liquidation context: <span class="neg">Chưa thấy (+0)</span></li>
+                            <li>Transition: <span class="neutral">Chưa rõ (Đang chờ)</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="pillar-card decision glass highlight">
+                        <div class="pillar-header">
+                            <i class="icon-decision"></i>
+                            <h3>Quyết định</h3>
+                        </div>
+                        <div class="decision-content">
+                            <div class="d-action">NÊN: Canh Mua (Long)</div>
+                            <div class="d-trigger">Trigger: Hồi m5 xác nhận</div>
+                            <div class="d-invalid">Vô hiệu: Thủng đáy m5</div>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            <!-- 4 Pillars: Đã thấy | Suy ra | Chưa thấy | Quyết định -->
-            <section class="logic-pillars">
-                <div class="pillar-card seen glass">
-                    <div class="pillar-header">
-                        <i class="icon-seen"></i>
-                        <h3>Đã thấy</h3>
+                <!-- Matrix Overview -->
+                <section class="matrix-overview">
+                    <div class="matrix-column glass">
+                        <h4 class="m-title">Matrix M5</h4>
+                        <div class="m-state acc">Tích lũy</div>
+                        <div class="m-grade">Grade: A</div>
+                        <div class="m-bias">Bias: Mua</div>
                     </div>
-                    <ul class="pillar-list">
-                        <li>Delta Spot: <span class="pos">+1.2M</span></li>
-                        <li>Delta Futures: <span class="pos">+4.5M</span></li>
-                        <li>OI: <span class="pos">Tăng (+2%)</span></li>
-                        <li>Xác nhận đa sàn: <span class="pos">Binance/Bybit</span></li>
-                        <li>Áp lực bán: <span class="neg">Thấp (Cạn kiệt)</span></li>
-                    </ul>
-                </div>
+                    <div class="matrix-column glass">
+                        <h4 class="m-title">Matrix 30m</h4>
+                        <div class="m-state neutral">Cân bằng</div>
+                        <div class="m-grade">Grade: B-</div>
+                        <div class="m-bias">Bias: Neutral</div>
+                    </div>
+                    <div class="matrix-column glass highlight">
+                        <h4 class="m-title">Matrix 4h</h4>
+                        <h4 class="m-state distribution">Phân phối</h4>
+                        <div class="m-grade">Grade: C</div>
+                        <div class="m-bias">Bias: Bán</div>
+                    </div>
+                </section>
+            </div>
 
-                <div class="pillar-card infer glass">
-                    <div class="pillar-header">
-                        <i class="icon-infer"></i>
-                        <h3>Suy ra</h3>
+            <!-- VIEW: LIVE MARKET -->
+            <div id="view-live" class="app-view">
+                <section class="live-market-container glass">
+                    <div class="section-header">
+                        <h3>Dòng tiền Thị trường Live</h3>
+                        <div class="live-badge-glow">TRỰC TIẾP</div>
                     </div>
-                    <ul class="pillar-list">
-                        <li>Continuation: <span class="pos">Khả năng cao</span></li>
-                        <li>Absorption: <span class="pos">Bid đang đỡ giá</span></li>
-                        <li>Trap: <span class="neutral">Rủi ro thấp</span></li>
-                        <li>Squeeze: <span class="neutral">Chưa có dấu hiệu</span></li>
-                    </ul>
-                </div>
+                    <div class="live-symbols-grid">
+                        <!-- Sẽ render bằng JS -->
+                    </div>
+                    <div class="live-signals-area">
+                         <!-- Bảng tín hiệu live -->
+                         <div class="section-header">
+                            <h4>Luận điểm Live</h4>
+                        </div>
+                        <table class="signals-table" id="live-signals-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Setup</th>
+                                    <th>Bias</th>
+                                    <th>Matrix</th>
+                                    <th>Grade</th>
+                                    <th>Hành động</th>
+                                    <th>Vô hiệu khi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Render bằng JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
 
-                <div class="pillar-card missing glass">
-                    <div class="pillar-header">
-                        <i class="icon-missing"></i>
-                        <h3>Chưa thấy</h3>
+            <!-- VIEW: JOURNAL -->
+            <div id="view-journal" class="app-view">
+                <section class="journal-container glass">
+                    <div class="section-header">
+                        <h3>Nhật ký Luận điểm (Review)</h3>
+                        <span class="count-badge">100 tín hiệu gần nhất</span>
                     </div>
-                    <ul class="pillar-list">
-                        <li>Futures confirm: <span class="pos">Đã có</span></li>
-                        <li>Liquidation context: <span class="neg">Chưa thấy (+0)</span></li>
-                        <li>Transition: <span class="neutral">Chưa rõ (Đang chờ)</span></li>
-                    </ul>
-                </div>
+                    <div class="journal-list" id="journal-list">
+                        <!-- Render bằng JS -->
+                        <div class="loading">Đang tải nhật ký...</div>
+                    </div>
+                </section>
+            </div>
 
-                <div class="pillar-card decision glass highlight">
-                    <div class="pillar-header">
-                        <i class="icon-decision"></i>
-                        <h3>Quyết định</h3>
+            <!-- VIEW: TUNING -->
+            <div id="view-tuning" class="app-view">
+                <section class="tuning-container glass">
+                    <div class="section-header">
+                        <h3>Tuning Hệ thống & Ngưỡng</h3>
                     </div>
-                    <div class="decision-content">
-                        <div class="d-action">NÊN: Canh Mua (Long)</div>
-                        <div class="d-trigger">Trigger: Hồi m5 xác nhận</div>
-                        <div class="d-invalid">Vô hiệu: Thủng đáy m5</div>
+                    <div class="tuning-grid">
+                        <div class="tuning-card glass">
+                            <h4>Ngưỡng Hội tụ (Convergence)</h4>
+                            <div class="tuning-stats">
+                                <div class="stat"><span>Delta StdDev:</span> <span class="val">2.5</span></div>
+                                <div class="stat"><span>OI Min Delta:</span> <span class="val">1.2%</span></div>
+                            </div>
+                        </div>
+                        <div class="tuning-card glass">
+                            <h4>Hiệu quả Signal</h4>
+                            <div class="tuning-stats">
+                                <div class="stat"><span>Hit Rate (Grade A):</span> <span class="val pos">72%</span></div>
+                                <div class="stat"><span>Avg Edge:</span> <span class="val pos">0.8%</span></div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </section>
-
-            <!-- Matrix Overview -->
-            <section class="matrix-overview">
-                <div class="matrix-column glass">
-                    <h4 class="m-title">Matrix M5</h4>
-                    <div class="m-state acc">Tích lũy</div>
-                    <div class="m-grade">Grade: A</div>
-                    <div class="m-bias">Bias: Mua</div>
-                </div>
-                <div class="matrix-column glass">
-                    <h4 class="m-title">Matrix 30m</h4>
-                    <div class="m-state neutral">Cân bằng</div>
-                    <div class="m-grade">Grade: B-</div>
-                    <div class="m-bias">Bias: Neutral</div>
-                </div>
-                <div class="matrix-column glass highlight">
-                    <h4 class="m-title">Matrix 4h</h4>
-                    <h4 class="m-state distribution">Phân phối</h4>
-                    <div class="m-grade">Grade: C</div>
-                    <div class="m-bias">Bias: Bán</div>
-                </div>
-            </section>
-
-            <!-- Live Signals Table -->
-            <section class="live-signals">
-                <div class="section-header">
-                    <h3>Luận điểm Live</h3>
-                    <div class="filters">
-                        <button class="filter-chip">Tất cả</button>
-                        <button class="filter-chip active">Có thể hành động</button>
-                    </div>
-                </div>
-                <table class="signals-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Setup</th>
-                            <th>Bias</th>
-                            <th>Matrix</th>
-                            <th>Grade</th>
-                            <th>Hành động</th>
-                            <th>Vô hiệu khi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>#7812</td>
-                            <td>Breakout Confirm</td>
-                            <td><span class="badge buy">LONG</span></td>
-                            <td>Accumulation</td>
-                            <td><span class="grade">A</span></td>
-                            <td>Vào lệnh 1/3 Volume</td>
-                            <td>Thủng 62,500</td>
-                        </tr>
-                        <tr>
-                            <td>#7815</td>
-                            <td>Trend Conti.</td>
-                            <td><span class="badge buy">LONG</span></td>
-                            <td>Strong Accumulation</td>
-                            <td><span class="grade">A+</span></td>
-                            <td>Mua mạnh tại 63k</td>
-                            <td>Vỡ m5 structure</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </section>
+                </section>
+            </div>
         </main>
 
         <!-- Sidebar / Health Panel -->

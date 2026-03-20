@@ -404,25 +404,103 @@ body {
 .dashboard-content::-webkit-scrollbar-track { background: transparent; }
 .dashboard-content::-webkit-scrollbar-thumb { background: var(--bg-accent); border-radius: 10px; }
 
-/* Responsive */
-@media (max-width: 1200px) {
-    .app-container {
-        grid-template-columns: 1fr;
-    }
-    .health-panel {
-        display: none;
-    }
+/* View Management */
+.app-view {
+    display: none;
+    flex-direction: column;
+    gap: 1.5rem;
+    animation: fadeIn 0.4s ease;
 }
 
-@media (max-width: 900px) {
-    .logic-pillars {
-        grid-template-columns: repeat(2, 1fr);
-    }
+.app-view.active {
+    display: flex;
 }
 
-@media (max-width: 600px) {
-    .logic-pillars {
-        grid-template-columns: 1fr;
-    }
-    .main-nav { display: none; }
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Journal View */
+.journal-container {
+    padding: 1.5rem;
+}
+
+.journal-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 700px;
+    overflow-y: auto;
+}
+
+.journal-entry {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 15px 20px;
+    display: grid;
+    grid-template-columns: 120px 1fr 100px 100px 120px;
+    align-items: center;
+    gap: 1.5rem;
+    transition: all 0.2s ease;
+}
+
+.journal-entry:hover {
+    background: var(--bg-accent);
+    border-color: var(--accent);
+}
+
+.entry-time { font-size: 0.85rem; color: var(--text-secondary); }
+.entry-message { font-weight: 500; }
+.entry-grade { text-align: center; }
+
+/* Tuning View */
+.tuning-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.tuning-card {
+    padding: 1.5rem;
+}
+
+.tuning-card h4 {
+    margin-bottom: 1.5rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+.tuning-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.stat {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1rem;
+}
+
+.stat .val { font-weight: 600; color: var(--accent); }
+
+/* Live Market Extras */
+.live-badge-glow {
+    background: var(--sell);
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    box-shadow: 0 0 10px var(--sell);
+    font-weight: 700;
+}
+
+.loading {
+    padding: 40px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-style: italic;
 }
