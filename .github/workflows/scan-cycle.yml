@@ -51,6 +51,9 @@ jobs:
     - name: Initialize SQLite (if needed)
       run: python scripts/init_sqlite_db.py
 
+    - name: Reprime Fixture (Sync to Today)
+      run: python scripts/reprime_data.py
+
     - name: Run CFTE Scan Cycle
       env:
         PYTHONPATH: src

@@ -124,6 +124,9 @@ def main():
 
     # Return non-zero if any critical step failed
     critical = ["bootstrap", "health", "scan"]
+    if not args.skip_live:
+        critical.append("live")
+    
     if any(results.get(s, 1) not in (0, -1) for s in critical):
         return 1
     return 0

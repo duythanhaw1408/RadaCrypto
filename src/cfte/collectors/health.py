@@ -31,7 +31,9 @@ class CollectorHealthSnapshot:
             "degraded": "đang suy giảm",
         }[self.state]
         if self.last_error is not None:
-            detail = f"Lỗi gần nhất: {self.last_error.message}."
+            # Phòng thủ nếu last_error không phải object (vốn là nguyên nhân gây crash CI trước đây)
+            msg = getattr(self.last_error, 'message', str(self.last_error))
+            detail = f"Lỗi gần nhất: {msg}."
         elif self.last_disconnect_reason is not None:
             detail = f"Lý do reconnect gần nhất: {self.last_disconnect_reason.message}."
         else:

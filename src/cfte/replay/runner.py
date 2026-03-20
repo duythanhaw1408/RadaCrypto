@@ -69,6 +69,9 @@ def run_replay(events: list[ReplayEvent], db_path: str | Path | None = None) -> 
     feature_windows = 0
     tpfm = TPFMStateEngine()
     store = ThesisSQLiteStore(db_path) if db_path else None
+    if store:
+        import asyncio
+        asyncio.run(store.migrate_schema())
     
     tpfm_trades: list[NormalizedTrade] = []
     tpfm_snapshots: list[TapeSnapshot] = []
@@ -177,9 +180,18 @@ def run_replay(events: list[ReplayEvent], db_path: str | Path | None = None) -> 
             futures_context=None
         )
         import asyncio
-        try:
-            asyncio.run(store.save_tpfm_snapshot(m5_snap))
-        except Exception: pass
+        asyncio.run(store.save_tpfm_snapshot(m5_snap))
+        
+        # Flush M30/4H even if thresholds not met (Phase T1-T5 Refinement)
+        tpfm_m5_buffer.append(m5_snap)
+        if tpfm_m5_buffer:
+            regime = tpfm.calculate_30m_regime(tpfm_m5_buffer)
+            asyncio.run(store.save_tpfm_m30_regime(regime))
+            tpfm_m30_buffer.append(regime)
+            
+            if tpfm_m30_buffer:
+                struct = tpfm.calculate_4h_structural(tpfm_m30_buffer)
+                asyncio.run(store.save_tpfm_4h_report(struct))
 
     if instrument_key is None:
         raise ValueError("No instrument_key found in replay events")

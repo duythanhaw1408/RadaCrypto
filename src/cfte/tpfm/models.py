@@ -158,6 +158,9 @@ class TPFM4hStructural:
     avg_persistence: float = 0.0
     structural_score: float = 0.0
 
+    # Health
+    health_state: str = "HEALTHY"
+
     # AI Analysis
     ai_analysis_vi: str = ""
     should_send_ai_report: bool = False

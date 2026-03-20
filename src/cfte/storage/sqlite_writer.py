@@ -5,6 +5,10 @@ import json
 import sqlite3
 import time
 from datetime import datetime, timezone
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    from backports.zoneinfo import ZoneInfo
 from pathlib import Path
 from typing import Any, Final
 
@@ -51,72 +55,62 @@ class ThesisSQLiteStore:
                 )
                 """
             )
-            db.execute(
-                """
-                CREATE TABLE IF NOT EXISTS tpfm_m5_snapshot (
-                    snapshot_id TEXT PRIMARY KEY,
-                    symbol TEXT NOT NULL,
-                    window_start_ts INTEGER NOT NULL,
-                    window_end_ts INTEGER NOT NULL,
-                    initiative_score REAL,
-                    initiative_polarity TEXT,
-                    inventory_score REAL,
-                    inventory_polarity TEXT,
-                    energy_score REAL,
-                    energy_state TEXT,
-                    response_efficiency_score REAL,
-                    response_efficiency_state TEXT,
-                    matrix_cell TEXT,
-                    micro_conclusion TEXT,
-                    tradability_score REAL,
-                    delta_quote REAL,
-                    cvd_slope REAL,
-                    trade_burst REAL,
-                    active_thesis_count INTEGER,
-                    actionable_count INTEGER,
-                    health_state TEXT
-                )
-                """
-            )
-            db.execute(
-                """
-                CREATE TABLE IF NOT EXISTS tpfm_m30_regime (
-                    regime_id TEXT PRIMARY KEY,
-                    symbol TEXT NOT NULL,
-                    window_start_ts INTEGER NOT NULL,
-                    window_end_ts INTEGER NOT NULL,
-                    m5_count INTEGER,
-                    dominant_cell TEXT,
-                    dominant_regime TEXT,
-                    transition_path TEXT,
-                    regime_persistence_score REAL,
-                    net_delta_quote REAL,
-                    avg_trade_burst REAL,
-                    macro_conclusion_code TEXT,
-                    macro_posture TEXT,
-                    health_state TEXT
-                )
-                """
-            )
-            db.execute(
-                """
-                CREATE TABLE IF NOT EXISTS tpfm_4h_structural (
-                    structural_id TEXT PRIMARY KEY,
-                    symbol TEXT NOT NULL,
-                    window_start_ts INTEGER NOT NULL,
-                    window_end_ts INTEGER NOT NULL,
-                    m30_count INTEGER,
-                    dominant_regime_share TEXT,
-                    dominant_cell_share TEXT,
-                    structural_bias TEXT,
-                    transition_map TEXT,
-                    net_delta_quote REAL,
-                    avg_persistence REAL,
-                    ai_analysis_vi TEXT,
-                    health_state TEXT
-                )
-                """
-            )
+
+            # TPFM M5 Migrations
+            db.execute("CREATE TABLE IF NOT EXISTS tpfm_m5_snapshot (snapshot_id TEXT PRIMARY KEY)")
+            m5_cols = [c[1] for c in db.execute("PRAGMA table_info(tpfm_m5_snapshot)").fetchall()]
+            m5_definitions = {
+                "symbol": "TEXT NOT NULL DEFAULT 'BTCUSDT'",
+                "window_start_ts": "INTEGER NOT NULL DEFAULT 0",
+                "window_end_ts": "INTEGER NOT NULL DEFAULT 0",
+                "initiative_score": "REAL", "initiative_polarity": "TEXT",
+                "inventory_score": "REAL", "inventory_polarity": "TEXT",
+                "energy_score": "REAL", "energy_state": "TEXT",
+                "response_efficiency_score": "REAL", "response_efficiency_state": "TEXT",
+                "matrix_cell": "TEXT", "micro_conclusion": "TEXT",
+                "tradability_score": "REAL", "delta_quote": "REAL",
+                "cvd_slope": "REAL", "trade_burst": "REAL",
+                "active_thesis_count": "INTEGER", "actionable_count": "INTEGER",
+                "health_state": "TEXT"
+            }
+            for col, dft in m5_definitions.items():
+                if col not in m5_cols:
+                    db.execute(f"ALTER TABLE tpfm_m5_snapshot ADD COLUMN {col} {dft}")
+
+            # TPFM M30 Migrations
+            db.execute("CREATE TABLE IF NOT EXISTS tpfm_m30_regime (regime_id TEXT PRIMARY KEY)")
+            m30_cols = [c[1] for c in db.execute("PRAGMA table_info(tpfm_m30_regime)").fetchall()]
+            m30_definitions = {
+                "symbol": "TEXT NOT NULL DEFAULT 'BTCUSDT'",
+                "window_start_ts": "INTEGER NOT NULL DEFAULT 0",
+                "window_end_ts": "INTEGER NOT NULL DEFAULT 0",
+                "m5_count": "INTEGER", "dominant_cell": "TEXT",
+                "dominant_regime": "TEXT", "transition_path": "TEXT",
+                "regime_persistence_score": "REAL", "net_delta_quote": "REAL",
+                "avg_trade_burst": "REAL", "macro_conclusion_code": "TEXT",
+                "macro_posture": "TEXT", "health_state": "TEXT"
+            }
+            for col, dft in m30_definitions.items():
+                if col not in m30_cols:
+                    db.execute(f"ALTER TABLE tpfm_m30_regime ADD COLUMN {col} {dft}")
+
+            # TPFM 4H Migrations
+            db.execute("CREATE TABLE IF NOT EXISTS tpfm_4h_structural (structural_id TEXT PRIMARY KEY)")
+            h4_cols = [c[1] for c in db.execute("PRAGMA table_info(tpfm_4h_structural)").fetchall()]
+            h4_definitions = {
+                "symbol": "TEXT NOT NULL DEFAULT 'BTCUSDT'",
+                "window_start_ts": "INTEGER NOT NULL DEFAULT 0",
+                "window_end_ts": "INTEGER NOT NULL DEFAULT 0",
+                "m30_count": "INTEGER", "dominant_regime_share": "TEXT",
+                "dominant_cell_share": "TEXT", "structural_bias": "TEXT",
+                "transition_map": "TEXT", "net_delta_quote": "REAL",
+                "avg_persistence": "REAL", "structural_score": "REAL",
+                "ai_analysis_vi": "TEXT", "health_state": "TEXT"
+            }
+            for col, dft in h4_definitions.items():
+                if col not in h4_cols:
+                    db.execute(f"ALTER TABLE tpfm_4h_structural ADD COLUMN {col} {dft}")
+            
             db.commit()
 
     async def save_thesis(
@@ -305,12 +299,13 @@ class ThesisSQLiteStore:
                 "event_count": event_count
             }
 
-    async def get_daily_summary_stats(self, date_str: str | None = None) -> dict[str, Any]:
+    async def get_daily_summary_stats(self, date_str: str | None = None, timezone_str: str = "UTC") -> dict[str, Any]:
+        tz = ZoneInfo(timezone_str)
         if not date_str:
-            date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+            date_str = datetime.now(tz).strftime("%Y-%m-%d")
         
-        # Parse date_str as UTC midnight
-        dt = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        # Parse date_str in the target timezone to get the correct day boundaries
+        dt = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=tz)
         start_ts = int(dt.timestamp() * 1000)
         end_ts = start_ts + 86400000
         return await self.get_period_summary(start_ts=start_ts, end_ts=end_ts, label=date_str)
@@ -519,8 +514,8 @@ class ThesisSQLiteStore:
                     structural_id, symbol, window_start_ts, window_end_ts,
                     m30_count, dominant_regime_share, dominant_cell_share,
                     structural_bias, transition_map, net_delta_quote,
-                    avg_persistence, ai_analysis_vi, health_state
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    avg_persistence, structural_score, ai_analysis_vi, health_state
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     report.structural_id,
@@ -534,6 +529,7 @@ class ThesisSQLiteStore:
                     json.dumps(report.transition_map),
                     report.net_delta_quote,
                     report.avg_persistence,
+                    report.structural_score,
                     report.ai_analysis_vi,
                     report.health_state,
                 ),

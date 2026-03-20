@@ -116,15 +116,18 @@ class BinancePublicCollector:
         self._last_disconnect_reason = error
         self._last_error = error
 
+    def _get_ssl_context(self) -> ssl.SSLContext:
+        import ssl
+        import certifi
+        return ssl.create_default_context(cafile=certifi.where())
+
     async def stream_forever(self):
         while True:
             try:
                 import websockets
-                import ssl
                 
                 # Create secure SSL context
-                import certifi
-                ssl_context = ssl.create_default_context(cafile=certifi.where())
+                ssl_context = self._get_ssl_context()
 
                 self._connect_attempts += 1
                 async with websockets.connect(self.url, ping_interval=20, ping_timeout=20, ssl=ssl_context) as ws:
@@ -138,4 +141,5 @@ class BinancePublicCollector:
             except Exception as exc:
                 self._record_failure(exc)
                 print(f"WS Error: {exc}")
+                await asyncio.sleep(1) # Backoff
                 await asyncio.sleep(self.reconnect_sleep_seconds)

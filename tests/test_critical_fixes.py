@@ -96,12 +96,9 @@ def test_binance_collector_secure_tls():
         with patch("certifi.where", return_value="/fake/path/cert.pem"):
             collector = BinancePublicCollector(streams=["btcusdt@aggTrade"])
             
-            with patch("websockets.connect", side_effect=Exception("stop")):
-                import asyncio
-                try:
-                    asyncio.run(collector.stream_forever().__anext__())
-                except:
-                    pass
+            # Verify _get_ssl_context returns a secure context with certifi
+            context = collector._get_ssl_context()
+            mock_ssl.assert_called_with(cafile="/fake/path/cert.pem")
             
             # Verify ssl.create_default_context was called with cafile=certifi.where()
             mock_ssl.assert_called_with(cafile="/fake/path/cert.pem")
