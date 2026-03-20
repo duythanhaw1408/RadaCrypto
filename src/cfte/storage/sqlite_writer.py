@@ -27,6 +27,62 @@ _FINAL_REVIEW_HORIZON: Final[str] = "24h"
 class ThesisSQLiteStore:
     def __init__(self, db_path: str | Path) -> None:
         self.db_path = Path(db_path)
+        self._lock_id = "primary_writer"
+
+    def _pid_is_alive(self, pid: int) -> bool:
+        if pid <= 0: return False
+        import os
+        try:
+            os.kill(pid, 0)
+        except (ProcessLookupError, PermissionError):
+            return False
+        return True
+
+    async def acquire_writer_lock(self, run_id: str, pid: int, host: str) -> None:
+        """Enforces single-writer principle at the database level."""
+        now = datetime.now(timezone.utc).isoformat()
+        with sqlite3.connect(self.db_path) as db:
+            db.row_factory = sqlite3.Row
+            # Ensure the lock table exists before we even check it
+            db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS system_writer_lock (
+                    lock_id TEXT PRIMARY KEY,
+                    run_id TEXT,
+                    pid INTEGER,
+                    host TEXT,
+                    acquired_at TEXT
+                )
+                """
+            )
+            row = db.execute("SELECT * FROM system_writer_lock WHERE lock_id = ?", (self._lock_id,)).fetchone()
+            if row:
+                existing_pid = row["pid"]
+                existing_run_id = row["run_id"]
+                if existing_pid == pid and existing_run_id == run_id:
+                    return # Already have it
+                if self._pid_is_alive(existing_pid):
+                    raise RuntimeError(
+                        f"Database đang được phiên khác sử dụng (pid={existing_pid}, run_id={existing_run_id}, host={row['host']})."
+                    )
+            
+            db.execute(
+                "INSERT OR REPLACE INTO system_writer_lock (lock_id, run_id, pid, host, acquired_at) VALUES (?, ?, ?, ?, ?)",
+                (self._lock_id, run_id, pid, host, now)
+            )
+            db.commit()
+
+    async def release_writer_lock(self, run_id: str, pid: int) -> None:
+        with sqlite3.connect(self.db_path) as db:
+            try:
+                db.execute(
+                    "DELETE FROM system_writer_lock WHERE lock_id = ? AND run_id = ? AND pid = ?",
+                    (self._lock_id, run_id, pid)
+                )
+                db.commit()
+            except sqlite3.OperationalError:
+                # If the table doesn't exist, we don't have a lock to release anyway
+                pass
 
     async def migrate_schema(self) -> None:
         with sqlite3.connect(self.db_path) as db:
@@ -238,6 +294,18 @@ class ThesisSQLiteStore:
                 if col not in transition_cols:
                     db.execute(f"ALTER TABLE tpfm_transition_event ADD COLUMN {col} {dft}")
             
+            # System Writer Lock Table
+            db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS system_writer_lock (
+                    lock_id TEXT PRIMARY KEY,
+                    run_id TEXT,
+                    pid INTEGER,
+                    host TEXT,
+                    acquired_at TEXT
+                )
+                """
+            )
             db.commit()
 
     async def save_thesis(

@@ -5,6 +5,7 @@ import os
 import time
 from collections import deque
 from dataclasses import asdict, dataclass, field
+import socket
 from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
@@ -381,6 +382,11 @@ class LiveThesisLoop:
                         retry_count += 1
                         continue
 
+                    await self.store.acquire_writer_lock(
+                        run_id=self._runtime_run_id,
+                        pid=os.getpid(),
+                        host=socket.gethostname()
+                    )
                     await self.store.migrate_schema()
 
                     futures_task = asyncio.create_task(self.futures_collector.stream_forever())
@@ -560,6 +566,9 @@ class LiveThesisLoop:
             if retry_count >= self.max_retries:
                 print("Đã đạt giới hạn số lần thử lại. Dừng hệ thống.")
         finally:
+            if self._runtime_lease is not None:
+                await self.store.release_writer_lock(run_id=self._runtime_run_id, pid=os.getpid())
+            
             release_live_runtime_lease(self._runtime_lease)
             self._runtime_lease = None
 

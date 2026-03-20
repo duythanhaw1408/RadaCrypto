@@ -129,16 +129,21 @@ Kiến trúc hiện tại coi `TPFM (Flow Intelligence)` là nguồn chân lý. 
 Trước khi mở pilot hoặc public launch:
 
 - [ ] Chạy `cfte bootstrap` để cập nhật schema và artifact mặc định.
-- [ ] Chạy `cfte doctor` và xác nhận hệ thống ở trạng thái `HEALTHY` hoặc ít nhất không có `BAD CONFIG`.
-- [ ] Xác nhận chỉ có **một** live loop ghi vào mỗi `live_runtime_path`; nếu cần song song nhiều loop, phải tách profile/artifact path riêng.
-- [ ] Chạy thử `cfte --profile configs/profiles/personal_binance.yaml run-live --max-events 1` khi đã có loop nền; lệnh phải fail nhanh với thông báo lock conflict thay vì ghi đè artifact.
-- [ ] Chạy `cfte --profile configs/profiles/personal_binance.yaml run-live --min-runtime-seconds 330 --run-until-first-m5`.
+- [x] Chạy `cfte doctor` và xác nhận hệ thống ở trạng thái `HEALTHY` hoặc ít nhất không có `BAD CONFIG`.
+- [x] Xác nhận chỉ có **một** live loop ghi vào mỗi `live_runtime_path` và mỗi `state.db`; hệ thống đã có cơ chế PID Lease & DB Writer Lock để chặn xung đột.
+- [ ] Chạy thử `cfte --profile configs/profiles/personal_binance.yaml run-live --max-events 1` khi đã có loop nền; lệnh phải fail nhanh với thông báo `Database đang được phiên khác sử dụng` hoặc `Runtime artifact đang được dùng`.
+- [ ] Chạy `cfte --profile configs/profiles/personal_binance.yaml run-live --min-runtime-seconds 1200 --run-until-first-m5`.
 - [ ] Kiểm tra `data/review/live_runtime.json` có đủ `run_id`, `pid`, `first_m5_seen_at`, `latest_tpfm`, `latest_flow_grade`.
-- [ ] Kiểm tra file lock `data/review/live_runtime.json.lock` đã tự biến mất sau khi phiên kết thúc `completed`.
+- [ ] Kiểm tra file lock `.lock` đã tự biến mất sau khi phiên kết thúc.
 - [ ] Kiểm tra `cfte watchdog` hiển thị được `Matrix gần nhất`, `Flow contract`, và `Transition gần nhất`.
 - [ ] Chạy `cfte review-day` và xác nhận report có `flow state scorecard`, `forced flow scorecard`, `transition scorecard`.
-- [ ] Chạy `cfte review-week` và `cfte tune-profile` để xác nhận tuning ưu tiên `flow state`.
-- [ ] Nếu `doctor` chỉ còn `DEGRADED` do `okx_stale`, quyết định rõ có chấp nhận launch với `Binance + Bybit` làm cặp venue chính hay không.
+- [ ] **V1 Strategy Note**: Binance + Bybit là cặp venue chính (`CONFIRMED`). Nếu `doctor` báo `okx_stale`, hệ thống vẫn vận hành tốt (V1 ưu tiên độ tin cậy của Binance/Bybit hơn là phủ sóng mọi sàn).
+
+### Định hướng V1 (Public Launch)
+
+- **Positioning**: Hệ thống là một công cụ **Trí tuệ Dòng tiền (Flow Intelligence Engine)** chuyên sâu, cung cấp context và bias cho trader, không phải bot trade tự động mù quáng.
+- **Venue Priority**: Binance (Futures/Spot) + Bybit. OKX là nguồn bổ trợ.
+- **Lease Model**: Mỗi instance (địa chỉ IP/Folder) chỉ chạy một loop ghi DB duy nhất để bảo đảm integrity.
 
 ### Pilot Checklist
 
