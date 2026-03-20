@@ -10,8 +10,23 @@ import requests
 
 from cfte.collectors.health import CollectorErrorSurface, CollectorHealthSnapshot, CollectorState, build_error_surface
 
-BINANCE_WS_BASE = "wss://stream.binance.com:9443/stream"
-BINANCE_REST_BASE = "https://api.binance.com"
+BINANCE_REST_MIRRORS = [
+    "https://api.binance.com",
+    "https://api1.binance.com",
+    "https://api2.binance.com",
+    "https://api3.binance.com",
+    "https://api4.binance.com",
+]
+
+BINANCE_WS_MIRRORS = [
+    "wss://stream.binance.com:9443/stream",
+    "wss://stream1.binance.com:9443/stream",
+    "wss://stream2.binance.com:9443/stream",
+    "wss://stream3.binance.com:9443/stream",
+]
+
+BINANCE_WS_BASE = BINANCE_WS_MIRRORS[0]
+BINANCE_REST_BASE = BINANCE_REST_MIRRORS[0]
 DEFAULT_DEPTH_LEVEL = 1000
 BINANCE_VENUE = "binance"
 
@@ -62,13 +77,21 @@ def try_fetch_depth_snapshot(
     limit: int = DEFAULT_DEPTH_LEVEL,
     rest_base: str = BINANCE_REST_BASE,
 ) -> tuple[dict[str, Any] | None, str | None]:
-    try:
-        snapshot = fetch_depth_snapshot(symbol=symbol, limit=limit, rest_base=rest_base)
-    except requests.RequestException as exc:
-        return None, f"Không lấy được snapshot depth Binance cho {symbol.upper()}: {exc}"
-    except (KeyError, TypeError, ValueError) as exc:
-        return None, f"Snapshot depth Binance không hợp lệ cho {symbol.upper()}: {exc}"
-    return snapshot, None
+    mirrors = [rest_base] + [m for m in BINANCE_REST_MIRRORS if m != rest_base]
+    last_error = None
+    
+    for mirror in mirrors:
+        try:
+            snapshot = fetch_depth_snapshot(symbol=symbol, limit=limit, rest_base=mirror)
+            return snapshot, None
+        except requests.RequestException as exc:
+            last_error = exc
+            if hasattr(exc, 'response') and exc.response is not None and exc.response.status_code == 451:
+                print(f"⚠️ Geo-blocked (451) on {mirror}. Trying next mirror...")
+                continue
+            break # Only retry on 451 or temporary connectivity issues
+            
+    return None, f"Không lấy được snapshot depth Binance cho {symbol.upper()} qua các mirrors: {last_error}"
 
 
 @dataclass(slots=True)
@@ -133,6 +156,7 @@ class BinancePublicCollector:
         return ssl.create_default_context(cafile=certifi.where())
 
     async def stream_forever(self):
+        mirror_idx = 0
         while True:
             try:
                 import websockets
@@ -141,16 +165,18 @@ class BinancePublicCollector:
                 ssl_context = self._get_ssl_context()
 
                 self._connect_attempts += 1
-                async with websockets.connect(self.url, ping_interval=20, ping_timeout=20, ssl=ssl_context) as ws:
+                current_url = f"{BINANCE_WS_MIRRORS[mirror_idx % len(BINANCE_WS_MIRRORS)]}?streams={'/'.join(self.streams)}"
+                
+                async with websockets.connect(current_url, ping_interval=20, ping_timeout=20, ssl=ssl_context) as ws:
                     self._mark_connected()
-                    print(f"WS Connected to {self.url}")
+                    print(f"WS Connected to {current_url}")
                     async for raw in ws:
                         self._record_message()
-                        # print(f"DEBUG RAW: {raw[:100]}")
                         envelope = json.loads(raw)
                         yield envelope
             except Exception as exc:
                 self._record_failure(exc)
-                print(f"WS Error: {exc}")
-                await asyncio.sleep(1) # Backoff
+                print(f"WS Error on {current_url}: {exc}")
+                # Rotate mirror on connection failure
+                mirror_idx += 1
                 await asyncio.sleep(self.reconnect_sleep_seconds)

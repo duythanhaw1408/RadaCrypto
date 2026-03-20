@@ -118,8 +118,22 @@ def classify_basis_state(basis_bps: float) -> str:
 class BinanceFuturesCollector:
     """Collector for Binance Futures context with rolling delta and liquidation windows."""
 
-    REST_BASE = "https://fapi.binance.com"
-    WS_BASE = "wss://fstream.binance.com/stream"
+    REST_MIRRORS = [
+        "https://fapi.binance.com",
+        "https://fapi1.binance.com",
+        "https://fapi2.binance.com",
+        "https://fapi3.binance.com",
+    ]
+    
+    WS_MIRRORS = [
+        "wss://fstream.binance.com/stream",
+        "wss://fstream1.binance.com/stream",
+        "wss://fstream2.binance.com/stream",
+        "wss://fstream3.binance.com/stream",
+    ]
+
+    REST_BASE = REST_MIRRORS[0]
+    WS_BASE = WS_MIRRORS[0]
 
     def __init__(
         self,
@@ -153,48 +167,57 @@ class BinanceFuturesCollector:
         self._seeded_recent_trades = False
 
     def fetch_mark_price_info(self) -> Dict[str, Any]:
-        url = f"{self.REST_BASE}/fapi/v1/premiumIndex"
-        params = {"symbol": self.symbol}
-        try:
-            resp = requests.get(url, params=params, timeout=5)
-            resp.raise_for_status()
-            return resp.json()
-        except Exception as exc:
-            print(f"⚠️ Error fetching Binance Futures Premium Index: {exc}")
-            return {}
+        for mirror in self.REST_MIRRORS:
+            url = f"{mirror}/fapi/v1/premiumIndex"
+            params = {"symbol": self.symbol}
+            try:
+                resp = requests.get(url, params=params, timeout=5)
+                resp.raise_for_status()
+                return resp.json()
+            except Exception as exc:
+                if hasattr(exc, 'response') and exc.response is not None and exc.response.status_code == 451:
+                    continue
+                print(f"⚠️ Error fetching Binance Futures Premium Index on {mirror}: {exc}")
+                break
+        return {}
 
     def fetch_open_interest(self) -> Dict[str, Any]:
-        url = f"{self.REST_BASE}/fapi/v1/openInterest"
-        params = {"symbol": self.symbol}
-        try:
-            resp = requests.get(url, params=params, timeout=5)
-            resp.raise_for_status()
-            return resp.json()
-        except Exception as exc:
-            print(f"⚠️ Error fetching Binance Futures OI: {exc}")
-            return {}
+        for mirror in self.REST_MIRRORS:
+            url = f"{mirror}/fapi/v1/openInterest"
+            params = {"symbol": self.symbol}
+            try:
+                resp = requests.get(url, params=params, timeout=5)
+                resp.raise_for_status()
+                return resp.json()
+            except Exception:
+                continue
+        return {}
 
     def fetch_recent_agg_trades(self, limit: int = 100) -> list[dict[str, Any]]:
-        url = f"{self.REST_BASE}/fapi/v1/aggTrades"
-        params = {"symbol": self.symbol, "limit": max(1, min(int(limit), 1000))}
-        try:
-            resp = requests.get(url, params=params, timeout=5)
-            resp.raise_for_status()
-            return resp.json()
-        except Exception:
-            return []
+        for mirror in self.REST_MIRRORS:
+            url = f"{mirror}/fapi/v1/aggTrades"
+            params = {"symbol": self.symbol, "limit": max(1, min(int(limit), 1000))}
+            try:
+                resp = requests.get(url, params=params, timeout=5)
+                resp.raise_for_status()
+                return resp.json()
+            except Exception:
+                continue
+        return []
 
     def fetch_recent_force_orders(self, limit: int = 50, start_time_ms: int | None = None) -> list[dict[str, Any]]:
-        url = f"{self.REST_BASE}/fapi/v1/allForceOrders"
-        params: dict[str, Any] = {"symbol": self.symbol, "limit": max(1, min(int(limit), 100))}
-        if start_time_ms is not None:
-            params["startTime"] = int(start_time_ms)
-        try:
-            resp = requests.get(url, params=params, timeout=5)
-            resp.raise_for_status()
-            return resp.json()
-        except Exception:
-            return []
+        for mirror in self.REST_MIRRORS:
+            url = f"{mirror}/fapi/v1/allForceOrders"
+            params: dict[str, Any] = {"symbol": self.symbol, "limit": max(1, min(int(limit), 100))}
+            if start_time_ms is not None:
+                params["startTime"] = int(start_time_ms)
+            try:
+                resp = requests.get(url, params=params, timeout=5)
+                resp.raise_for_status()
+                return resp.json()
+            except Exception:
+                continue
+        return []
 
     def _append_agg_trade(self, trade: dict[str, Any]) -> None:
         ts = _to_int(trade.get("T", trade.get("E", trade.get("ts"))))
@@ -313,16 +336,17 @@ class BinanceFuturesCollector:
         url = f"{self.WS_BASE}?streams={'/'.join(streams)}"
         ssl_context = ssl.create_default_context(cafile=certifi.where())
 
+        mirror_idx = 0
         while True:
             try:
                 self._connect_attempts += 1
-                async with websockets.connect(url, ssl=ssl_context) as ws:
+                current_url = f"{self.WS_MIRRORS[mirror_idx % len(self.WS_MIRRORS)]}?streams={'/'.join(streams)}"
+                async with websockets.connect(current_url, ssl=ssl_context) as ws:
                     self._connected = True
                     self._stream_connected = True
                     self._state = "running"
                     self._last_error = None
-                    self._stream_connected = True
-                    print(f"📡 Futures Stream Connected: {url}")
+                    print(f"📡 Futures Stream Connected: {current_url}")
                     async for raw in ws:
                         self._message_count += 1
                         envelope = json.loads(raw)
@@ -344,7 +368,8 @@ class BinanceFuturesCollector:
                 self._reconnect_count += 1
                 self._last_disconnect_reason = error
                 self._last_error = error
-                print(f"📡 Futures WS Error: {exc}")
+                print(f"📡 Futures WS Error on {current_url}: {exc}")
+                mirror_idx += 1
                 await asyncio.sleep(5)
 
     def get_live_context(self, *, now_ms: int | None = None) -> Dict[str, Any]:
