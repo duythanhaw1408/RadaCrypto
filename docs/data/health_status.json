@@ -1,6 +1,6 @@
 {
   "overall_status": "degraded",
-  "generated_at": "2026-03-20T19:48:25.487196+00:00",
+  "generated_at": "2026-03-20T20:21:53.014431+00:00",
   "checks": [
     {
       "key": "python_version",
@@ -49,14 +49,14 @@
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact replay_summary sẵn sàng",
-      "detail": "2026-03-20T19:05:51.390723+00:00"
+      "detail": "2026-03-20T19:48:28.142404+00:00"
     },
     {
       "key": "daily_summary",
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact daily_summary sẵn sàng",
-      "detail": "2026-03-20T19:06:58.774080+00:00"
+      "detail": "2026-03-20T19:49:30.247670+00:00"
     },
     {
       "key": "weekly_summary",
@@ -84,21 +84,21 @@
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact health_report sẵn sàng",
-      "detail": "2026-03-20T19:48:25.478213+00:00"
+      "detail": "2026-03-20T20:21:53.005479+00:00"
     },
     {
       "key": "live_runtime",
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact live_runtime sẵn sàng",
-      "detail": "2026-03-20T19:06:48.711475+00:00"
+      "detail": "2026-03-20T19:49:20.188597+00:00"
     },
     {
       "key": "live_runtime_owner",
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact live_runtime có owner rõ ràng",
-      "detail": "run_id=6e08450f95d042f1b260a762f3d96a15 | pid=2429 | host=runnervm46oaq"
+      "detail": "run_id=3a3eec560afc41019fa13068ca4ebc1f | pid=2446 | host=runnervm46oaq"
     },
     {
       "key": "live_runtime_status",
