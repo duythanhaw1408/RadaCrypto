@@ -130,11 +130,15 @@ Trước khi mở pilot hoặc public launch:
 
 - [ ] Chạy `cfte bootstrap` để cập nhật schema và artifact mặc định.
 - [ ] Chạy `cfte doctor` và xác nhận hệ thống ở trạng thái `HEALTHY` hoặc ít nhất không có `BAD CONFIG`.
+- [ ] Xác nhận chỉ có **một** live loop ghi vào mỗi `live_runtime_path`; nếu cần song song nhiều loop, phải tách profile/artifact path riêng.
+- [ ] Chạy thử `cfte --profile configs/profiles/personal_binance.yaml run-live --max-events 1` khi đã có loop nền; lệnh phải fail nhanh với thông báo lock conflict thay vì ghi đè artifact.
 - [ ] Chạy `cfte --profile configs/profiles/personal_binance.yaml run-live --min-runtime-seconds 330 --run-until-first-m5`.
-- [ ] Kiểm tra `data/review/live_runtime.json` có đủ `first_m5_seen_at`, `latest_tpfm`, `latest_flow_grade`.
+- [ ] Kiểm tra `data/review/live_runtime.json` có đủ `run_id`, `pid`, `first_m5_seen_at`, `latest_tpfm`, `latest_flow_grade`.
+- [ ] Kiểm tra file lock `data/review/live_runtime.json.lock` đã tự biến mất sau khi phiên kết thúc `completed`.
 - [ ] Kiểm tra `cfte watchdog` hiển thị được `Matrix gần nhất`, `Flow contract`, và `Transition gần nhất`.
 - [ ] Chạy `cfte review-day` và xác nhận report có `flow state scorecard`, `forced flow scorecard`, `transition scorecard`.
 - [ ] Chạy `cfte review-week` và `cfte tune-profile` để xác nhận tuning ưu tiên `flow state`.
+- [ ] Nếu `doctor` chỉ còn `DEGRADED` do `okx_stale`, quyết định rõ có chấp nhận launch với `Binance + Bybit` làm cặp venue chính hay không.
 
 ### Pilot Checklist
 

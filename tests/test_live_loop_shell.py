@@ -155,3 +155,7 @@ def test_live_thesis_loop_persists_runtime_artifact_on_watchdog_timeout(tmp_path
     assert artifact['status'] == 'watchdog_timeout'
     assert artifact['idle_timeout_seconds'] == 0.01
     assert 'Watchdog' in artifact['last_error']
+    assert artifact['run_id']
+    assert artifact['pid'] is not None
+    assert artifact['lock_path']
+    assert Path(artifact['lock_path']).exists() is False

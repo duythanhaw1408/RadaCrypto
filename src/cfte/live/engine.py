@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import asyncio
+import os
 import time
 from collections import deque
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
+from uuid import uuid4
 
 from cfte.books.binance_depth import BinanceDepthReconciler
 from cfte.collectors.binance_public import BinancePublicCollector, build_public_streams, try_fetch_depth_snapshot
@@ -23,7 +25,13 @@ from cfte.normalizers.binance import (
     normalize_depth_diff,
     normalize_trade,
 )
-from cfte.cli.reliability import LiveRuntimeArtifact, persist_live_runtime_artifact
+from cfte.cli.reliability import (
+    LiveRuntimeArtifact,
+    LiveRuntimeLease,
+    acquire_live_runtime_lease,
+    persist_live_runtime_artifact,
+    release_live_runtime_lease,
+)
 from cfte.storage.sqlite_writer import ThesisSQLiteStore
 from cfte.storage.thesis_log import ThesisLogWriter
 from cfte.live.outcome_monitor import OutcomeMonitor
@@ -82,6 +90,8 @@ class LiveThesisLoop:
         self.watchdog_idle_seconds = watchdog_idle_seconds
         self.heartbeat_interval = max(1, heartbeat_interval)
         self.runtime_report_path = runtime_report_path
+        self._runtime_run_id = uuid4().hex
+        self._runtime_lease: LiveRuntimeLease | None = None
         self.max_retries = max(1, max_retries)
         self.trade_window_seconds = max(1.0, float(trade_window_seconds))
         self.max_window_trades = max(1, int(max_window_trades))
@@ -349,200 +359,209 @@ class LiveThesisLoop:
         started_at = datetime.now(tz=timezone.utc).isoformat()
         print(f"Khởi chạy loop cho {self.symbol}...")
         session_started_monotonic = time.monotonic()
-        
+        if self.runtime_report_path is not None and self._runtime_lease is None:
+            self._runtime_lease = acquire_live_runtime_lease(
+                self.runtime_report_path,
+                run_id=self._runtime_run_id,
+            )
+
         retry_count = 0
-        
-        while retry_count < self.max_retries:
-            try:
-                if not await self._init_book():
-                    print("Lỗi khởi tạo sổ lệnh. Sẽ thử lại sau 10 giây...")
-                    self._persist_runtime_artifact(
-                        status="bootstrap_failed",
-                        started_at=started_at,
-                        processed=0,
-                        event_counts={},
-                    )
-                    await asyncio.sleep(10)
-                    retry_count += 1
-                    continue
-
-                await self.store.migrate_schema()
-
-                # Phase 4: Start Futures & Secondary Venue Streams
-                futures_task = asyncio.create_task(self.futures_collector.stream_forever())
-                
-                # Bybit Stream
-                bybit_collector = BybitPublicCollector(topics=build_public_topics([self.symbol]))
-                async def bybit_loop():
-                    async for msg in bybit_collector.stream_forever():
-                        if msg.get("topic", "").startswith("publicTrade"):
-                            for t in msg.get("data", []):
-                                norm = normalize_bybit_trade(t, f"bybit:{self.symbol}:perp")
-                                self._venue_trades["bybit"].append(norm)
-                bybit_task = asyncio.create_task(bybit_loop())
-
-                # OKX Stream
-                okx_collector = OkxPublicCollector(args=build_public_args([f"{self.symbol}-SWAP"]))
-                async def okx_loop():
-                    async for msg in okx_collector.stream_forever():
-                        if msg.get("arg", {}).get("channel") == "trades":
-                            for t in msg.get("data", []):
-                                norm = normalize_okx_trade(t, f"okx:{self.symbol}:perp")
-                                self._venue_trades["okx"].append(norm)
-                okx_task = asyncio.create_task(okx_loop())
-
-                monitor = OutcomeMonitor(self.store)
-                monitor_task = asyncio.create_task(monitor.run_forever())
-
-                streams = build_public_streams([self.symbol], use_agg_trade=self.use_agg_trade)
-                collector = BinancePublicCollector(streams=streams)
-                self._refresh_collector_health(
-                    spot_collector=collector,
-                    bybit_collector=bybit_collector,
-                    okx_collector=okx_collector,
-                )
-
-                processed = 0
-                event_counts: dict[str, int] = {}
-                deferred_exit_notice_sent = False
-                self.health.connected = True
-                self.health.reconnect_count += 1
-                print(f"Đã kết nối Binance Stream: {streams}")
-
-                status = "completed"
+        try:
+            while retry_count < self.max_retries:
                 try:
-                    iterator = collector.stream_forever().__aiter__()
-                    while not self._stop_event.is_set():
-                        try:
-                            envelope = await asyncio.wait_for(iterator.__anext__(), timeout=self.watchdog_idle_seconds)
-                        except asyncio.TimeoutError:
-                            status = "watchdog_timeout"
-                            self.health.last_error = (
-                                f"Watchdog không nhận được dữ liệu mới trong {self.watchdog_idle_seconds:.1f}s"
-                            )
-                            print(f"[WATCHDOG] {self.health.last_error}. Chủ động dừng loop để tự phục hồi.")
-                            break
-                        except StopAsyncIteration:
-                            break
-
-                        self.health.message_count = collector.health_snapshot().message_count
-                        self._refresh_collector_health(
-                            spot_collector=collector,
-                            bybit_collector=bybit_collector,
-                            okx_collector=okx_collector,
+                    if not await self._init_book():
+                        print("Lỗi khởi tạo sổ lệnh. Sẽ thử lại sau 10 giây...")
+                        self._persist_runtime_artifact(
+                            status="bootstrap_failed",
+                            started_at=started_at,
+                            processed=0,
+                            event_counts={},
                         )
-                        self._last_message_monotonic = time.monotonic()
-                        data = envelope.get("data", {})
-                        if not isinstance(data, dict):
-                            continue
+                        await asyncio.sleep(10)
+                        retry_count += 1
+                        continue
 
-                        event_type = str(data.get("e", ""))
-                        event_counts[event_type] = event_counts.get(event_type, 0) + 1
-                        normalized = None
+                    await self.store.migrate_schema()
 
-                        if event_type == "aggTrade":
-                            normalized = normalize_agg_trade(data, instrument_key=self.instrument_key)
-                        elif event_type == "trade":
-                            normalized = normalize_trade(data, instrument_key=self.instrument_key)
-                        elif event_type == "bookTicker":
-                            normalized = normalize_book_ticker(data, instrument_key=self.instrument_key)
-                        elif event_type == "depthUpdate":
-                            norm_depth = normalize_depth_diff(data, instrument_key=self.instrument_key)
-                            self._depth.ingest_diff(norm_depth)
+                    futures_task = asyncio.create_task(self.futures_collector.stream_forever())
 
-                        if isinstance(normalized, NormalizedTrade):
-                            self._trades.append(normalized)
-                            self._venue_trades["binance"].append(normalized)
-                            self._last_trade_ts = normalized.venue_ts
-                            await self._process_trade_event(normalized)
+                    bybit_collector = BybitPublicCollector(topics=build_public_topics([self.symbol]))
 
-                        processed += 1
-                        if processed % self.heartbeat_interval == 0:
-                            gap = self._stale_gap_seconds()
-                            health_snap = self.get_health_snapshot()
-                            status_tag = ""
-                            if health_snap.is_stale:
-                                status_tag = " ⚠️ [STALE]"
-                            elif not health_snap.connected:
-                                status_tag = " ❌ [DISCONNECTED]"
-                            
-                            print(
-                                f"💓{status_tag} Hệ thống đang chạy... Đã xử lý {processed} sự kiện | "
-                                f"message={self.health.message_count} | gap={gap:.1f}s"
-                            )
+                    async def bybit_loop():
+                        async for msg in bybit_collector.stream_forever():
+                            if msg.get("topic", "").startswith("publicTrade"):
+                                for trade in msg.get("data", []):
+                                    norm = normalize_bybit_trade(trade, f"bybit:{self.symbol}:perp")
+                                    self._venue_trades["bybit"].append(norm)
 
-                        if self._should_stop_live_session(
-                            processed=processed,
-                            max_events=max_events,
-                            started_monotonic=session_started_monotonic,
-                            min_runtime_seconds=min_runtime_seconds,
-                            run_until_first_m5=run_until_first_m5,
-                        ):
-                            break
-                        if (
-                            max_events is not None
-                            and processed >= max_events
-                            and not deferred_exit_notice_sent
-                        ):
-                            wait_reasons: list[str] = []
-                            if min_runtime_seconds is not None and (
-                                time.monotonic() - session_started_monotonic
-                            ) < min_runtime_seconds:
-                                wait_reasons.append(f"đủ {min_runtime_seconds:.0f}s runtime")
-                            if run_until_first_m5 and not self._has_m5_snapshot():
-                                wait_reasons.append("snapshot M5 đầu tiên")
-                            if wait_reasons:
-                                print(
-                                    "⏳ Đã chạm max-events nhưng tiếp tục chạy để chờ "
-                                    + " và ".join(wait_reasons)
-                                    + "."
+                    bybit_task = asyncio.create_task(bybit_loop())
+
+                    okx_collector = OkxPublicCollector(args=build_public_args([f"{self.symbol}-SWAP"]))
+
+                    async def okx_loop():
+                        async for msg in okx_collector.stream_forever():
+                            if msg.get("arg", {}).get("channel") == "trades":
+                                for trade in msg.get("data", []):
+                                    norm = normalize_okx_trade(trade, f"okx:{self.symbol}:perp")
+                                    self._venue_trades["okx"].append(norm)
+
+                    okx_task = asyncio.create_task(okx_loop())
+
+                    monitor = OutcomeMonitor(self.store)
+                    monitor_task = asyncio.create_task(monitor.run_forever())
+
+                    streams = build_public_streams([self.symbol], use_agg_trade=self.use_agg_trade)
+                    collector = BinancePublicCollector(streams=streams)
+                    self._refresh_collector_health(
+                        spot_collector=collector,
+                        bybit_collector=bybit_collector,
+                        okx_collector=okx_collector,
+                    )
+
+                    processed = 0
+                    event_counts: dict[str, int] = {}
+                    deferred_exit_notice_sent = False
+                    self.health.connected = True
+                    self.health.reconnect_count += 1
+                    print(f"Đã kết nối Binance Stream: {streams}")
+
+                    status = "completed"
+                    try:
+                        iterator = collector.stream_forever().__aiter__()
+                        while not self._stop_event.is_set():
+                            try:
+                                envelope = await asyncio.wait_for(iterator.__anext__(), timeout=self.watchdog_idle_seconds)
+                            except asyncio.TimeoutError:
+                                status = "watchdog_timeout"
+                                self.health.last_error = (
+                                    f"Watchdog không nhận được dữ liệu mới trong {self.watchdog_idle_seconds:.1f}s"
                                 )
-                                deferred_exit_notice_sent = True
-                    
-                    # If we exit normally (e.g. max_events or stop_event or watchdog break), 
-                    # we check if we should break retry loop
-                    if status == "completed" or self._stop_event.is_set():
-                        break
-                    else:
-                        # For watchdog_timeout, we retry
+                                print(f"[WATCHDOG] {self.health.last_error}. Chủ động dừng loop để tự phục hồi.")
+                                break
+                            except StopAsyncIteration:
+                                break
+
+                            self.health.message_count = collector.health_snapshot().message_count
+                            self._refresh_collector_health(
+                                spot_collector=collector,
+                                bybit_collector=bybit_collector,
+                                okx_collector=okx_collector,
+                            )
+                            self._last_message_monotonic = time.monotonic()
+                            data = envelope.get("data", {})
+                            if not isinstance(data, dict):
+                                continue
+
+                            event_type = str(data.get("e", ""))
+                            event_counts[event_type] = event_counts.get(event_type, 0) + 1
+                            normalized = None
+
+                            if event_type == "aggTrade":
+                                normalized = normalize_agg_trade(data, instrument_key=self.instrument_key)
+                            elif event_type == "trade":
+                                normalized = normalize_trade(data, instrument_key=self.instrument_key)
+                            elif event_type == "bookTicker":
+                                normalized = normalize_book_ticker(data, instrument_key=self.instrument_key)
+                            elif event_type == "depthUpdate":
+                                norm_depth = normalize_depth_diff(data, instrument_key=self.instrument_key)
+                                self._depth.ingest_diff(norm_depth)
+
+                            if isinstance(normalized, NormalizedTrade):
+                                self._trades.append(normalized)
+                                self._venue_trades["binance"].append(normalized)
+                                self._last_trade_ts = normalized.venue_ts
+                                await self._process_trade_event(normalized)
+
+                            processed += 1
+                            if processed % self.heartbeat_interval == 0:
+                                gap = self._stale_gap_seconds()
+                                health_snap = self.get_health_snapshot()
+                                status_tag = ""
+                                if health_snap.is_stale:
+                                    status_tag = " ⚠️ [STALE]"
+                                elif not health_snap.connected:
+                                    status_tag = " ❌ [DISCONNECTED]"
+
+                                print(
+                                    f"💓{status_tag} Hệ thống đang chạy... Đã xử lý {processed} sự kiện | "
+                                    f"message={self.health.message_count} | gap={gap:.1f}s"
+                                )
+
+                            if self._should_stop_live_session(
+                                processed=processed,
+                                max_events=max_events,
+                                started_monotonic=session_started_monotonic,
+                                min_runtime_seconds=min_runtime_seconds,
+                                run_until_first_m5=run_until_first_m5,
+                            ):
+                                break
+                            if (
+                                max_events is not None
+                                and processed >= max_events
+                                and not deferred_exit_notice_sent
+                            ):
+                                wait_reasons: list[str] = []
+                                if min_runtime_seconds is not None and (
+                                    time.monotonic() - session_started_monotonic
+                                ) < min_runtime_seconds:
+                                    wait_reasons.append(f"đủ {min_runtime_seconds:.0f}s runtime")
+                                if run_until_first_m5 and not self._has_m5_snapshot():
+                                    wait_reasons.append("snapshot M5 đầu tiên")
+                                if wait_reasons:
+                                    print(
+                                        "⏳ Đã chạm max-events nhưng tiếp tục chạy để chờ "
+                                        + " và ".join(wait_reasons)
+                                        + "."
+                                    )
+                                    deferred_exit_notice_sent = True
+
+                        if status == "completed" or self._stop_event.is_set():
+                            break
+
                         retry_count += 1
                         print("Khởi động lại loop tìm kiếm dữ liệu mới...")
                         await asyncio.sleep(5)
 
-                except Exception as exc:
-                    status = "runtime_error"
-                    print(f"Bắt lỗi trong loop: {exc}")
-                    self.health.last_error = str(exc)
-                    self.health.connected = False
-                    print("Mất kết nối. Đang thử kết nối lại sau 10 giây...")
+                    except Exception as exc:
+                        status = "runtime_error"
+                        print(f"Bắt lỗi trong loop: {exc}")
+                        self.health.last_error = str(exc)
+                        self.health.connected = False
+                        print("Mất kết nối. Đang thử kết nối lại sau 10 giây...")
+                        await asyncio.sleep(10)
+                        retry_count += 1
+                    finally:
+                        self._refresh_collector_health(
+                            spot_collector=collector if "collector" in locals() else None,
+                            bybit_collector=bybit_collector if "bybit_collector" in locals() else None,
+                            okx_collector=okx_collector if "okx_collector" in locals() else None,
+                        )
+                        monitor.stop()
+                        monitor_task.cancel()
+                        if "futures_task" in locals():
+                            futures_task.cancel()
+                        if "bybit_task" in locals():
+                            bybit_task.cancel()
+                        if "okx_task" in locals():
+                            okx_task.cancel()
+                        self.health.connected = False
+                        self._persist_runtime_artifact(
+                            status=status,
+                            started_at=started_at,
+                            processed=processed,
+                            event_counts=event_counts,
+                        )
+
+                except Exception as outer_exc:
+                    print(f"Lỗi hệ thống nghiêm trọng: {outer_exc}")
                     await asyncio.sleep(10)
                     retry_count += 1
-                finally:
-                    self._refresh_collector_health(
-                        spot_collector=collector if 'collector' in locals() else None,
-                        bybit_collector=bybit_collector if 'bybit_collector' in locals() else None,
-                        okx_collector=okx_collector if 'okx_collector' in locals() else None,
-                    )
-                    monitor.stop()
-                    monitor_task.cancel()
-                    if 'futures_task' in locals(): futures_task.cancel()
-                    if 'bybit_task' in locals(): bybit_task.cancel()
-                    if 'okx_task' in locals(): okx_task.cancel()
-                    self.health.connected = False
-                    self._persist_runtime_artifact(
-                        status=status,
-                        started_at=started_at,
-                        processed=processed,
-                        event_counts=event_counts,
-                    )
 
-            except Exception as outer_exc:
-                print(f"Lỗi hệ thống nghiêm trọng: {outer_exc}")
-                await asyncio.sleep(10)
-                retry_count += 1
-
-        if retry_count >= self.max_retries:
-            print("Đã đạt giới hạn số lần thử lại. Dừng hệ thống.")
+            if retry_count >= self.max_retries:
+                print("Đã đạt giới hạn số lần thử lại. Dừng hệ thống.")
+        finally:
+            release_live_runtime_lease(self._runtime_lease)
+            self._runtime_lease = None
 
     async def _process_trade_event(self, trade: NormalizedTrade):
         from cfte.thesis.cards import render_trader_card
@@ -624,7 +643,7 @@ class LiveThesisLoop:
                     f"{transition_event.from_cell} -> {transition_event.to_cell} "
                     f"({transition_event.transition_code})"
                 )
-                asyncio.run(self.store.save_flow_transition(transition_event))
+                await self.store.save_flow_transition(transition_event)
             
             # Update counts from state
             active_list = list(self.thesis_state.values())
@@ -804,6 +823,11 @@ class LiveThesisLoop:
             finished_at=datetime.now(tz=timezone.utc).isoformat(),
             processed_events=processed,
             event_counts=event_counts,
+            pid=os.getpid(),
+            run_id=self._runtime_run_id,
+            owner_host=self._runtime_lease.host if self._runtime_lease is not None else None,
+            lock_path=str(self._runtime_lease.lock_path) if self._runtime_lease is not None else None,
+            lock_acquired_at=self._runtime_lease.acquired_at if self._runtime_lease is not None else None,
             reconnect_count=max(0, self.health.reconnect_count),
             message_count=self.health.message_count,
             idle_timeout_seconds=self.watchdog_idle_seconds,
@@ -822,7 +846,7 @@ class LiveThesisLoop:
             last_transition_alias_vi=self._last_transition_alias_vi,
             degraded_flags=degraded_flags,
         )
-        persist_live_runtime_artifact(self.runtime_report_path, artifact)
+        persist_live_runtime_artifact(self.runtime_report_path, artifact, lease=self._runtime_lease)
 
     def stop(self):
         self._stop_event.set()

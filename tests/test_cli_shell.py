@@ -1,6 +1,7 @@
+import sys
 from pathlib import Path
 
-from cfte.cli.main import build_context, build_parser, command_run_scan, doctor
+from cfte.cli.main import build_context, build_parser, command_run_scan, doctor, main
 
 
 def test_doctor_accepts_personal_profile_and_required_paths_exist(capsys):
@@ -34,6 +35,56 @@ def test_run_live_parser_accepts_runtime_controls():
     assert args.cmd == "run-live"
     assert args.min_runtime_seconds == 330.0
     assert args.run_until_first_m5 is True
+
+
+def test_main_dispatches_run_live_runtime_controls(monkeypatch):
+    captured: dict[str, object] = {}
+
+    monkeypatch.setattr("cfte.cli.main.build_context", lambda profile: "context")
+
+    def _fake_command_run_live(context, symbol, max_events, use_trade, min_runtime_seconds, run_until_first_m5):
+        captured.update(
+            {
+                "context": context,
+                "symbol": symbol,
+                "max_events": max_events,
+                "use_trade": use_trade,
+                "min_runtime_seconds": min_runtime_seconds,
+                "run_until_first_m5": run_until_first_m5,
+            }
+        )
+        return 0
+
+    monkeypatch.setattr("cfte.cli.main.command_run_live", _fake_command_run_live)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "cfte",
+            "--profile",
+            "configs/profiles/personal_binance.yaml",
+            "run-live",
+            "--symbol",
+            "BTCUSDT",
+            "--max-events",
+            "1500",
+            "--min-runtime-seconds",
+            "330",
+            "--run-until-first-m5",
+        ],
+    )
+
+    exit_code = main()
+
+    assert exit_code == 0
+    assert captured == {
+        "context": "context",
+        "symbol": "BTCUSDT",
+        "max_events": 1500,
+        "use_trade": False,
+        "min_runtime_seconds": 330.0,
+        "run_until_first_m5": True,
+    }
 
 
 def test_run_scan_outputs_vietnamese_summary(capsys):

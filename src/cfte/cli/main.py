@@ -125,6 +125,17 @@ def _render_live_runtime_status_lines(payload: dict[str, Any]) -> list[str]:
         ),
     ]
 
+    run_id = str(payload.get("run_id", "")).strip()
+    owner_pid = payload.get("pid")
+    owner_host = str(payload.get("owner_host", "")).strip()
+    if run_id or owner_pid:
+        lines.append(
+            " - Runtime owner: "
+            f"run_id={run_id or 'N/A'}"
+            f", pid={owner_pid if owner_pid is not None else 'N/A'}"
+            + (f", host={owner_host}" if owner_host else "")
+        )
+
     if isinstance(context_health, dict):
         lines.append(
             " - Context: "
@@ -378,7 +389,7 @@ def command_run_live(
     symbol: str | None,
     max_events: int | None,
     use_trade: bool,
-    min_runtime: int | None,
+    min_runtime_seconds: float | None,
     run_until_first_m5: bool,
 ) -> int:
     from cfte.live.engine import LiveThesisLoop
@@ -388,7 +399,7 @@ def command_run_live(
     target_symbol = symbol or live_defaults.get("symbol") or context.profile.defaults.get("symbol") or "BTCUSDT"
     target_max_events = int(max_events or live_defaults.get("max_events", 25))
     configured_min_runtime = live_defaults.get("min_runtime") or live_defaults.get("min_runtime_seconds")
-    target_min_runtime_seconds = min_runtime
+    target_min_runtime_seconds = min_runtime_seconds
     if target_min_runtime_seconds is None and configured_min_runtime is not None:
         target_min_runtime_seconds = float(configured_min_runtime)
     target_run_until_first_m5 = run_until_first_m5 or bool(live_defaults.get("run_until_first_m5", False))

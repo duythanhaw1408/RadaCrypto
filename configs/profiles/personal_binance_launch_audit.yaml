@@ -1,0 +1,44 @@
+profile: personal-binance-launch-audit
+locale: vi-VN
+
+trader:
+  display_name: Trader Binance Launch Audit
+  timezone: Asia/Ho_Chi_Minh
+
+defaults:
+  symbol: BTCUSDT
+  replay_events: fixtures/replay/btcusdt_normalized.jsonl
+  summary_out: data/replay/summary_btcusdt.json
+
+scan:
+  actionable_threshold: 70
+  max_cards: 5
+  trade_window_seconds: 60
+  max_window_trades: 400
+
+live:
+  symbol: BTCUSDT
+  raw_dir: data/raw
+  max_events: 40000
+  watchdog_idle_seconds: 45
+  heartbeat_interval: 250
+  trade_window_seconds: 60
+  max_window_trades: 400
+  thesis_log: data/thesis/thesis_log_launch_audit.jsonl
+
+review:
+  summary_path: data/replay/summary_btcusdt.json
+  daily_summary_path: data/review/daily_summary_launch_audit.json
+  weekly_summary_path: data/review/weekly_review_launch_audit.json
+  tuning_report_path: data/review/tuning_report_launch_audit.json
+  health_report_path: data/review/health_status_launch_audit.json
+  live_runtime_path: data/review/live_runtime_launch_audit.json
+  review_journal_path: data/review/review_journal.jsonl
+
+outcomes:
+  horizons: ["1h", "4h", "24h"]
+
+ux:
+  alert_on_stage_change: true
+  alert_on_score_delta: 10.0
+  alert_score_floor: 65.0
