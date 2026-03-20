@@ -67,18 +67,24 @@ def _runtime_artifact_path(profile_path: str) -> Path:
     return Path(str(review.get("live_runtime_path", DEFAULT_LIVE_RUNTIME_REPORT)))
 
 
-def _runtime_has_m5(runtime_path: Path) -> bool:
+def _runtime_is_ready(runtime_path: Path) -> bool:
+    """Kiểm tra xem artifact live đã sẵn sàng (có M5 và grade) chưa."""
     if not runtime_path.exists():
         return False
     try:
         payload = json.loads(runtime_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return False
-    first_m5_seen_at = payload.get("first_m5_seen_at")
-    if isinstance(first_m5_seen_at, str) and first_m5_seen_at.strip():
-        return True
-    latest_tpfm = payload.get("latest_tpfm", {})
-    return isinstance(latest_tpfm, dict) and bool(latest_tpfm.get("matrix_cell"))
+        
+    # Check 1: Phải thấy M5
+    has_m5 = bool(payload.get("first_m5_seen_at")) or bool(
+        payload.get("latest_tpfm", {}).get("matrix_cell")
+    )
+    
+    # Check 2: Phải có flow grade (Phase 6 requirement)
+    has_grade = bool(payload.get("latest_flow_grade"))
+    
+    return has_m5 and has_grade
 
 
 def _build_live_args(args: argparse.Namespace) -> list[str]:
@@ -139,10 +145,10 @@ def main():
     # 4. Run-live (short burst)
     if not args.skip_live:
         results["live"] = run_command("RUN-LIVE", profile_args + _build_live_args(args))
-        if results["live"] == 0 and not args.allow_missing_m5 and not _runtime_has_m5(runtime_path):
+        if results["live"] == 0 and not args.allow_missing_m5 and not _runtime_is_ready(runtime_path):
             print(
-                "  ❌ [RUN-LIVE] Phiên live kết thúc nhưng runtime artifact vẫn chưa có snapshot M5. "
-                "Đánh dấu chu kỳ là fail để tránh báo xanh giả."
+                "  ❌ [RUN-LIVE] Phiên live hoàn tất nhưng chưa đạt trạng thái SẴN SÀNG (thiếu M5 hoặc Grade). "
+                "Đánh dấu chu kỳ là fail."
             )
             results["live"] = 1
     else:

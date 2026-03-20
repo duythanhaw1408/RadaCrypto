@@ -1,13 +1,12 @@
-name: CFTE Scan Cycle (4x/ngày)
+name: CFTE Scan Cycle (15p/lần)
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 on:
   schedule:
-    # Chạy mỗi 4 giờ: 00:00, 04:00, 08:00, 12:00, 16:00, 20:00 UTC
-    # = 07:00, 11:00, 15:00, 19:00, 23:00, 03:00 ICT (UTC+7)
-    - cron: '0 */4 * * *'
+    # Chạy mỗi 15 phút
+    - cron: '*/15 * * * *'
   push:
     branches: [ main ]
     paths:

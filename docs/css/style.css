@@ -1,0 +1,428 @@
+:root {
+    --bg-base: #0a0b0e;
+    --bg-surface: #16181d;
+    --bg-accent: #1e2227;
+    --accent: #3b82f6;
+    --accent-glow: rgba(59, 130, 246, 0.3);
+    --buy: #10b981;
+    --buy-glow: rgba(16, 185, 129, 0.2);
+    --sell: #f43f5e;
+    --sell-glow: rgba(244, 63, 94, 0.2);
+    --warning: #fbbf24;
+    --warning-glow: rgba(251, 191, 36, 0.2);
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --border: rgba(255, 255, 255, 0.08);
+    --glass: rgba(22, 24, 29, 0.85);
+    
+    --font-main: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+.app-container {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    grid-template-rows: 70px 1fr;
+    height: 100vh;
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+
+/* Glassmorphism utility */
+.glass {
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Header */
+.app-header {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1.5rem;
+    background: var(--bg-surface);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-img {
+    width: 32px;
+    height: 32px;
+}
+
+.logo-text {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.logo-text .accent {
+    color: var(--accent);
+}
+
+.version-badge {
+    font-size: 0.7rem;
+    background: var(--accent-glow);
+    color: var(--accent);
+    padding: 2px 8px;
+    border-radius: 6px;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.main-nav {
+    display: flex;
+    gap: 1rem;
+}
+
+.nav-item {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 8px;
+}
+
+.nav-item:hover, .nav-item.active {
+    color: var(--text-primary);
+    background: var(--bg-accent);
+}
+
+.status-area {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.system-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--buy);
+    box-shadow: 0 0 8px var(--buy);
+}
+
+/* Main Content */
+.dashboard-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+/* Hero Intelligence */
+.intel-hero .intel-main-card {
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.intel-main-card::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, var(--buy-glow) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+}
+
+.symbol-name {
+    font-size: 2.2rem;
+    font-weight: 700;
+}
+
+.timeframe-badge {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+.intel-metrics {
+    display: flex;
+    gap: 2rem;
+}
+
+.metric .m-label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.metric .m-value {
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+.grade-a { color: var(--buy); }
+.bias-long { color: var(--buy); }
+
+.status-headline {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.status-headline h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.indicator.buy {
+    width: 12px;
+    height: 12px;
+    background: var(--buy);
+    border-radius: 50%;
+    box-shadow: 0 0 16px var(--buy);
+}
+
+.conclusion-text {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    max-width: 800px;
+    margin-bottom: 2rem;
+}
+
+.intel-badges {
+    display: flex;
+    gap: 1rem;
+}
+
+.intel-badges .badge {
+    background: var(--bg-accent);
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border: 1px solid var(--border);
+}
+
+/* Pillars */
+.logic-pillars {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.2rem;
+}
+
+.pillar-card {
+    padding: 1.5rem;
+    transition: transform 0.3s ease;
+}
+
+.pillar-card:hover {
+    transform: translateY(-5px);
+}
+
+.pillar-card.highlight {
+    border-color: var(--accent);
+    background: linear-gradient(145deg, var(--bg-surface), #1a1e26);
+}
+
+.pillar-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+}
+
+.pillar-header h3 {
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+}
+
+.pillar-list {
+    list-style: none;
+    font-size: 0.95rem;
+}
+
+.pillar-list li {
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.pos { color: var(--buy); font-weight: 500; }
+.neg { color: var(--sell); font-weight: 500; }
+.neutral { color: var(--text-secondary); }
+
+.decision-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.d-action { font-size: 1.1rem; font-weight: 700; color: var(--buy); }
+.d-trigger, .d-invalid { font-size: 0.9rem; color: var(--text-secondary); }
+
+/* Matrix */
+.matrix-overview {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.matrix-column {
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.matrix-column.highlight {
+    border-color: var(--warning);
+}
+
+.m-title {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.m-state {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.m-state.acc { color: var(--buy); }
+.m-state.distribution { color: var(--sell); }
+
+/* Live Signals Table */
+.signals-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+
+.signals-table th {
+    text-align: left;
+    padding: 10px 15px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+.signals-table td {
+    background: var(--bg-surface);
+    padding: 15px;
+}
+
+.signals-table tr td:first-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
+.signals-table tr td:last-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
+
+/* Sidebar Health Panel */
+.health-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 1.5rem;
+}
+
+.panel-section h3 {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 1.2rem;
+}
+
+.health-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.h-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+}
+
+.h-value.ok { color: var(--buy); }
+.h-value.warning { color: var(--warning); }
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+}
+
+.info-row .v { color: var(--text-primary); }
+
+/* Custom Scrollbar */
+.dashboard-content::-webkit-scrollbar { width: 6px; }
+.dashboard-content::-webkit-scrollbar-track { background: transparent; }
+.dashboard-content::-webkit-scrollbar-thumb { background: var(--bg-accent); border-radius: 10px; }
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .app-container {
+        grid-template-columns: 1fr;
+    }
+    .health-panel {
+        display: none;
+    }
+}
+
+@media (max-width: 900px) {
+    .logic-pillars {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .logic-pillars {
+        grid-template-columns: 1fr;
+    }
+    .main-nav { display: none; }
+}
