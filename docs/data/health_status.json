@@ -1,6 +1,6 @@
 {
   "overall_status": "degraded",
-  "generated_at": "2026-03-20T15:45:06.786115+00:00",
+  "generated_at": "2026-03-20T15:53:19.464656+00:00",
   "checks": [
     {
       "key": "python_version",
@@ -49,14 +49,14 @@
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact replay_summary sẵn sàng",
-      "detail": "2026-03-20T15:27:16.128439+00:00"
+      "detail": "2026-03-20T15:48:06.997065+00:00"
     },
     {
       "key": "daily_summary",
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact daily_summary sẵn sàng",
-      "detail": "2026-03-20T15:28:06.494847+00:00"
+      "detail": "2026-03-20T15:49:06.955495+00:00"
     },
     {
       "key": "weekly_summary",
@@ -84,28 +84,28 @@
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact health_report sẵn sàng",
-      "detail": "2026-03-20T15:45:06.776577+00:00"
+      "detail": "2026-03-20T15:53:19.455625+00:00"
     },
     {
       "key": "live_runtime",
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact live_runtime sẵn sàng",
-      "detail": "2026-03-20T15:27:56.419026+00:00"
+      "detail": "2026-03-20T15:48:56.893961+00:00"
     },
     {
       "key": "live_runtime_owner",
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact live_runtime có owner rõ ràng",
-      "detail": "run_id=b10d145d9bea43f399bf0c7f6744b206 | pid=2501 | host=runnervm46oaq"
+      "detail": "run_id=3ada34ac2f5440ce9eddf9dee355f4a5 | pid=2510 | host=runnervm46oaq"
     },
     {
       "key": "live_runtime_status",
       "level": "critical",
       "status": "warn",
       "summary_vi": "Phiên live gần nhất kết thúc với trạng thái bootstrap_failed",
-      "detail": "Không lấy được snapshot depth Binance cho BTCUSDT: 451 Client Error:  for url: https://api.binance.com/api/v3/depth?symbol=BTCUSDT&limit=1000"
+      "detail": "Không lấy được snapshot depth Binance cho BTCUSDT qua các mirrors: 451 Client Error:  for url: https://api4.binance.com/api/v3/depth?symbol=BTCUSDT&limit=1000"
     },
     {
       "key": "live_runtime_latest_matrix",
