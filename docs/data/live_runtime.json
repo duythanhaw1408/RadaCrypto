@@ -1,8 +1,8 @@
 {
   "symbol": "BTCUSDT",
   "status": "watchdog_timeout",
-  "started_at": "2026-03-21T14:02:32.006724+00:00",
-  "finished_at": "2026-03-21T14:07:05.271161+00:00",
+  "started_at": "2026-03-21T14:10:37.525263+00:00",
+  "finished_at": "2026-03-21T14:15:07.196909+00:00",
   "processed_events": 0,
   "event_counts": {},
   "reconnect_count": 4,
@@ -12,12 +12,12 @@
   "stale_gap_seconds": 0.0,
   "last_error": "Watchdog không nhận được dữ liệu mới trong 45.0s",
   "last_trade_ts": null,
-  "pid": 2441,
-  "run_id": "ce6c9d2c34ff4cb5b926e859b3a3f765",
+  "pid": 2444,
+  "run_id": "7090b7c3e8af4e13a6a58b8562846c0e",
   "owner_host": "runnervm46oaq",
   "lock_path": "data/review/live_runtime.json.lock",
-  "lock_acquired_at": "2026-03-21T14:02:32.006790+00:00",
-  "futures_ws_latency_ms": 618,
+  "lock_acquired_at": "2026-03-21T14:10:37.525320+00:00",
+  "futures_ws_latency_ms": 77,
   "futures_is_stale": false,
   "collector_health": {
     "binance_futures": {
@@ -26,15 +26,16 @@
       "connected": true,
       "connect_attempts": 5,
       "reconnect_count": 0,
-      "message_count": 1231,
+      "message_count": 15875,
       "last_disconnect_reason": null,
       "last_error": null,
-      "latency_ms": 618,
+      "latency_ms": 77,
       "is_stale": false,
-      "last_message_ts": 1774102024653,
-      "idle_gap_seconds": 0.618,
+      "last_message_ts": 1774102507119,
+      "idle_gap_seconds": 0.077,
       "notes": [
-        "agg_trade_age=618ms"
+        "agg_trade_age=77ms",
+        "force_order_age=144910ms"
       ]
     },
     "binance_spot": {
@@ -58,13 +59,13 @@
       "connected": true,
       "connect_attempts": 1,
       "reconnect_count": 0,
-      "message_count": 1497,
+      "message_count": 2725,
       "last_disconnect_reason": null,
       "last_error": null,
       "latency_ms": null,
       "is_stale": false,
-      "last_message_ts": 1774102025243,
-      "idle_gap_seconds": 0.028057098388671875,
+      "last_message_ts": 1774102507184,
+      "idle_gap_seconds": 0.012812614440917969,
       "notes": []
     },
     "okx": {
@@ -73,13 +74,13 @@
       "connected": true,
       "connect_attempts": 1,
       "reconnect_count": 0,
-      "message_count": 2,
+      "message_count": 3165,
       "last_disconnect_reason": null,
       "last_error": null,
       "latency_ms": null,
-      "is_stale": true,
-      "last_message_ts": 1774101976204,
-      "idle_gap_seconds": 49.067065715789795,
+      "is_stale": false,
+      "last_message_ts": 1774102507186,
+      "idle_gap_seconds": 0.010820627212524414,
       "notes": []
     }
   },
@@ -89,7 +90,5 @@
   "latest_transition": {},
   "latest_flow_grade": null,
   "last_transition_alias_vi": null,
-  "degraded_flags": [
-    "okx_stale"
-  ]
+  "degraded_flags": []
 }
