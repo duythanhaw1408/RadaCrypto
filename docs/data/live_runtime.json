@@ -1,8 +1,8 @@
 {
   "symbol": "BTCUSDT",
   "status": "watchdog_timeout",
-  "started_at": "2026-03-21T14:10:37.525263+00:00",
-  "finished_at": "2026-03-21T14:15:07.196909+00:00",
+  "started_at": "2026-03-21T14:17:31.518393+00:00",
+  "finished_at": "2026-03-21T14:22:05.079218+00:00",
   "processed_events": 0,
   "event_counts": {},
   "reconnect_count": 4,
@@ -12,12 +12,12 @@
   "stale_gap_seconds": 0.0,
   "last_error": "Watchdog không nhận được dữ liệu mới trong 45.0s",
   "last_trade_ts": null,
-  "pid": 2444,
-  "run_id": "7090b7c3e8af4e13a6a58b8562846c0e",
+  "pid": 2458,
+  "run_id": "f2949fc7c1af41b6bcd3f92a0059edf5",
   "owner_host": "runnervm46oaq",
   "lock_path": "data/review/live_runtime.json.lock",
-  "lock_acquired_at": "2026-03-21T14:10:37.525320+00:00",
-  "futures_ws_latency_ms": 77,
+  "lock_acquired_at": "2026-03-21T14:17:31.518450+00:00",
+  "futures_ws_latency_ms": 135,
   "futures_is_stale": false,
   "collector_health": {
     "binance_futures": {
@@ -26,16 +26,15 @@
       "connected": true,
       "connect_attempts": 5,
       "reconnect_count": 0,
-      "message_count": 15875,
+      "message_count": 4667,
       "last_disconnect_reason": null,
       "last_error": null,
-      "latency_ms": 77,
+      "latency_ms": 135,
       "is_stale": false,
-      "last_message_ts": 1774102507119,
-      "idle_gap_seconds": 0.077,
+      "last_message_ts": 1774102924944,
+      "idle_gap_seconds": 0.135,
       "notes": [
-        "agg_trade_age=77ms",
-        "force_order_age=144910ms"
+        "agg_trade_age=135ms"
       ]
     },
     "binance_spot": {
@@ -59,13 +58,13 @@
       "connected": true,
       "connect_attempts": 1,
       "reconnect_count": 0,
-      "message_count": 2725,
+      "message_count": 2015,
       "last_disconnect_reason": null,
       "last_error": null,
       "latency_ms": null,
       "is_stale": false,
-      "last_message_ts": 1774102507184,
-      "idle_gap_seconds": 0.012812614440917969,
+      "last_message_ts": 1774102925073,
+      "idle_gap_seconds": 0.006124019622802734,
       "notes": []
     },
     "okx": {
@@ -74,13 +73,13 @@
       "connected": true,
       "connect_attempts": 1,
       "reconnect_count": 0,
-      "message_count": 3165,
+      "message_count": 1692,
       "last_disconnect_reason": null,
       "last_error": null,
       "latency_ms": null,
       "is_stale": false,
-      "last_message_ts": 1774102507186,
-      "idle_gap_seconds": 0.010820627212524414,
+      "last_message_ts": 1774102925069,
+      "idle_gap_seconds": 0.0101318359375,
       "notes": []
     }
   },

@@ -1,6 +1,6 @@
 {
   "overall_status": "degraded",
-  "generated_at": "2026-03-21T14:10:34.712866+00:00",
+  "generated_at": "2026-03-21T14:17:27.911323+00:00",
   "checks": [
     {
       "key": "python_version",
@@ -49,14 +49,14 @@
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact replay_summary sẵn sàng",
-      "detail": "2026-03-21T14:02:31.965077+00:00"
+      "detail": "2026-03-21T14:10:37.483091+00:00"
     },
     {
       "key": "daily_summary",
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact daily_summary sẵn sàng",
-      "detail": "2026-03-21T14:07:05.319375+00:00"
+      "detail": "2026-03-21T14:15:07.247054+00:00"
     },
     {
       "key": "weekly_summary",
@@ -84,21 +84,21 @@
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact health_report sẵn sàng",
-      "detail": "2026-03-21T14:10:34.703772+00:00"
+      "detail": "2026-03-21T14:17:27.902331+00:00"
     },
     {
       "key": "live_runtime",
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact live_runtime sẵn sàng",
-      "detail": "2026-03-21T14:07:05.271679+00:00"
+      "detail": "2026-03-21T14:15:07.197465+00:00"
     },
     {
       "key": "live_runtime_owner",
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact live_runtime có owner rõ ràng",
-      "detail": "run_id=ce6c9d2c34ff4cb5b926e859b3a3f765 | pid=2441 | host=runnervm46oaq"
+      "detail": "run_id=7090b7c3e8af4e13a6a58b8562846c0e | pid=2444 | host=runnervm46oaq"
     },
     {
       "key": "live_runtime_status",
@@ -106,13 +106,6 @@
       "status": "warn",
       "summary_vi": "Phiên live gần nhất bị watchdog timeout",
       "detail": "Watchdog không nhận được dữ liệu mới trong 45.0s"
-    },
-    {
-      "key": "live_runtime_degraded_flags",
-      "level": "warning",
-      "status": "warn",
-      "summary_vi": "Phiên live gần nhất có dấu hiệu suy giảm feed/context",
-      "detail": "okx_stale"
     },
     {
       "key": "live_runtime_latest_matrix",
