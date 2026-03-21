@@ -35,22 +35,22 @@ def test_runtime_has_m5_detects_matrix_cell(tmp_path):
     module = _load_run_cycle_module()
     runtime_path = tmp_path / "live_runtime.json"
     runtime_path.write_text(
-        json.dumps({"latest_tpfm": {"matrix_cell": "POS_INIT__POS_INV"}}, ensure_ascii=False),
+        json.dumps({"latest_tpfm": {"matrix_cell": "POS_INIT__POS_INV"}, "latest_flow_grade": "A"}, ensure_ascii=False),
         encoding="utf-8",
     )
 
-    assert module._runtime_has_m5(runtime_path) is True
+    assert module._runtime_is_ready(runtime_path) is True
 
 
 def test_runtime_has_m5_accepts_first_m5_contract(tmp_path):
     module = _load_run_cycle_module()
     runtime_path = tmp_path / "live_runtime.json"
     runtime_path.write_text(
-        json.dumps({"first_m5_seen_at": "2026-03-20T05:20:49+00:00", "latest_tpfm": {}}, ensure_ascii=False),
+        json.dumps({"first_m5_seen_at": "2026-03-20T05:20:49+00:00", "latest_flow_grade": "A", "latest_tpfm": {}}, ensure_ascii=False),
         encoding="utf-8",
     )
 
-    assert module._runtime_has_m5(runtime_path) is True
+    assert module._runtime_is_ready(runtime_path) is True
 
 
 def test_runtime_has_m5_rejects_empty_latest_matrix(tmp_path):
@@ -61,4 +61,4 @@ def test_runtime_has_m5_rejects_empty_latest_matrix(tmp_path):
         encoding="utf-8",
     )
 
-    assert module._runtime_has_m5(runtime_path) is False
+    assert module._runtime_is_ready(runtime_path) is False
