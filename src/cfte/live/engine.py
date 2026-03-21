@@ -9,6 +9,7 @@ import socket
 from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
+import shutil
 
 from cfte.books.binance_depth import BinanceDepthReconciler
 from cfte.collectors.binance_public import BinancePublicCollector, build_public_streams, try_fetch_depth_snapshot
@@ -47,7 +48,7 @@ from cfte.tpfm.ai_explainer import TPFMAIExplainer
 from cfte.models.events import NormalizedTrade, TapeSnapshot
 
 # Phase 4 Imports
-from cfte.collectors.bybit_public import BybitPublicCollector, build_public_topics, fetch_depth_snapshot as fetch_bybit_depth
+from cfte.collectors.bybit_public import BybitPublicCollector, build_public_topics, try_fetch_depth_snapshot as try_fetch_bybit_depth
 from cfte.collectors.okx_public import OkxPublicCollector, build_public_args
 from cfte.normalizers.bybit import normalize_public_trade as normalize_bybit_trade
 from cfte.normalizers.okx import normalize_trade as normalize_okx_trade
@@ -294,6 +295,40 @@ class LiveThesisLoop:
 
         return sorted(set(flags))
 
+    async def _sync_to_dashboard(self):
+        """
+        Syncs the latest thesis_log.jsonl to the dashboard/data folder if it exists.
+        This provides a seamless local development experience.
+        """
+        try:
+            # Source path
+            src_path = Path("data/thesis/thesis_log.jsonl")
+            if not src_path.exists():
+                return
+
+            # Target path
+            dashboard_data_dir = Path("dashboard/data")
+            if not dashboard_data_dir.exists():
+                # Try to create it if dashboard exists
+                if Path("dashboard").exists():
+                    dashboard_data_dir.mkdir(parents=True, exist_ok=True)
+                else:
+                    return
+
+            target_path = dashboard_data_dir / "thesis_log.jsonl"
+            
+            # Simple copy
+            shutil.copy2(src_path, target_path)
+            
+            # Also sync any TPFM M5 cards if they exist
+            m5_src = Path("data/review/tpfm_m5.json")
+            if m5_src.exists():
+                shutil.copy2(m5_src, dashboard_data_dir / "tpfm_m5.json")
+                
+        except Exception:
+            # Silent failure for sync, don't break the engine
+            pass
+
     async def _init_book(self) -> bool:
         snapshot, error = try_fetch_depth_snapshot(symbol=self.symbol)
         
@@ -301,7 +336,10 @@ class LiveThesisLoop:
         if snapshot is None and "451" in str(error):
             print(f"⚠️ Binance Geo-blocked (451). Thử khởi tạo Book qua Bybit...")
             try:
-                result = fetch_bybit_depth(symbol=self.symbol)
+                result, b_err = try_fetch_bybit_depth(symbol=self.symbol)
+                if result is None:
+                    raise ValueError(f"Bybit fallback failed: {b_err}")
+                
                 # Map Bybit V5 structure to Binance-like for internal books
                 self._depth.apply_snapshot(
                     bids=[(float(i[0]), float(i[1])) for i in result.get("b", [])],
@@ -852,6 +890,8 @@ class LiveThesisLoop:
                                 "flow_alignment_score": signal.flow_alignment_score,
                             }
                         )
+                # After processing all events for this signal, sync to dashboard
+                await self._sync_to_dashboard()
 
             self.thesis_state[signal.thesis_id] = next_state
 

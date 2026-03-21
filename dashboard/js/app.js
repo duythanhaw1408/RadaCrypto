@@ -69,18 +69,73 @@ async function loadRealData() {
     }
 }
 
+/**
+ * Helper to fetch logs from multiple possible paths and handle JSON/JSONL
+ */
+async function fetchLogData() {
+    const paths = [
+        'data/thesis_log.json',
+        'data/thesis/thesis_log.jsonl',
+        'data/thesis_log.jsonl',
+        '../data/thesis/thesis_log.jsonl'
+    ];
+    let logs = [];
+
+    for (const path of paths) {
+        try {
+            const res = await fetch(path);
+            if (!res.ok) continue;
+            const text = await res.text();
+            if (!text.trim()) continue;
+
+            // Handle both JSON array and JSONL
+            if (text.trim().startsWith('[')) {
+                logs = JSON.parse(text);
+            } else {
+                logs = text.trim().split('\n')
+                    .filter(line => line.trim())
+                    .map(line => {
+                        try { return JSON.parse(line); }
+                        catch(e) { return null; }
+                    })
+                    .filter(obj => obj !== null);
+            }
+            if (logs.length > 0) {
+                console.log(`Loaded ${logs.length} logs from ${path}`);
+                return logs;
+            }
+        } catch (e) {
+            continue;
+        }
+    }
+    return [];
+}
+
 async function loadJournalData() {
     const list = document.getElementById('journal-list');
     try {
-        const res = await fetch('data/thesis_log.json');
-        if (!res.ok) throw new Error("File not found");
-        const logs = await res.json();
+        const logs = await fetchLogData();
+        if (logs.length === 0) throw new Error("No logs found");
         
         list.innerHTML = '';
-        logs.reverse().slice(0, 50).forEach(entry => {
+        // Map live events to journal format if needed
+        const journalEntries = logs.map(entry => {
+            if (entry.flow === 'live') {
+                return {
+                    timestamp: entry.event_ts,
+                    message: entry.summary_vi || `Event: ${entry.event_type}`,
+                    bias: entry.direction === 'LONG_BIAS' ? 'LONG' : 'SHORT',
+                    id: entry.thesis_id ? entry.thesis_id.substring(0, 8) : '---'
+                };
+            }
+            return entry; // Assume it's already in journal format from scan
+        });
+
+        journalEntries.reverse().slice(0, 50).forEach(entry => {
             const div = document.createElement('div');
             div.className = 'journal-entry';
-            const time = new Date(entry.timestamp).toLocaleTimeString('vi-VN');
+            const date = new Date(entry.timestamp);
+            const time = date.toLocaleTimeString('vi-VN');
             div.innerHTML = `
                 <span class="entry-time">${time}</span>
                 <span class="entry-message">${entry.message || 'Cập nhật hệ thống'}</span>
@@ -91,7 +146,7 @@ async function loadJournalData() {
             list.appendChild(div);
         });
     } catch (err) {
-        list.innerHTML = '<div class="loading">Chưa có dữ liệu nhật ký thực tế. Đang chờ GitHub Actions...</div>';
+        list.innerHTML = '<div class="loading">Chưa có dữ liệu nhật ký thực tế. Đang chờ hệ thống...</div>';
     }
 }
 
@@ -113,34 +168,17 @@ async function loadLiveSignals() {
     if (!tableBody) return;
 
     try {
-        // Try multiple paths to support both Local and GitHub Pages
-        const paths = ['data/thesis_log.json', '../data/thesis/thesis_log.jsonl', 'data/thesis/thesis_log.jsonl'];
-        let logs = [];
-
-        for (const path of paths) {
-            try {
-                const res = await fetch(path);
-                if (!res.ok) continue;
-                const text = await res.text();
-                // Handle both JSON array and JSONL
-                if (text.trim().startsWith('[')) {
-                    logs = JSON.parse(text);
-                } else {
-                    logs = text.trim().split('\n').map(l => JSON.parse(l));
-                }
-                break;
-            } catch (e) { continue; }
-        }
-
+        const logs = await fetchLogData();
         if (logs.length === 0) return;
 
         // Map setup codes to display names
         const setupMap = {
-            'stealth_accumulation': 'Tích lũy âm thầm',
-            'breakout_ignition': 'Kích hoạt bứt phá',
-            'distribution': 'Phân phối / Xả hàng',
-            'failed_breakout': 'Bứt phá thất bại',
-            'absorption_play': 'Vùng hấp thụ'
+            'stealth_accumulation': 'Stealth Accum.',
+            'breakout_ignition': 'Breakout Confirm',
+            'trend_continuation': 'Trend Conti.',
+            'distribution': 'Distribution',
+            'failed_breakout': 'Failed Breakout',
+            'absorption_play': 'Absorption Play'
         };
 
         // Filter for actionable signals or just latest transitions
@@ -153,15 +191,21 @@ async function loadLiveSignals() {
             const isLong = sig.direction === 'LONG_BIAS' || (sig.summary_vi && sig.summary_vi.includes('Mua'));
             const grade = sig.score >= 90 ? 'A+' : sig.score >= 80 ? 'A' : sig.score >= 70 ? 'B+' : 'B';
             
+            // ACTION and INVALIDATION logic
+            const action = isLong ? 'Mua nhẹ tại Market' : 'Bán nhẹ tại Market';
+            const invalidation = isLong ? 'Thủng đáy m5' : 'Vượt đỉnh m5';
+
+            const matrix = sig.matrix_cell ? sig.matrix_cell.charAt(0).toUpperCase() + sig.matrix_cell.slice(1).toLowerCase() : 'N/A';
+
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>#${sig.thesis_id ? sig.thesis_id.substring(0, 4) : '---'}</td>
                 <td>${setupMap[sig.setup] || sig.setup || 'N/A'}</td>
                 <td><span class="badge ${isLong ? 'buy' : 'sell'}">${isLong ? 'LONG' : 'SHORT'}</span></td>
-                <td>${sig.matrix_cell || 'N/A'}</td>
+                <td>${matrix}</td>
                 <td><span class="grade grade-${grade.toLowerCase().replace('+', 'plus')}">${grade}</span></td>
-                <td>${sig.summary_vi ? sig.summary_vi.split('.')[0] : 'Đang theo dõi'}</td>
-                <td>Cấu trúc vỡ</td>
+                <td>${action}</td>
+                <td>${invalidation}</td>
             `;
             tableBody.appendChild(row);
         });

@@ -1,211 +1,378 @@
-// RadaCrypto Dashboard Logic - Multi-View & Data Driven
+// RadaCrypto Dashboard Logic - Pages-friendly snapshot mode
 
-document.addEventListener('DOMContentLoaded', () => {
-    initNavigation();
+let realDataLoaded = false;
+
+document.addEventListener("DOMContentLoaded", () => {
     initSessionTimer();
     initMockLiveFeed();
     loadRealData();
-    
+
     // Refresh data every 1 minute
     setInterval(loadRealData, 60000);
 });
 
-/**
- * Điều hướng giữa các View
- */
-function initNavigation() {
-    const navItems = document.querySelectorAll('.nav-item');
-    const views = document.querySelectorAll('.app-view');
-    
-    const viewMap = {
-        'Tổng quan': 'view-overview',
-        'Thị trường Live': 'view-live',
-        'Review nhật ký': 'view-journal',
-        'Tuning hệ thống': 'view-tuning'
-    };
-
-    navItems.forEach(item => {
-        item.addEventListener('click', () => {
-            // Update Active Nav
-            navItems.forEach(n => n.classList.remove('active'));
-            item.classList.add('active');
-            
-            // Switch View
-            const targetId = viewMap[item.textContent.trim()];
-            views.forEach(v => v.classList.remove('active'));
-            const targetView = document.getElementById(targetId);
-            if (targetView) {
-                targetView.classList.add('active');
-                
-                // Trigger specific loaders
-                if (targetId === 'view-journal') loadJournalData();
-                if (targetId === 'view-live') loadLiveMarketData();
-            }
-        });
-    });
+async function fetchJson(path) {
+    try {
+        const response = await fetch(path);
+        if (!response.ok) {
+            return null;
+        }
+        return await response.json();
+    } catch (_err) {
+        return null;
+    }
 }
 
 async function loadRealData() {
-    try {
-        const [statusRes, m5Res] = await Promise.all([
-            fetch('data/actions_status.json').catch(() => null),
-            fetch('data/tpfm_m5.json').catch(() => null)
-        ]);
+    const [status, m5List, summary, thesisLog] = await Promise.all([
+        fetchJson("data/actions_status.json"),
+        fetchJson("data/tpfm_m5.json"),
+        fetchJson("data/summary_btcusdt.json"),
+        fetchJson("data/thesis_log.json"),
+    ]);
 
-        if (statusRes && statusRes.ok) {
-            const status = await statusRes.json();
-            updateSystemHealth(status);
+    const liveSnapshot = Array.isArray(m5List) ? m5List.find((entry) => entry && entry.matrix_cell) : null;
+    const replaySignals = extractSignalsFromThesisLog(thesisLog);
+    const summarySignals = Array.isArray(summary?.top_signals) ? summary.top_signals : [];
+    const signals = replaySignals.length ? replaySignals : summarySignals;
+    const primarySignal = signals[0] || status?.top_signal || null;
+
+    updateSystemHealth(status, Boolean(liveSnapshot), Boolean(primarySignal));
+
+    if (liveSnapshot) {
+        updateIntelligenceHeroFromLive(liveSnapshot);
+        updateMatrixGridFromLive(liveSnapshot);
+        realDataLoaded = true;
+    } else if (primarySignal) {
+        updateIntelligenceHeroFromReplay(primarySignal);
+        updateMatrixGridFromReplay(primarySignal, status);
+        realDataLoaded = true;
+    }
+
+    if (signals.length > 0) {
+        updateSignalsTable(signals);
+        realDataLoaded = true;
+    }
+}
+
+function extractSignalsFromThesisLog(thesisLog) {
+    if (!Array.isArray(thesisLog) || thesisLog.length === 0) {
+        return [];
+    }
+    for (let index = thesisLog.length - 1; index >= 0; index -= 1) {
+        const record = thesisLog[index];
+        if (record && Array.isArray(record.signals) && record.signals.length > 0) {
+            return record.signals.slice(0, 5);
         }
-
-        if (m5Res && m5Res.ok) {
-            const m5List = await m5Res.json();
-            if (m5List && m5List.length > 0) {
-                updateIntelligenceHero(m5List[0]);
-                updateMatrixGrid(m5List[0]);
-            }
-        }
-    } catch (err) {
-        console.warn("Dữ liệu live chưa sẵn sàng, đang dùng chế độ demo.", err);
     }
+    return [];
 }
 
-async function loadJournalData() {
-    const list = document.getElementById('journal-list');
-    try {
-        const res = await fetch('data/thesis_log.json');
-        if (!res.ok) throw new Error("File not found");
-        const logs = await res.json();
-        
-        list.innerHTML = '';
-        logs.reverse().slice(0, 50).forEach(entry => {
-            const div = document.createElement('div');
-            div.className = 'journal-entry';
-            const time = new Date(entry.timestamp).toLocaleTimeString('vi-VN');
-            div.innerHTML = `
-                <span class="entry-time">${time}</span>
-                <span class="entry-message">${entry.message || 'Cập nhật hệ thống'}</span>
-                <span class="badge ${entry.bias === 'LONG' ? 'buy' : 'sell'}">${entry.bias || 'N/A'}</span>
-                <span class="entry-grade">Grade: ${entry.flow_grade || 'B'}</span>
-                <span style="color: var(--text-secondary)">#${entry.id || '---'}</span>
-            `;
-            list.appendChild(div);
-        });
-    } catch (err) {
-        list.innerHTML = '<div class="loading">Chưa có dữ liệu nhật ký thực tế. Đang chờ GitHub Actions...</div>';
-    }
-}
-
-function loadLiveMarketData() {
-    // Tạm thời dùng mock data cho Live Market view
-    const grid = document.querySelector('.live-symbols-grid');
-    if (grid && grid.children.length === 0) {
-        grid.innerHTML = `
-            <div class="symbol-mini-card glass highlight">
-                <span>BTCUSDT</span>
-                <span class="pos">+2.4%</span>
-            </div>
-            <div class="symbol-mini-card glass">
-                <span>ETHUSDT</span>
-                <span class="pos">+1.8%</span>
-            </div>
-             <div class="symbol-mini-card glass">
-                <span>SOLUSDT</span>
-                <span class="neg">-0.5%</span>
-            </div>
-        `;
-    }
-}
-
-function updateSystemHealth(status) {
-    const healthValues = document.querySelectorAll('.h-value');
+function updateSystemHealth(status, hasLiveSnapshot, hasSnapshotData) {
+    const healthValues = document.querySelectorAll(".h-value");
     if (healthValues.length >= 3) {
-        healthValues[0].textContent = status.scan_count > 0 ? "Ổn định" : "Khởi tạo";
-        healthValues[0].className = "h-value ok";
-        
-        const grade = status.latest_flow_grade || "N/A";
-        const gradeEl = document.querySelector('.metric .grade-a');
-        if (gradeEl) {
-            gradeEl.textContent = grade;
-            gradeEl.className = `m-value grade-${grade.toLowerCase().startsWith('a') ? 'a' : 'b'}`;
-        }
+        healthValues[0].textContent = hasLiveSnapshot ? "Live M5" : hasSnapshotData ? "Scan snapshot" : "Khởi tạo";
+        healthValues[0].className = `h-value ${hasLiveSnapshot || hasSnapshotData ? "ok" : "warning"}`;
+
+        const grade = status?.latest_flow_grade || "N/A";
+        healthValues[1].textContent = hasLiveSnapshot ? `Grade ${grade}` : "Không dùng live CI";
+        healthValues[1].className = `h-value ${hasLiveSnapshot ? "ok" : "warning"}`;
+
+        healthValues[2].textContent = hasLiveSnapshot ? "Flow thật" : hasSnapshotData ? "Replay thật" : "Thiếu dữ liệu";
+        healthValues[2].className = `h-value ${hasSnapshotData ? "ok" : "warning"}`;
     }
-    
-    // Session timer (distance from last run)
-    const sessionTimerValue = document.querySelector('.session-timer .value');
-    if (status.last_run && sessionTimerValue) {
+
+    const systemStatus = document.querySelector(".status-text");
+    if (systemStatus) {
+        systemStatus.textContent = hasLiveSnapshot
+            ? "Hệ thống: Live M5 sẵn sàng"
+            : hasSnapshotData
+                ? "Hệ thống: Chế độ scan snapshot"
+                : "Hệ thống: Đang khởi tạo";
+    }
+
+    const gradeEl = document.querySelector(".metric .m-value");
+    if (gradeEl && status?.latest_flow_grade) {
+        const grade = String(status.latest_flow_grade);
+        gradeEl.textContent = grade;
+        gradeEl.className = `m-value grade-${grade.toLowerCase().startsWith("a") ? "a" : "b"}`;
+    }
+
+    const sessionTimer = document.querySelector(".session-timer .value");
+    if (status?.last_run && sessionTimer) {
         const lastRun = new Date(status.last_run);
         const now = new Date();
         const diffMs = now - lastRun;
-        const diffMins = Math.floor(diffMs / 60000);
-        sessionTimerValue.textContent = diffMins < 1 ? "Vừa mới đây" : `${diffMins} phút trước`;
+        const diffMins = Math.max(0, Math.floor(diffMs / 60000));
+        sessionTimer.textContent = `Cách đây ${diffMins} phút`;
+    }
+
+    const ownerRows = document.querySelectorAll(".info-row .v");
+    if (ownerRows.length >= 2) {
+        ownerRows[0].textContent = status?.data_mode === "scan_only" ? "GitHub Actions" : "Live runtime";
+        ownerRows[1].textContent = status?.live_enabled === false ? "scan-only" : "live";
     }
 }
 
-function updateIntelligenceHero(m5) {
-    const headline = document.querySelector('.status-headline h2');
-    const conclusion = document.querySelector('.conclusion-text');
-    const biasEl = document.querySelector('.bias-long');
-    const indicator = document.querySelector('.indicator');
+function updateIntelligenceHeroFromLive(m5) {
+    const headline = document.querySelector(".status-headline h2");
+    const conclusion = document.querySelector(".conclusion-text");
+    const biasEl = document.querySelector(".bias-long, .bias-short");
+    const indicator = document.querySelector(".indicator");
+    const badges = document.querySelectorAll(".intel-badges .badge");
 
-    if (m5.matrix_cell) {
-        const isPos = m5.buy_pressure > 0.5;
-        headline.textContent = m5.matrix_cell;
-        conclusion.textContent = `Dòng tiền đang ở trạng thái ${m5.matrix_cell}. Thuận pha ${(isPos ? 'Mua' : 'Bán')} mạnh.`;
-        
-        if (biasEl) {
-            biasEl.textContent = isPos ? "THUẬN MUA" : "THUẬN BÁN";
-            biasEl.className = isPos ? "m-value bias-long" : "m-value bias-short";
-        }
-        
-        if (indicator) {
-            indicator.className = isPos ? "indicator buy" : "indicator sell";
-        }
+    const isBuy = Number(m5.initiative_score || 0) >= 0;
+    const alias = m5.matrix_alias_vi || m5.matrix_cell || "Flow M5";
+    const summary = m5.decision_summary_vi || "Dòng tiền live đang sẵn sàng cho trader đọc trực tiếp.";
+
+    if (headline) {
+        headline.textContent = alias;
+    }
+    if (conclusion) {
+        conclusion.textContent = summary;
+    }
+    if (biasEl) {
+        biasEl.textContent = isBuy ? "THUẬN MUA" : "THUẬN BÁN";
+        biasEl.className = isBuy ? "m-value bias-long" : "m-value bias-short";
+        biasEl.style.color = isBuy ? "var(--buy)" : "var(--sell)";
+    }
+    if (indicator) {
+        indicator.className = isBuy ? "indicator buy" : "indicator sell";
+    }
+    if (badges.length >= 3) {
+        badges[0].textContent = `Flow: ${m5.flow_state_code || "LIVE"}`;
+        badges[1].textContent = `Matrix: ${alias}`;
+        badges[2].textContent = `Tư thế: ${m5.decision_posture || "THEO DÕI"}`;
     }
 }
 
-function updateMatrixGrid(m5) {
-    const m5State = document.querySelector('.matrix-overview .matrix-column:nth-child(1) .m-state');
-    if (m5State) {
-        m5State.textContent = m5.matrix_cell;
-        m5State.className = `m-state ${m5.buy_pressure > 0.5 ? 'acc' : 'distribution'}`;
+function updateIntelligenceHeroFromReplay(signal) {
+    const headline = document.querySelector(".status-headline h2");
+    const conclusion = document.querySelector(".conclusion-text");
+    const biasEl = document.querySelector(".bias-long, .bias-short");
+    const indicator = document.querySelector(".indicator");
+    const badges = document.querySelectorAll(".intel-badges .badge");
+
+    const isBuy = String(signal.direction || "").includes("LONG");
+    const setupLabel = humanizeSetup(signal.setup);
+    const summary = signal.decision_summary_vi || summarizeSignal(signal);
+
+    if (headline) {
+        headline.textContent = `${setupLabel} | Snapshot scan`;
     }
+    if (conclusion) {
+        conclusion.textContent = summary;
+    }
+    if (biasEl) {
+        biasEl.textContent = isBuy ? "THUẬN MUA" : "THUẬN BÁN";
+        biasEl.className = isBuy ? "m-value bias-long" : "m-value bias-short";
+        biasEl.style.color = isBuy ? "var(--buy)" : "var(--sell)";
+    }
+    if (indicator) {
+        indicator.className = isBuy ? "indicator buy" : "indicator sell";
+    }
+    if (badges.length >= 3) {
+        badges[0].textContent = `Flow: ${signal.flow_state || "SCAN SNAPSHOT"}`;
+        badges[1].textContent = `Setup: ${setupLabel}`;
+        badges[2].textContent = `Trạng thái: ${humanizeStage(signal.stage)}`;
+    }
+
+    const gradeMetric = document.querySelector(".intel-metrics .metric .m-value.grade-a, .intel-metrics .metric .m-value.grade-b");
+    if (gradeMetric) {
+        const grade = deriveGrade(signal);
+        gradeMetric.textContent = grade;
+        gradeMetric.className = `m-value grade-${grade.toLowerCase().startsWith("a") ? "a" : "b"}`;
+    }
+}
+
+function updateMatrixGridFromLive(m5) {
+    const matrixColumns = document.querySelectorAll(".matrix-overview .matrix-column");
+    if (matrixColumns.length === 0) {
+        return;
+    }
+    updateMatrixColumn(matrixColumns[0], {
+        title: "Matrix M5",
+        state: m5.matrix_alias_vi || m5.matrix_cell || "Live M5",
+        grade: m5.tradability_grade || "A",
+        bias: Number(m5.initiative_score || 0) >= 0 ? "Mua" : "Bán",
+        className: Number(m5.initiative_score || 0) >= 0 ? "acc" : "distribution",
+    });
+}
+
+function updateMatrixGridFromReplay(signal, status) {
+    const matrixColumns = document.querySelectorAll(".matrix-overview .matrix-column");
+    if (matrixColumns.length === 0) {
+        return;
+    }
+    updateMatrixColumn(matrixColumns[0], {
+        title: "Snapshot scan",
+        state: humanizeSetup(signal.setup),
+        grade: deriveGrade(signal),
+        bias: String(signal.direction || "").includes("LONG") ? "Mua" : "Bán",
+        className: String(signal.direction || "").includes("LONG") ? "acc" : "distribution",
+    });
+    if (matrixColumns.length >= 2) {
+        updateMatrixColumn(matrixColumns[1], {
+            title: "Nguồn dữ liệu",
+            state: status?.data_mode === "scan_only" ? "Replay thật" : "Khởi tạo",
+            grade: status?.latest_flow_grade || "N/A",
+            bias: "Scan",
+            className: "neutral",
+        });
+    }
+}
+
+function updateMatrixColumn(column, payload) {
+    const title = column.querySelector(".m-title");
+    const state = column.querySelector(".m-state");
+    const grade = column.querySelector(".m-grade");
+    const bias = column.querySelector(".m-bias");
+
+    if (title) {
+        title.textContent = payload.title;
+    }
+    if (state) {
+        state.textContent = payload.state;
+        state.className = `m-state ${payload.className}`;
+    }
+    if (grade) {
+        grade.textContent = `Grade: ${payload.grade}`;
+    }
+    if (bias) {
+        bias.textContent = `Bias: ${payload.bias}`;
+    }
+}
+
+function updateSignalsTable(signals) {
+    const tableBody = document.querySelector(".signals-table tbody");
+    if (!tableBody) {
+        return;
+    }
+
+    tableBody.innerHTML = "";
+    signals.slice(0, 5).forEach((signal) => {
+        const row = document.createElement("tr");
+        const isBuy = String(signal.direction || "").includes("LONG");
+        row.innerHTML = `
+            <td>#${String(signal.thesis_id || "").slice(0, 6)}</td>
+            <td>${humanizeSetup(signal.setup)}</td>
+            <td><span class="badge ${isBuy ? "buy" : "sell"}">${isBuy ? "LONG" : "SHORT"}</span></td>
+            <td>${signal.matrix_alias_vi || humanizeStage(signal.stage)}</td>
+            <td><span class="grade">${deriveGrade(signal)}</span></td>
+            <td>${truncateText(signal.entry_style || summarizeSignal(signal), 42)}</td>
+            <td>${truncateText(signal.invalidation || "Chờ xác nhận", 30)}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+function humanizeSetup(setup) {
+    const labels = {
+        stealth_accumulation: "Tích lũy âm thầm",
+        breakout_ignition: "Kích hoạt bứt phá",
+        failed_breakout: "Bứt phá thất bại",
+        distribution: "Phân phối",
+    };
+    return labels[setup] || String(setup || "Snapshot replay");
+}
+
+function humanizeStage(stage) {
+    const labels = {
+        ACTIONABLE: "Có thể hành động",
+        WATCHLIST: "Danh sách theo dõi",
+        CONFIRMED: "Đã xác nhận",
+        DETECTED: "Mới phát hiện",
+        INVALIDATED: "Đã vô hiệu",
+    };
+    return labels[stage] || String(stage || "Snapshot");
+}
+
+function deriveGrade(signal) {
+    if (signal.tradability_grade) {
+        return signal.tradability_grade;
+    }
+    const score = Number(signal.score || 0);
+    if (score >= 85) {
+        return "A";
+    }
+    if (score >= 70) {
+        return "B";
+    }
+    if (score > 0) {
+        return "C";
+    }
+    return "N/A";
+}
+
+function summarizeSignal(signal) {
+    const why = Array.isArray(signal.why_now) ? signal.why_now.slice(0, 2).join(" | ") : "";
+    if (why) {
+        return why;
+    }
+    if (signal.entry_style) {
+        return signal.entry_style;
+    }
+    return "Snapshot replay mới nhất từ scan-cycle.";
+}
+
+function truncateText(value, maxLength) {
+    const text = String(value || "");
+    if (text.length <= maxLength) {
+        return text;
+    }
+    return `${text.slice(0, maxLength - 1)}…`;
 }
 
 function initSessionTimer() {
-    const timerValue = document.querySelector('.session-timer .value');
-    if (timerValue && (timerValue.textContent.includes('phút') || timerValue.textContent.includes('Vừa'))) return;
-    
+    const timerValue = document.querySelector(".session-timer .value");
+    if (!timerValue || timerValue.textContent.includes("phút")) {
+        return;
+    }
+
     let seconds = 0;
     setInterval(() => {
-        if (timerValue.textContent.includes('phút') || timerValue.textContent.includes('Vừa')) return;
-        seconds++;
+        if (timerValue.textContent.includes("phút")) {
+            return;
+        }
+        seconds += 1;
         const h = Math.floor(seconds / 3600);
         const m = Math.floor((seconds % 3600) / 60);
         const s = seconds % 60;
-        timerValue.textContent = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        timerValue.textContent =
+            `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
     }, 1000);
 }
 
 function initMockLiveFeed() {
-    const tableBody = document.querySelector('#live-signals-table tbody');
-    if (!tableBody) return;
-    
+    const tableBody = document.querySelector(".signals-table tbody");
+    if (!tableBody) {
+        return;
+    }
+
     setInterval(() => {
-        if (tableBody.children.length > 8) return;
+        if (realDataLoaded) {
+            return;
+        }
         const id = Math.floor(Math.random() * 9000) + 1000;
         const setup = "Flow Confirmation";
         const isLong = Math.random() > 0.5;
-        const row = document.createElement('tr');
+        const row = document.createElement("tr");
         row.innerHTML = `
             <td>#${id}</td>
             <td>${setup}</td>
-            <td><span class="badge ${isLong ? 'buy' : 'sell'}">${isLong ? 'LONG' : 'SHORT'}</span></td>
-            <td>Matrix Meta</td>
+            <td><span class="badge ${isLong ? "buy" : "sell"}">${isLong ? "LONG" : "SHORT"}</span></td>
+            <td>Chế độ demo</td>
             <td><span class="grade">A</span></td>
             <td>Theo dõi Vol</td>
             <td>Vỡ cấu trúc</td>
         `;
-        if (tableBody.firstChild) tableBody.insertBefore(row, tableBody.firstChild);
-        else tableBody.appendChild(row);
+        if (tableBody.firstChild) {
+            tableBody.insertBefore(row, tableBody.firstChild);
+        } else {
+            tableBody.appendChild(row);
+        }
+        if (tableBody.children.length > 8) {
+            tableBody.removeChild(tableBody.lastChild);
+        }
     }, 30000);
 }

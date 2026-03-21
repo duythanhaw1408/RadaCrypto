@@ -1,12 +1,12 @@
-name: CFTE Scan Cycle (15p/lần)
+name: CFTE Scan Cycle (Snapshot cho Pages)
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 on:
   schedule:
-    # Chạy mỗi 15 phút
-    - cron: '*/15 * * * *'
+    # Chạy mỗi 2 giờ, phù hợp với free-tier snapshot
+    - cron: '5 */2 * * *'
   push:
     branches: [ main ]
     paths:
@@ -58,11 +58,10 @@ jobs:
         PYTHONPATH: src
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       run: |
-        # Chạy 5000 events live để đảm bảo bao phủ đủ dữ liệu trong 15 phút
+        # GitHub-hosted runner thường bị geo-block bởi Binance/Bybit.
+        # Ở free-tier public Pages, ưu tiên scan/replay-first thay vì live giả xanh.
         python scripts/run_cycle.py \
-          --max-events 5000 \
-          --min-runtime-seconds 330 \
-          --allow-missing-m5 \
+          --skip-live \
           --profile configs/profiles/personal_binance.yaml
 
     - name: Copy data to docs for GitHub Pages
@@ -110,17 +109,29 @@ jobs:
         import json, os
         from datetime import datetime, timezone
         runtime = {}
+        summary = {}
         if os.path.exists('data/review/live_runtime.json'):
           runtime = json.load(open('data/review/live_runtime.json'))
+        if os.path.exists('data/replay/summary_btcusdt.json'):
+          summary = json.load(open('data/replay/summary_btcusdt.json'))
+        top_signal = (summary.get('top_signals') or [None])[0] or {}
+        derived_grade = top_signal.get('tradability_grade') or (
+          'A' if top_signal.get('stage') == 'ACTIONABLE'
+          else 'B' if top_signal.get('stage') == 'WATCHLIST'
+          else 'C' if top_signal else None
+        )
         status = {
           'last_run': datetime.now(tz=timezone.utc).isoformat(),
           'last_scan_time': datetime.now(tz=timezone.utc).isoformat(),
           'scan_count': ${{ github.run_number }},
+          'data_mode': 'scan_only',
+          'live_enabled': False,
           'first_m5_seen_at': runtime.get('first_m5_seen_at'),
-          'latest_flow_grade': runtime.get('latest_flow_grade'),
+          'latest_flow_grade': runtime.get('latest_flow_grade') or derived_grade,
           'latest_transition': runtime.get('latest_transition', {}),
+          'top_signal': top_signal,
           'workflows': [
-            {'name':'CFTE Scan Cycle (4h/lần)','status':'success','last_run':datetime.now(tz=timezone.utc).isoformat(),'duration':'~2m'},
+            {'name':'CFTE Scan Cycle (scan-only / 2h)','status':'success','last_run':datetime.now(tz=timezone.utc).isoformat(),'duration':'~2m'},
           ]
         }
         json.dump(status, open('docs/data/actions_status.json','w'), ensure_ascii=False)

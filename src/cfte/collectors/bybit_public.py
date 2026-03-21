@@ -10,9 +10,26 @@ from cfte.collectors.health import CollectorErrorSurface, CollectorHealthSnapsho
 import ssl
 import certifi
 
-BYBIT_WS_BASE = "wss://stream.bybit.com/v5/public/linear"
-BYBIT_REST_BASE = "https://api.bybit.com"
+BYBIT_REST_MIRRORS = [
+    "https://api.bybit.com",
+    "https://api.bytick.com",
+    "https://api.bybit.nl",
+    "https://api.bybit.be",
+]
+BYBIT_REST_BASE = BYBIT_REST_MIRRORS[0]
 BYBIT_VENUE = "bybit"
+
+BYBIT_WS_MIRRORS = [
+    "wss://stream.bybit.com/v5/public/linear",
+    "wss://stream.bytick.com/v5/public/linear",
+]
+BYBIT_WS_BASE = BYBIT_WS_MIRRORS[0]
+
+COMMON_USER_AGENTS = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+]
 
 
 def build_public_topics(symbols: list[str]) -> list[str]:
@@ -20,16 +37,18 @@ def build_public_topics(symbols: list[str]) -> list[str]:
     for symbol in symbols:
         upper = symbol.upper().replace("-", "")
         topics.append(f"publicTrade.{upper}")
-        topics.append(f"orderbook.50.{upper}") # Use 50 for better coverage than 1
+        topics.append(f"orderbook.50.{upper}") 
     return topics
 
 
 def fetch_depth_snapshot(symbol: str, limit: int = 50, rest_base: str = BYBIT_REST_BASE) -> dict[str, object]:
     """Fetch L2 orderbook from Bybit V5."""
     import requests
+    import random
     url = f"{rest_base}/v5/market/orderbook"
     params = {"category": "linear", "symbol": symbol.upper(), "limit": limit}
-    resp = requests.get(url, params=params, timeout=5)
+    headers = {"User-Agent": random.choice(COMMON_USER_AGENTS)}
+    resp = requests.get(url, params=params, headers=headers, timeout=5)
     resp.raise_for_status()
     data = resp.json()
     if data.get("retCode") != 0:
@@ -37,12 +56,36 @@ def fetch_depth_snapshot(symbol: str, limit: int = 50, rest_base: str = BYBIT_RE
     return data.get("result", {})
 
 
+def try_fetch_depth_snapshot(
+    symbol: str,
+    limit: int = 50,
+    rest_base: str = BYBIT_REST_BASE,
+) -> tuple[dict[str, object] | None, str | None]:
+    """Try multiple mirrors to fetch Bybit depth snapshot."""
+    import requests
+    mirrors = [rest_base] + [m for m in BYBIT_REST_MIRRORS if m != rest_base]
+    last_error = None
+    
+    for mirror in mirrors:
+        try:
+            snapshot = fetch_depth_snapshot(symbol=symbol, limit=limit, rest_base=mirror)
+            return snapshot, None
+        except requests.RequestException as exc:
+            last_error = exc
+            print(f"⚠️ Bybit Mirror failed ({mirror}): {exc}")
+            continue
+            
+    return None, f"Không lấy được snapshot depth Bybit cho {symbol.upper()} qua các mirrors: {last_error}"
+
+
 def fetch_recent_trades(symbol: str, limit: int = 50, rest_base: str = BYBIT_REST_BASE) -> list[dict[str, object]]:
     """Fetch recent trades from Bybit V5."""
     import requests
+    import random
     url = f"{rest_base}/v5/market/recent-trade"
     params = {"category": "linear", "symbol": symbol.upper(), "limit": limit}
-    resp = requests.get(url, params=params, timeout=5)
+    headers = {"User-Agent": random.choice(COMMON_USER_AGENTS)}
+    resp = requests.get(url, params=params, headers=headers, timeout=5)
     resp.raise_for_status()
     data = resp.json()
     if data.get("retCode") != 0:
@@ -53,7 +96,6 @@ def fetch_recent_trades(symbol: str, limit: int = 50, rest_base: str = BYBIT_RES
 @dataclass(slots=True)
 class BybitPublicCollector:
     topics: list[str]
-    ws_base: str = BYBIT_WS_BASE
     reconnect_sleep_seconds: float = 3.0
     _state: CollectorState = field(default="idle", init=False, repr=False)
     _connected: bool = field(default=False, init=False, repr=False)
@@ -105,21 +147,24 @@ class BybitPublicCollector:
         self._last_error = error
 
     async def stream_forever(self):
+        mirror_idx = 0
         while True:
             try:
                 import websockets
                 ssl_context = ssl.create_default_context(cafile=certifi.where())
 
                 self._connect_attempts += 1
+                current_url = BYBIT_WS_MIRRORS[mirror_idx % len(BYBIT_WS_MIRRORS)]
+                
                 async with websockets.connect(
-                    self.ws_base, 
+                    current_url, 
                     ssl=ssl_context, 
                     ping_interval=20, 
-                    ping_timeout=20, # Increased timeout
+                    ping_timeout=20,
                 ) as ws:
                     self._mark_connected()
                     await ws.send(json.dumps(self.subscription_message()))
-                    print(f"📡 Bybit Stream Connected: {self.ws_base}")
+                    print(f"📡 Bybit Stream Connected: {current_url}")
                     async for raw in ws:
                         self._record_message()
                         data = json.loads(raw)
@@ -129,5 +174,6 @@ class BybitPublicCollector:
                         yield data
             except Exception as exc:
                 self._record_failure(exc)
-                print(f"📡 Bybit WS Error: {exc}")
+                print(f"📡 Bybit WS Error on {current_url}: {exc}")
+                mirror_idx += 1
                 await asyncio.sleep(self.reconnect_sleep_seconds)
