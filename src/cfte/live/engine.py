@@ -49,7 +49,7 @@ from cfte.models.events import NormalizedTrade, TapeSnapshot
 
 # Phase 4 Imports
 from cfte.collectors.bybit_public import BybitPublicCollector, build_public_topics, try_fetch_depth_snapshot as try_fetch_bybit_depth
-from cfte.collectors.okx_public import OkxPublicCollector, build_public_args
+from cfte.collectors.okx_public import OkxPublicCollector, build_public_args, try_fetch_depth_snapshot as try_fetch_okx_depth
 from cfte.normalizers.bybit import normalize_public_trade as normalize_bybit_trade
 from cfte.normalizers.okx import normalize_trade as normalize_okx_trade
 from cfte.features.venue_compare import compare_trade_flows, build_venue_confirmation_context
@@ -349,8 +349,23 @@ class LiveThesisLoop:
                 self.health.venue = "bybit"
                 return True
             except Exception as e:
-                self.health.last_error = f"Bybit init failed: {e}"
-                return False
+                print(f"⚠️ Bybit init failed ({e}). Thử khởi tạo Book qua OKX...")
+                try:
+                    result, o_err = try_fetch_okx_depth(symbol=self.symbol)
+                    if result is None:
+                        raise ValueError(f"OKX fallback failed: {o_err}")
+                    
+                    # Map OKX structure to Binance-like for internal books
+                    self._depth.apply_snapshot(
+                        bids=[(float(i[0]), float(i[1])) for i in result.get("bids", [])],
+                        asks=[(float(i[0]), float(i[1])) for i in result.get("asks", [])],
+                        last_update_id=int(result.get("ts", 0)),
+                    )
+                    self.health.venue = "okx"
+                    return True
+                except Exception as e2:
+                    self.health.last_error = f"Tất cả fallback Bybit & OKX đều thất bại: {e2}"
+                    return False
 
         if snapshot is None:
             self.health.last_error = error

@@ -13,6 +13,17 @@ import certifi
 OKX_WS_BASE = "wss://ws.okx.com:8443/ws/v5/public"
 OKX_VENUE = "okx"
 
+OKX_REST_MIRRORS = [
+    "https://www.okx.com",
+    "https://aws.okex.com",
+]
+OKX_REST_BASE = OKX_REST_MIRRORS[0]
+
+COMMON_USER_AGENTS = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+]
 
 def build_public_args(inst_ids: list[str]) -> list[dict[str, str]]:
     args: list[dict[str, str]] = []
@@ -22,6 +33,53 @@ def build_public_args(inst_ids: list[str]) -> list[dict[str, str]]:
         args.append({"channel": "bbo-tbt", "instId": upper})
     return args
 
+
+def fetch_depth_snapshot(symbol: str, limit: int = 50, rest_base: str = OKX_REST_BASE) -> dict[str, object]:
+    """Fetch L2 orderbook from OKX V5."""
+    import requests
+    import random
+    
+    # OKX format is BTC-USDT
+    if "-" not in symbol:
+        symbol = f"{symbol[:3]}-{symbol[3:]}"
+        
+    url = f"{rest_base}/api/v5/market/books"
+    params = {"instId": symbol.upper(), "sz": limit}
+    headers = {"User-Agent": random.choice(COMMON_USER_AGENTS)}
+    
+    resp = requests.get(url, params=params, headers=headers, timeout=5)
+    resp.raise_for_status()
+    data = resp.json()
+    
+    if data.get("code") != "0":
+        raise ValueError(f"OKX API error: {data.get('msg')}")
+        
+    result = data.get("data", [])
+    if not result:
+        return {}
+    return result[0]
+
+
+def try_fetch_depth_snapshot(
+    symbol: str,
+    limit: int = 50,
+    rest_base: str = OKX_REST_BASE,
+) -> tuple[dict[str, object] | None, str | None]:
+    """Try multiple mirrors to fetch OKX depth snapshot."""
+    import requests
+    mirrors = [rest_base] + [m for m in OKX_REST_MIRRORS if m != rest_base]
+    last_error = None
+    
+    for mirror in mirrors:
+        try:
+            snapshot = fetch_depth_snapshot(symbol=symbol, limit=limit, rest_base=mirror)
+            return snapshot, None
+        except requests.RequestException as exc:
+            last_error = exc
+            print(f"⚠️ OKX Mirror failed ({mirror}): {exc}")
+            continue
+            
+    return None, f"Không lấy được snapshot depth OKX cho {symbol.upper()} qua các mirrors: {last_error}"
 
 @dataclass(slots=True)
 class OkxPublicCollector:
