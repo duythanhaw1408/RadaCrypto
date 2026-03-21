@@ -492,6 +492,7 @@ class LiveThesisLoop:
                     streams = build_public_streams([self.symbol], use_agg_trade=self.use_agg_trade)
                     primary_collector = BinancePublicCollector(streams=streams)
                     use_bybit_primary = (self.health.venue == "bybit")
+                    use_okx_primary = (self.health.venue == "okx")
 
                     if use_bybit_primary:
                         print(f"🛡️ Chuyển sang Bybit làm nguồn dữ liệu chính cho {self.symbol}.")
