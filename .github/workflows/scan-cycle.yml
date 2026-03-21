@@ -58,10 +58,10 @@ jobs:
         PYTHONPATH: src
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       run: |
-        # GitHub-hosted runner thường bị geo-block bởi Binance/Bybit.
-        # Ở free-tier public Pages, ưu tiên scan/replay-first thay vì live giả xanh.
+        # GitHub-hosted runner thường bị geo-block bởi Binance. Hệ thống giờ đã có Bybit fallback và Anti-block.
+        # Chạy live để collect data thật.
         python scripts/run_cycle.py \
-          --skip-live \
+          --allow-missing \
           --profile configs/profiles/personal_binance.yaml
 
     - name: Copy data to docs for GitHub Pages
