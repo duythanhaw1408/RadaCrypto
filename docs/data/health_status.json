@@ -1,6 +1,6 @@
 {
   "overall_status": "degraded",
-  "generated_at": "2026-03-21T13:46:29.665194+00:00",
+  "generated_at": "2026-03-21T13:52:18.262301+00:00",
   "checks": [
     {
       "key": "python_version",
@@ -49,14 +49,14 @@
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact replay_summary sẵn sàng",
-      "detail": "2026-03-21T13:34:59.069435+00:00"
+      "detail": "2026-03-21T13:46:32.190380+00:00"
     },
     {
       "key": "daily_summary",
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact daily_summary sẵn sàng",
-      "detail": "2026-03-21T13:36:10.461666+00:00"
+      "detail": "2026-03-21T13:51:00.482770+00:00"
     },
     {
       "key": "weekly_summary",
@@ -84,28 +84,35 @@
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact health_report sẵn sàng",
-      "detail": "2026-03-21T13:46:29.656335+00:00"
+      "detail": "2026-03-21T13:52:18.253329+00:00"
     },
     {
       "key": "live_runtime",
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact live_runtime sẵn sàng",
-      "detail": "2026-03-21T13:36:00.414601+00:00"
+      "detail": "2026-03-21T13:51:00.444089+00:00"
     },
     {
       "key": "live_runtime_owner",
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact live_runtime có owner rõ ràng",
-      "detail": "run_id=3cbcb60b24cf419180b2a3f8755b5216 | pid=2365 | host=runnervm46oaq"
+      "detail": "run_id=244fde1330fd499cac30ce2dac2bd122 | pid=2390 | host=runnervm46oaq"
     },
     {
       "key": "live_runtime_status",
-      "level": "critical",
+      "level": "warning",
       "status": "warn",
-      "summary_vi": "Phiên live gần nhất kết thúc với trạng thái bootstrap_failed",
-      "detail": "Bybit init failed: Bybit fallback failed: Không lấy được snapshot depth Bybit cho BTCUSDT qua các mirrors: 403 Client Error: Forbidden for url: https://sedo.com/search/details/?domain=api.bybit.be&campaignId=329145&origin=sales_lander_15"
+      "summary_vi": "Phiên live gần nhất bị watchdog timeout",
+      "detail": "Watchdog không nhận được dữ liệu mới trong 45.0s"
+    },
+    {
+      "key": "live_runtime_degraded_flags",
+      "level": "warning",
+      "status": "warn",
+      "summary_vi": "Phiên live gần nhất có dấu hiệu suy giảm feed/context",
+      "detail": "okx_stale"
     },
     {
       "key": "live_runtime_latest_matrix",
