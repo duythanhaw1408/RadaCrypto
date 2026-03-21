@@ -1,6 +1,6 @@
 {
   "overall_status": "degraded",
-  "generated_at": "2026-03-21T13:25:17.266078+00:00",
+  "generated_at": "2026-03-21T13:25:44.534624+00:00",
   "checks": [
     {
       "key": "python_version",
@@ -49,14 +49,14 @@
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact replay_summary sẵn sàng",
-      "detail": "2026-03-21T13:20:23.832245+00:00"
+      "detail": "2026-03-21T13:25:19.833751+00:00"
     },
     {
       "key": "daily_summary",
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact daily_summary sẵn sàng",
-      "detail": "2026-03-21T13:21:31.548237+00:00"
+      "detail": "2026-03-21T13:25:19.873761+00:00"
     },
     {
       "key": "weekly_summary",
@@ -84,7 +84,7 @@
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact health_report sẵn sàng",
-      "detail": "2026-03-21T13:25:17.257057+00:00"
+      "detail": "2026-03-21T13:25:44.525322+00:00"
     },
     {
       "key": "live_runtime",
