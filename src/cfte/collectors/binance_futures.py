@@ -286,6 +286,7 @@ class BinanceFuturesCollector:
         mark_info = self.fetch_mark_price_info()
         oi_info = self.fetch_open_interest()
         if not mark_info or not oi_info:
+            self._rest_context_ts = now_ms  # update ts to prevent immediately retrying and spamming API
             if self._rest_context_cache:
                 cached = dict(self._rest_context_cache)
                 cached["fresh"] = False
