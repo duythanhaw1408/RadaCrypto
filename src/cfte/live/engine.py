@@ -573,7 +573,6 @@ class LiveThesisLoop:
                                             processed += 1
                                 elif msg.get("arg", {}).get("channel") == "books":
                                     pass
-                                continue # Already processed in sub-loop
                             else:
                                 # Binance Normalization
                                 envelope = enveloppe_or_msg
