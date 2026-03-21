@@ -473,7 +473,8 @@ class LiveThesisLoop:
 
                     bybit_task = asyncio.create_task(bybit_loop())
 
-                    okx_collector = OkxPublicCollector(args=build_public_args([f"{self.symbol}-SWAP"]))
+                    okx_inst_id = f"{self.symbol[:-4]}-USDT-SWAP" if self.symbol.endswith("USDT") else f"{self.symbol[:3]}-{self.symbol[3:]}-SWAP"
+                    okx_collector = OkxPublicCollector(args=build_public_args([okx_inst_id]))
 
                     async def okx_loop():
                         async for msg in okx_collector.stream_forever():
@@ -510,6 +511,8 @@ class LiveThesisLoop:
                     
                     if use_bybit_primary:
                         print(f"Đã kết nối Bybit Stream: {self.symbol}")
+                    elif use_okx_primary:
+                        print(f"Đã kết nối OKX Stream: {self.symbol}")
                     else:
                         print(f"Đã kết nối Binance Stream: {streams}")
 
@@ -531,9 +534,9 @@ class LiveThesisLoop:
 
                             self.health.message_count = primary_collector.health_snapshot().message_count
                             self._refresh_collector_health(
-                                spot_collector=primary_collector if not use_bybit_primary else None,
+                                spot_collector=primary_collector if not (use_bybit_primary or use_okx_primary) else None,
                                 bybit_collector=primary_collector if use_bybit_primary else bybit_collector,
-                                okx_collector=okx_collector,
+                                okx_collector=primary_collector if use_okx_primary else okx_collector,
                             )
                             self._last_message_monotonic = time.monotonic()
                             
@@ -553,6 +556,21 @@ class LiveThesisLoop:
                                             processed += 1
                                 elif msg.get("topic", "").startswith("orderbook"):
                                     # Update depth if needed, currently we focus on trades for flow
+                                    pass
+                                continue # Already processed in sub-loop
+                            elif use_okx_primary:
+                                # OKX Normalization
+                                msg = enveloppe_or_msg
+                                if msg.get("arg", {}).get("channel") == "trades":
+                                    for trade in msg.get("data", []):
+                                        normalized = normalize_okx_trade(trade, f"okx:{self.symbol}:perp")
+                                        if normalized:
+                                            self._trades.append(normalized)
+                                            self._venue_trades["okx"].append(normalized)
+                                            self._last_trade_ts = normalized.venue_ts
+                                            await self._process_trade_event(normalized)
+                                            processed += 1
+                                elif msg.get("arg", {}).get("channel") == "books":
                                     pass
                                 continue # Already processed in sub-loop
                             else:
@@ -577,7 +595,7 @@ class LiveThesisLoop:
 
                             if isinstance(normalized, NormalizedTrade):
                                 self._trades.append(normalized)
-                                if not use_bybit_primary:
+                                if not (use_bybit_primary or use_okx_primary):
                                     self._venue_trades["binance"].append(normalized)
                                 self._last_trade_ts = normalized.venue_ts
                                 await self._process_trade_event(normalized)
