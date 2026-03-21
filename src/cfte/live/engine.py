@@ -497,11 +497,14 @@ class LiveThesisLoop:
                     if use_bybit_primary:
                         print(f"🛡️ Chuyển sang Bybit làm nguồn dữ liệu chính cho {self.symbol}.")
                         primary_collector = BybitPublicCollector(topics=build_public_topics([self.symbol]))
+                    elif use_okx_primary:
+                        print(f"🛡️ Chuyển sang OKX làm nguồn dữ liệu chính cho {self.symbol}.")
+                        primary_collector = okx_collector
 
                     self._refresh_collector_health(
-                        spot_collector=primary_collector if not use_bybit_primary else None,
-                        bybit_collector=bybit_collector,
-                        okx_collector=okx_collector,
+                        spot_collector=primary_collector if not (use_bybit_primary or use_okx_primary) else None,
+                        bybit_collector=primary_collector if use_bybit_primary else bybit_collector,
+                        okx_collector=primary_collector if use_okx_primary else okx_collector,
                     )
 
                     processed = 0
