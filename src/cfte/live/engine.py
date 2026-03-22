@@ -771,6 +771,9 @@ class LiveThesisLoop:
                 s.flow_state = tpfm_snap.flow_state_code
                 s.matrix_alias_vi = tpfm_snap.matrix_alias_vi
                 s.decision_summary_vi = tpfm_snap.decision_summary_vi
+                s.pattern_code = tpfm_snap.pattern_code
+                s.pattern_phase = tpfm_snap.pattern_phase
+                s.sequence_signature = tpfm_snap.sequence_signature
                 if hasattr(tpfm_snap, "edge_profile") and tpfm_snap.edge_profile:
                     s.edge_score = tpfm_snap.edge_profile.edge_score
                     s.edge_confidence = tpfm_snap.edge_profile.confidence
@@ -815,6 +818,10 @@ class LiveThesisLoop:
             pattern_event = tpfm_snap.metadata.get("pattern_event")
             if pattern_event:
                 await self.store.save_flow_pattern_event(pattern_event)
+            
+            pattern_outcomes = tpfm_snap.metadata.get("pattern_outcomes", [])
+            for outcome in pattern_outcomes:
+                await self.store.save_pattern_outcome(outcome)
             self._update_latest_tpfm_summary(tpfm_snap)
             self._latest_tpfm_snapshot = tpfm_snap
             if self._first_m5_seen_at is None:

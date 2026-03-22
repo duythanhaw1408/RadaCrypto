@@ -56,40 +56,44 @@ class ProbabilityEngine:
     def evaluate_edge(self, matrix_cell: str, sequence_length: int = 1, 
                       pattern_code: str = None, sequence_signature: str = None) -> ProbabilityEdge:
         """Evaluates the mathematical edge using the most specific data available."""
-        # Start with cell-level baseline
-        base = self._cell_stats.get(matrix_cell, {"win_rate": 0.50, "rr": 1.5, "count": 0})
+        # Start with matrix-level baseline
+        baseline = self._cell_stats.get(matrix_cell, {"win_rate": 0.50, "rr": 1.5, "count": 0})
         
-        # Override with pattern-native stats if specific match exists (Finding 3)
-        stats = base
-        conf_bonus = 0.0
+        # Priority 1: Specific Pattern-Native match (Finding 3 Uplift)
+        stats = baseline
+        source = "CELL_HEURISTIC"
+        
         if pattern_code and sequence_signature:
             p_stats = self._pattern_stats.get((pattern_code, sequence_signature))
-            if p_stats and p_stats["count"] >= 3:
+            if p_stats and p_stats["count"] >= 5: # Minimum threshold to trust pattern-native over cell-native
                 stats = p_stats
-                conf_bonus = 0.1 # Bonus confidence for pattern-specific matches
+                source = "PATTERN_NATIVE"
         
-        # Win rate adjustment for sequence maturity (if not already baked into p_stats)
-        wr_mod = 0.0
-        if not pattern_code: # Only apply heuristic mods if we don't have pattern-native stats
+        # Win rate adjustment for sequence maturity if using cell baseline
+        final_wr = stats["win_rate"]
+        if source == "CELL_HEURISTIC":
+            wr_mod = 0.0
             if sequence_length == 2: wr_mod = 0.02
             elif 3 <= sequence_length <= 4: wr_mod = 0.05
             elif sequence_length >= 5: wr_mod = -0.05
+            final_wr = min(0.95, max(0.05, final_wr + wr_mod))
             
-        final_wr = min(0.95, max(0.05, stats["win_rate"] + wr_mod))
         loss_rate = 1.0 - final_wr
         edge_raw = (final_wr * stats["rr"]) - loss_rate
         
         # Normalize edge score
         edge_score = max(0.0, min(1.0, (edge_raw + 0.2) / 1.0))
         
-        if stats["count"] >= 50: confidence = "HIGH"
-        elif stats["count"] >= 10: confidence = "MEDIUM"
-        else: confidence = "LOW"
+        # New thresholds: < 5 (LOW), 5-19 (MEDIUM), >= 20 (HIGH)
+        if stats["count"] >= 20: 
+            confidence = "HIGH"
+        elif stats["count"] >= 5: 
+            confidence = "MEDIUM"
+        else: 
+            confidence = "LOW"
         
-        if conf_bonus > 0 and confidence == "LOW": confidence = "MEDIUM"
-
         return ProbabilityEdge(
-            setup_name=pattern_code or matrix_cell,
+            setup_name=pattern_code if source == "PATTERN_NATIVE" else matrix_cell,
             historical_win_rate=round(final_wr, 2),
             expected_rr=round(stats["rr"], 2),
             sample_size=stats["count"],

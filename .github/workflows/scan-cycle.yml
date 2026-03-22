@@ -54,6 +54,7 @@ jobs:
       run: python scripts/reprime_data.py
 
     - name: Run CFTE Scan Cycle
+      id: run-cycle
       env:
         PYTHONPATH: src
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -61,7 +62,7 @@ jobs:
         # Chạy vNext Scan Cycle trên dữ liệu fixture/replay để cập nhật Intelligence cho Dashboard.
         # Chế độ này không phải live trading, dùng để duy trì snapshot cho GitHub Pages.
         python scripts/run_cycle.py \
-          --allow-missing \
+          --allow-missing-m5 \
           --events-path fixtures/replay/btcusdt_vnext_hifi.jsonl \
           --profile configs/profiles/personal_binance.yaml
 
@@ -117,11 +118,11 @@ jobs:
           'scan_only': True,
           'is_live': False,
           'last_run': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
-          'bootstrap': {'ok': ${{ steps.run-cycle.outcome == 'success' }}, 'label': 'BOOTSTRAP'},
-          'scan': {'ok': ${{ steps.run-cycle.outcome == 'success' }}, 'label': 'RUN-SCAN'},
-          'live': {'ok': ${{ steps.run-cycle.outcome == 'success' }}, 'label': 'RUN-LIVE'},
-          'review': {'ok': ${{ steps.run-cycle.outcome == 'success' }}, 'label': 'REVIEW-DAY'},
-          'watchdog': {'ok': ${{ steps.run-cycle.outcome == 'success' }}, 'label': 'WATCHDOG'}
+          'bootstrap': {'ok': '${{ steps.run-cycle.outcome }}' == 'success', 'label': 'BOOTSTRAP'},
+          'scan': {'ok': '${{ steps.run-cycle.outcome }}' == 'success', 'label': 'RUN-SCAN'},
+          'live': {'ok': '${{ steps.run-cycle.outcome }}' == 'success', 'label': 'RUN-LIVE'},
+          'review': {'ok': '${{ steps.run-cycle.outcome }}' == 'success', 'label': 'REVIEW-DAY'},
+          'watchdog': {'ok': '${{ steps.run-cycle.outcome }}' == 'success', 'label': 'WATCHDOG'}
         }
         # Python True maps to JSON true automatically
         print(json.dumps(status))
@@ -155,8 +156,8 @@ jobs:
           'last_scan_time': datetime.now(tz=timezone.utc).isoformat(),
           'scan_count': ${{ github.run_number }},
           'data_mode': 'scan',
-          'live_enabled': false,
-          'is_replay': true,
+          'live_enabled': False,
+          'is_replay': True,
           'first_m5_seen_at': runtime.get('first_m5_seen_at'),
           'latest_flow_grade': runtime.get('latest_flow_grade') or derived_grade,
           'latest_transition': runtime.get('latest_transition', {}),

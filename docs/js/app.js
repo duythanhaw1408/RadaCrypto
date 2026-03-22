@@ -107,10 +107,9 @@ function updateSystemHealth(status, hasLiveSnapshot, hasSnapshotData) {
         sessionTimer.textContent = `Cách đây ${diffMins} phút`;
     }
 
-    const ownerRows = document.querySelectorAll(".info-row .v");
     if (ownerRows.length >= 2) {
-        ownerRows[0].textContent = status?.data_mode === "scan_only" ? "GitHub Actions" : "Live runtime";
-        ownerRows[1].textContent = status?.live_enabled === false ? "scan-only" : "live";
+        ownerRows[0].textContent = status?.data_mode === "scan" ? "GitHub Actions" : "Live runtime";
+        ownerRows[1].textContent = status?.data_mode === "scan" ? "scan" : "live";
     }
 }
 
@@ -211,15 +210,13 @@ function updateMatrixGridFromReplay(signal, status) {
         bias: String(signal.direction || "").includes("LONG") ? "Mua" : "Bán",
         className: String(signal.direction || "").includes("LONG") ? "acc" : "distribution",
     });
-    if (matrixColumns.length >= 2) {
         updateMatrixColumn(matrixColumns[1], {
             title: "Nguồn dữ liệu",
-            state: status?.data_mode === "scan_only" ? "Chế độ Scan" : "Khởi tạo",
+            state: status?.data_mode === "scan" ? "Chế độ Scan" : "Khởi tạo",
             grade: status?.latest_flow_grade || "N/A",
             bias: "Scan",
             className: "neutral",
         });
-    }
 }
 
 function updateMatrixColumn(column, payload) {

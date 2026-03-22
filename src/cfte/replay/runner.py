@@ -30,6 +30,7 @@ class ReplayRunResult:
     thesis_events: list[ThesisSignal]
     thesis_state: dict[str, ThesisLifecycleRecord]
     thesis_event_history: list[ThesisEventRecord]
+    latest_tpfm_snapshot: Optional['TPFMSnapshot'] = None
 
 
 _SIGNAL_STAGE_RANK = {
@@ -65,6 +66,9 @@ def _fingerprint_signals(signals: list[ThesisSignal]) -> str:
             "tradability_grade": s.tradability_grade,
             "decision_posture": s.decision_posture,
             "flow_alignment_score": s.flow_alignment_score,
+            "pattern_code": s.pattern_code,
+            "pattern_phase": s.pattern_phase,
+            "sequence_signature": s.sequence_signature,
         }
         for s in signals
     ]
@@ -219,6 +223,9 @@ def run_replay(
                     s.flow_state = m5_snap.flow_state_code
                     s.matrix_alias_vi = m5_snap.matrix_alias_vi
                     s.decision_summary_vi = m5_snap.decision_summary_vi
+                    s.pattern_code = m5_snap.pattern_code
+                    s.pattern_phase = m5_snap.pattern_phase
+                    s.sequence_signature = m5_snap.sequence_signature
                     if hasattr(m5_snap, "edge_profile") and m5_snap.edge_profile:
                         s.edge_score = m5_snap.edge_profile.edge_score
                         s.edge_confidence = m5_snap.edge_profile.confidence
@@ -245,6 +252,10 @@ def run_replay(
                     pattern_ev = m5_snap.metadata.get("pattern_event")
                     if pattern_ev:
                         asyncio.run(store.save_flow_pattern_event(pattern_ev))
+                    
+                    pattern_outcomes = m5_snap.metadata.get("pattern_outcomes", [])
+                    for outcome in pattern_outcomes:
+                        asyncio.run(store.save_pattern_outcome(outcome))
                 
                 tpfm_m5_buffer.append(m5_snap)
                 if len(tpfm_m5_buffer) >= 6:
@@ -323,6 +334,7 @@ def run_replay(
         thesis_events=thesis_events,
         thesis_state=thesis_state,
         thesis_event_history=thesis_event_history,
+        latest_tpfm_snapshot=latest_tpfm_snapshot,
     )
 
 
@@ -335,6 +347,7 @@ def persist_replay_summary(result: ReplayRunResult, output_path: str | Path) -> 
         "feature_windows": result.feature_windows,
         "thesis_count": result.thesis_count,
         "fingerprint": result.fingerprint,
+        "latest_tpfm": asdict(result.latest_tpfm_snapshot) if result.latest_tpfm_snapshot else {},
         "top_signals": [asdict(s) for s in select_top_signals(result.thesis_events, limit=5)],
     }
     out.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")

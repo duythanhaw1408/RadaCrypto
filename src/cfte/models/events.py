@@ -123,6 +123,9 @@ class ThesisSignal:
     ai_brief_vi: str = ""
     edge_score: float = 0.0
     edge_confidence: str = "LOW"
+    pattern_code: str = ""
+    pattern_phase: str = ""
+    sequence_signature: str = ""
 
 
 @dataclass(slots=True)
@@ -138,3 +141,41 @@ class ThesisOutcome:
     mae_bps: float | None = None
     mfe_bps: float | None = None
     exit_ts: int | None = None
+
+
+@dataclass(slots=True)
+class FlowPatternEvent:
+    pattern_id: str
+    instrument_key: str
+    pattern_code: str
+    pattern_family: str
+    pattern_phase: str
+    sequence_id: str
+    sequence_signature: str
+    start_ts: int
+    end_ts: int
+    pattern_start_price: float
+    pattern_end_price: float
+    confidence: float
+    is_pivot: bool
+    trigger_m5_ts: int
+
+
+@dataclass(slots=True)
+class FlowPatternOutcome:
+    outcome_id: str
+    snapshot_id: str
+    symbol: str
+    timestamp: int
+    pattern_code: str
+    sequence_signature: str
+    start_px: float
+    t1_px: float = 0.0
+    t5_px: float = 0.0
+    t12_px: float = 0.0
+    r1_bps: float = 0.0
+    r5_bps: float = 0.0
+    r12_bps: float = 0.0
+    max_favorable_bps: float = 0.0
+    max_adverse_bps: float = 0.0
+    metadata: dict = field(default_factory=dict)

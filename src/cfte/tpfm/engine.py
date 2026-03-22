@@ -102,6 +102,7 @@ class TPFMStateEngine:
         self._rolling_delta = deque(maxlen=200) # For z-score
         self._recent_snapshots = deque(maxlen=12)
         self._current_sequence: Optional['FlowSequenceEvent'] = None
+        self._pending_patterns: List[Dict[str, Any]] = []
         
         # Load local module safely inside module or import at top
         from cfte.tpfm.probability import ProbabilityEngine
@@ -299,6 +300,7 @@ class TPFMStateEngine:
             venue=self.venue,
             window_start_ts=window_start_ts,
             window_end_ts=window_end_ts,
+            microprice=snapshots[-1].microprice,
             initiative_score=initiative_score,
             initiative_polarity=initiative_polarity,
             initiative_strength=abs(initiative_score),
@@ -408,6 +410,9 @@ class TPFMStateEngine:
         # If we need to return the sequence, we either return it as a third element or attach it to metadata
         if closed_sequence:
             snapshot.metadata["closed_sequence"] = closed_sequence
+
+        # Phase 14: Pattern Outcome Tracking
+        snapshot.metadata["pattern_outcomes"] = self._update_pattern_outcomes(snapshot, trades)
 
         # Phase D: Probability / Expectancy Engine (Finding 3 Uplift)
         snapshot.edge_profile = self._probability_engine.evaluate_edge(
@@ -941,6 +946,21 @@ class TPFMStateEngine:
             if snapshot.trap_risk < 0.4 and snapshot.response_efficiency_state == "FOLLOW_THROUGH":
                 snapshot.pattern_code = "ABSORB_LONG"
                 snapshot.pattern_alias_vi = "Hấp thụ ngược (Chống Mua)"
+        elif cell == "POS_INIT__NEUTRAL_INV":
+            snapshot.pattern_code = "BREAKOUT_FORMING_LONG"
+            snapshot.pattern_alias_vi = "Đang nén bứt phá Mua"
+        elif cell == "NEG_INIT__NEUTRAL_INV":
+            snapshot.pattern_code = "BREAKDOWN_FORMING_SHORT"
+            snapshot.pattern_alias_vi = "Đang nén phá đáy Bán"
+        elif cell == "NEUTRAL_INIT__POS_INV":
+            snapshot.pattern_code = "PASSIVE_ACCUMULATION"
+            snapshot.pattern_alias_vi = "Tích lũy thụ động"
+        elif cell == "NEUTRAL_INIT__NEG_INV":
+            snapshot.pattern_code = "PASSIVE_DISTRIBUTION"
+            snapshot.pattern_alias_vi = "Phân phối thụ động"
+        elif cell == "NEUTRAL_INIT__NEUTRAL_INV":
+            snapshot.pattern_code = "BALANCE"
+            snapshot.pattern_alias_vi = "Cân bằng Flow"
                 
         # Forced flow overrides
         if snapshot.forced_flow_state == "SQUEEZE_LED" and snapshot.delta_quote > 0:
@@ -1650,3 +1670,71 @@ class TPFMStateEngine:
             window_end_ts=end,
             health_state="EMPTY_DATA"
         )
+
+    def _update_pattern_outcomes(self, snapshot: TPFMSnapshot, trades: List[NormalizedTrade]) -> List[Any]:
+        from cfte.models.events import FlowPatternOutcome
+        import uuid
+        outcomes_to_save = []
+        
+        if not trades:
+            return []
+            
+        interval_high = max(t.price for t in trades)
+        interval_low = min(t.price for t in trades)
+        current_px = snapshot.microprice
+        
+        # 1. Update existing pending
+        remaining_pending = []
+        for entry in self._pending_patterns:
+            outcome = entry["outcome"]
+            meta = entry["meta"]
+            
+            meta["max_px"] = max(meta["max_px"], interval_high)
+            meta["min_px"] = min(meta["min_px"], interval_low)
+            meta["bars_seen"] += 1
+            
+            start_px = outcome.start_px
+            if start_px != 0:
+                if meta["bars_seen"] == 1:
+                    outcome.t1_px = current_px
+                    outcome.r1_bps = (current_px - start_px) / start_px * 10000
+                elif meta["bars_seen"] == 5:
+                    outcome.t5_px = current_px
+                    outcome.r5_bps = (current_px - start_px) / start_px * 10000
+                elif meta["bars_seen"] == 12:
+                    outcome.t12_px = current_px
+                    outcome.r12_bps = (current_px - start_px) / start_px * 10000
+                
+                # Update MAE/MFE (raw deviation in bps)
+                outcome.max_favorable_bps = max(outcome.max_favorable_bps, (meta["max_px"] - start_px) / start_px * 10000)
+                outcome.max_adverse_bps = min(outcome.max_adverse_bps, (meta["min_px"] - start_px) / start_px * 10000)
+            
+            if meta["bars_seen"] in [1, 5, 12]:
+                outcomes_to_save.append(outcome)
+            
+            if meta["bars_seen"] < 12:
+                remaining_pending.append(entry)
+        
+        self._pending_patterns = remaining_pending
+        
+        # 2. Add current pattern state to pending
+        if snapshot.pattern_code != "UNCLASSIFIED":
+            new_outcome = FlowPatternOutcome(
+                outcome_id=str(uuid.uuid4()),
+                snapshot_id=snapshot.snapshot_id,
+                symbol=snapshot.symbol,
+                timestamp=snapshot.window_end_ts,
+                pattern_code=snapshot.pattern_code,
+                sequence_signature=snapshot.sequence_signature,
+                start_px=current_px,
+            )
+            self._pending_patterns.append({
+                "outcome": new_outcome,
+                "meta": {
+                    "max_px": interval_high,
+                    "min_px": interval_low,
+                    "bars_seen": 0,
+                }
+            })
+                
+        return outcomes_to_save

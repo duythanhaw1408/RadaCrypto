@@ -670,6 +670,9 @@ def _apply_flow_context_to_signals(
                 decision_summary_vi=decision_summary_vi,
                 flow_alignment_score=round(alignment_score, 2),
                 ai_brief_vi=getattr(tpfm_snapshot, "ai_brief_vi", ""),
+                pattern_code=getattr(tpfm_snapshot, "pattern_code", ""),
+                pattern_phase=getattr(tpfm_snapshot, "pattern_phase", ""),
+                sequence_signature=getattr(tpfm_snapshot, "sequence_signature", ""),
                 edge_score=getattr(tpfm_snapshot.edge_profile, "score", 0.0) if hasattr(tpfm_snapshot, "edge_profile") else 0.0,
                 edge_confidence=getattr(tpfm_snapshot.edge_profile, "confidence", "LOW") if hasattr(tpfm_snapshot, "edge_profile") else "LOW",
             )

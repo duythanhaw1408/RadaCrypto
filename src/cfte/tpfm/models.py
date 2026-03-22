@@ -11,6 +11,7 @@ class TPFMSnapshot:
     venue: str = "binance"
     window_start_ts: int = 0
     window_end_ts: int = 0
+    microprice: float = 0.0
 
     # Polarity & Scores
     initiative_score: float = 0.0
