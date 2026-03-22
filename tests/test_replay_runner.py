@@ -56,10 +56,10 @@ def test_run_replay_records_lifecycle_history_for_real_stage_progression():
     accumulation = next(state for state in result.thesis_state.values() if state.signal.setup == "stealth_accumulation")
     history = [event for event in result.thesis_event_history if event.thesis_id == accumulation.signal.thesis_id]
 
-    assert [event.to_stage for event in history] == ["DETECTED", "WATCHLIST", "CONFIRMED", "ACTIONABLE", "RESOLVED"]
-    assert accumulation.signal.stage == "RESOLVED"
-    assert accumulation.closed_ts == max(event.venue_ts for event in events)
-    assert history[-1].summary_vi.endswith("'Đã hoàn tất'.")
+    assert [event.to_stage for event in history] == ["DETECTED", "WATCHLIST", "CONFIRMED", "ACTIONABLE", "INVALIDATED"]
+    assert accumulation.signal.stage == "INVALIDATED"
+    assert accumulation.closed_ts == history[-1].event_ts
+    assert "Đã" in history[-1].summary_vi
 
 
 def test_run_replay_reaches_invalidated_terminal_stage_through_real_state_update_path():

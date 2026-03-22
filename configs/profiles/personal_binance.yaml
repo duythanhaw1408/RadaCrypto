@@ -6,8 +6,8 @@ trader:
   timezone: Asia/Ho_Chi_Minh
 
 defaults:
-  symbol: BTCUSDT
-  replay_events: fixtures/replay/btcusdt_normalized.jsonl
+  # Default replay fixture for vNext High-Fidelity Snapshotting
+  replay_events: fixtures/replay/btcusdt_vnext_hifi.jsonl
   summary_out: data/replay/summary_btcusdt.json
 
 scan:

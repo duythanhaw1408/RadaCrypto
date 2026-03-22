@@ -62,6 +62,7 @@ jobs:
         # Chế độ này không phải live trading, dùng để duy trì snapshot cho GitHub Pages.
         python scripts/run_cycle.py \
           --allow-missing \
+          --events-path fixtures/replay/btcusdt_vnext_hifi.jsonl \
           --profile configs/profiles/personal_binance.yaml
 
     - name: Copy data to docs for GitHub Pages
