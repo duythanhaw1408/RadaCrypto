@@ -104,6 +104,7 @@ class ThesisSQLiteStore:
                     closed_ts INTEGER,
                     entry_px REAL,
                     matrix_cell_at_entry TEXT,
+                    flow_state_at_entry TEXT,
                     transition_code_at_entry TEXT,
                     flow_grade_at_entry TEXT
                 )
@@ -130,7 +131,7 @@ class ThesisSQLiteStore:
             if "invalidation_px" not in column_names:
                 print("Đang nâng cấp cơ sở dữ liệu (thêm invalidation_px)...")
                 db.execute("ALTER TABLE thesis ADD COLUMN invalidation_px REAL")
-            for col in ["matrix_cell_at_entry", "transition_code_at_entry", "flow_grade_at_entry"]:
+            for col in ["matrix_cell_at_entry", "flow_state_at_entry", "transition_code_at_entry", "flow_grade_at_entry"]:
                 if col not in column_names:
                     print(f"Đang nâng cấp cơ sở dữ liệu (thêm {col})...")
                     db.execute(f"ALTER TABLE thesis ADD COLUMN {col} TEXT")
@@ -438,8 +439,8 @@ class ThesisSQLiteStore:
                     thesis_id, instrument_key, setup, direction, timeframe,
                     regime_bucket, stage, score, confidence, coverage,
                     invalidation_px, opened_ts, closed_ts, entry_px,
-                    matrix_cell_at_entry, transition_code_at_entry, flow_grade_at_entry
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    matrix_cell_at_entry, flow_state_at_entry, transition_code_at_entry, flow_grade_at_entry
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     signal.thesis_id,
@@ -456,9 +457,10 @@ class ThesisSQLiteStore:
                     opened_ts,
                     closed_ts,
                     entry_px,
-                    getattr(signal, "metadata", {}).get("matrix_cell_at_entry"),
-                    getattr(signal, "metadata", {}).get("transition_code_at_entry"),
-                    getattr(signal, "metadata", {}).get("flow_grade_at_entry"),
+                    signal.metadata.get("matrix_cell_at_entry") if signal.metadata else None,
+                    signal.metadata.get("flow_state_at_entry") if signal.metadata else None,
+                    signal.metadata.get("transition_code_at_entry") if signal.metadata else None,
+                    signal.metadata.get("flow_grade_at_entry") if signal.metadata else None,
                 ),
             )
             db.commit()
@@ -762,12 +764,12 @@ class ThesisSQLiteStore:
                     t.direction,
                     t.score,
                     t.confidence,
-                    COALESCE(s.matrix_cell, 'UNKNOWN') as matrix_cell,
+                    COALESCE(s.matrix_cell, t.matrix_cell_at_entry, 'UNKNOWN') as matrix_cell,
                     COALESCE(s.matrix_alias_vi, 'Chưa có matrix') as matrix_alias_vi,
                     COALESCE(s.spot_futures_relation, 'NO_TPFM_CONTEXT') as spot_futures_relation,
                     COALESCE(s.venue_confirmation_state, 'UNCONFIRMED') as venue_confirmation_state,
                     COALESCE(s.liquidation_bias, 'UNKNOWN') as liquidation_bias,
-                    COALESCE(s.tradability_grade, 'D') as tradability_grade,
+                    COALESCE(s.tradability_grade, t.flow_grade_at_entry, 'D') as tradability_grade,
                     ROW_NUMBER() OVER (
                         PARTITION BY t.thesis_id
                         ORDER BY
@@ -884,11 +886,11 @@ class ThesisSQLiteStore:
                     t.direction,
                     t.score,
                     t.confidence,
-                    COALESCE(s.flow_state_code, 'NO_FLOW_CONTEXT') as flow_state_code,
+                    COALESCE(s.flow_state_code, t.flow_state_at_entry, 'NO_FLOW_CONTEXT') as flow_state_code,
                     COALESCE(s.forced_flow_state, 'NONE') as forced_flow_state,
                     COALESCE(s.inventory_defense_state, 'NONE') as inventory_defense_state,
                     COALESCE(s.decision_posture, 'WAIT') as decision_posture,
-                    COALESCE(s.tradability_grade, 'D') as tradability_grade,
+                    COALESCE(s.tradability_grade, t.flow_grade_at_entry, 'D') as tradability_grade,
                     COALESCE(s.trap_risk, 0.0) as trap_risk,
                     COALESCE(s.forced_flow_intensity, 0.0) as forced_flow_intensity,
                     COALESCE(s.context_quality_score, 0.0) as context_quality_score,

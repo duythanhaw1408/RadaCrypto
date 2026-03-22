@@ -606,6 +606,14 @@ def _apply_flow_context_to_signals(
         if decision_summary_vi:
             _append_unique(why_now, f"Decision TPFM: {decision_summary_vi}")
 
+        # Phase 14: Populate metadata for database persistence (Finding 1)
+        if signal.metadata is None:
+            signal.metadata = {}
+        signal.metadata["matrix_cell_at_entry"] = matrix_cell
+        signal.metadata["flow_state_at_entry"] = flow_state
+        signal.metadata["flow_grade_at_entry"] = tradability_grade
+        signal.metadata["transition_code_at_entry"] = getattr(tpfm_snapshot, "transition_code", "UNKNOWN")
+
         # Trap Risk Governance
         if trap_risk >= 0.45:
             score -= (trap_risk * 25.0)

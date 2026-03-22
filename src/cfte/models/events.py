@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Literal
+from typing import Literal, Any
 
 TakerSide = Literal["BUY", "SELL"]
 Stage = Literal["DETECTED", "WATCHLIST", "CONFIRMED", "ACTIONABLE", "INVALIDATED", "RESOLVED"]
@@ -126,6 +126,7 @@ class ThesisSignal:
     pattern_code: str = ""
     pattern_phase: str = ""
     sequence_signature: str = ""
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(slots=True)

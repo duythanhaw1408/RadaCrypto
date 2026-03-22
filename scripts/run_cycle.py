@@ -185,6 +185,21 @@ def main():
     print(f"\n  ⏱️  Tổng thời gian: {total_elapsed:.1f}s")
     print("=" * 60)
 
+    # Phase 14: Export granular cycle status for Pages (Finding 2)
+    try:
+        status_payload = {
+            "last_run_ts": int(time.time() * 1000),
+            "total_elapsed_s": total_elapsed,
+            "steps": {k: ("success" if v in (0, -1) else "failure") for k, v in results.items()},
+            "details": results
+        }
+        status_path = Path("data/review/cycle_status.json")
+        status_path.parent.mkdir(parents=True, exist_ok=True)
+        status_path.write_text(json.dumps(status_payload, indent=2), encoding="utf-8")
+        print(f"  📄 Đã xuất trạng thái chu kỳ tại: {status_path}")
+    except Exception as exc:
+        print(f"  ⚠️  Không thể xuất trạng thái chu kỳ: {exc}")
+
     # Return non-zero if any critical step failed
     critical = ["bootstrap", "health", "scan"]
     if not args.skip_live:

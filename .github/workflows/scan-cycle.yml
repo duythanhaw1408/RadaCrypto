@@ -110,29 +110,12 @@ jobs:
     - name: Export Cycle Status
       if: always()
       run: |
-        python3 -c "
-        import os, json, datetime
-        from pathlib import Path
-        status = {
-          'data_mode': 'scan',
-          'scan_only': True,
-          'is_live': False,
-          'last_run': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
-          'bootstrap': {'ok': '${{ steps.run-cycle.outcome }}' == 'success', 'label': 'BOOTSTRAP'},
-          'scan': {'ok': '${{ steps.run-cycle.outcome }}' == 'success', 'label': 'RUN-SCAN'},
-          'live': {'ok': '${{ steps.run-cycle.outcome }}' == 'success', 'label': 'RUN-LIVE'},
-          'review': {'ok': '${{ steps.run-cycle.outcome }}' == 'success', 'label': 'REVIEW-DAY'},
-          'watchdog': {'ok': '${{ steps.run-cycle.outcome }}' == 'success', 'label': 'WATCHDOG'}
-        }
-        # Python True maps to JSON true automatically
-        print(json.dumps(status))
-        # We actually use set-output for the next step to write the file safely
-        " > cycle_status.json
-
-    - name: Update Cycle Artifact
-      if: always()
-      run: |
-        mv cycle_status.json docs/data/cycle_status.json
+        # Phase 14: Use granular status from run_cycle.py (Finding 2)
+        if [ -f data/review/cycle_status.json ]; then
+            cp data/review/cycle_status.json docs/data/cycle_status.json
+        else
+            echo '{"status": "unknown"}' > docs/data/cycle_status.json
+        fi
 
     - name: Generate actions_status.json
       run: |

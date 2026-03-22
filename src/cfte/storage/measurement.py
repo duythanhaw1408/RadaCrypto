@@ -455,8 +455,12 @@ def render_pattern_scorecard_vi(rows: list[dict[str, Any]]) -> str:
         return "Chưa có đủ dữ liệu pattern để lập pattern scorecard."
     lines = [
         "Bảng điểm Flow Patterns (Mẫu hình dòng tiền)",
-        "pattern | sequence | count | win rate (5m) | avg RR",
     ]
+    total_count = sum(row.get("count", 0) for row in rows)
+    if total_count < 10:
+        lines.append(f"⚠️ *Lưu ý: Mẫu thống kê còn mỏng (n={total_count}), độ tin cậy chưa cao.*")
+    
+    lines.append("pattern | sequence | count | win rate (5m) | avg RR")
     for row in rows:
         lines.append(
             f"{row['pattern_code']} | {row['sequence_signature']} | {row['count']} | "
