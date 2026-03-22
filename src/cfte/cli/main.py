@@ -505,6 +505,7 @@ def command_review_day(context: ShellContext, date_str: str | None = None, summa
         render_flow_state_scorecard_vi,
         render_forced_flow_scorecard_vi,
         render_transition_scorecard_vi,
+        render_pattern_scorecard_vi,
     )
     from cfte.storage.review_journal import ReviewJournal, render_review_journal_vi, summarize_review_journal
     from cfte.storage.sqlite_writer import ThesisSQLiteStore
@@ -519,18 +520,21 @@ def command_review_day(context: ShellContext, date_str: str | None = None, summa
         flow_state_scorecard = await store.get_flow_state_scorecard(start_ts=stats["start_ts"], end_ts=stats["end_ts"])
         forced_flow_scorecard = await store.get_forced_flow_scorecard(start_ts=stats["start_ts"], end_ts=stats["end_ts"])
         transition_scorecard = await store.get_transition_scorecard(start_ts=stats["start_ts"], end_ts=stats["end_ts"])
+        pattern_scorecard = await store.get_pattern_scorecard() # Get all patterns for context
         journal_path = _profile_path(context.profile, "review", "review_journal_path", DEFAULT_REVIEW_JOURNAL)
         review_summary = summarize_review_journal(
             ReviewJournal(journal_path).read_records(),
             start_ts=stats["start_ts"],
             end_ts=stats["end_ts"],
         )
-        text = render_daily_summary_vi(stats, review_summary, matrix_scorecard, flow_state_scorecard, forced_flow_scorecard)
+        text = render_daily_summary_vi(stats, review_summary, matrix_scorecard, flow_state_scorecard, forced_flow_scorecard, pattern_scorecard)
         print(text)
         print()
         print(render_flow_state_scorecard_vi(flow_state_scorecard))
         print()
         print(render_forced_flow_scorecard_vi(forced_flow_scorecard))
+        print()
+        print(render_pattern_scorecard_vi(pattern_scorecard))
         print()
         print(render_transition_scorecard_vi(transition_scorecard))
         if review_summary.get("total_reviews", 0):
@@ -549,7 +553,8 @@ def command_review_day(context: ShellContext, date_str: str | None = None, summa
                     "matrix_scorecard": matrix_scorecard,
                     "flow_state_scorecard": flow_state_scorecard,
                     "forced_flow_scorecard": forced_flow_scorecard,
-                    "transition_scorecard": transition_scorecard
+                    "transition_scorecard": transition_scorecard,
+                    "pattern_scorecard": pattern_scorecard
                 },
             ),
         )
@@ -584,6 +589,7 @@ def command_review_week(context: ShellContext, end_date_str: str | None = None) 
         render_matrix_scorecard_vi,
         render_setup_scorecard_vi,
         render_transition_scorecard_vi,
+        render_pattern_scorecard_vi,
         render_weekly_review_vi,
     )
     from cfte.storage.review_journal import (
@@ -613,6 +619,7 @@ def command_review_week(context: ShellContext, end_date_str: str | None = None) 
         flow_state_scorecard = await store.get_flow_state_scorecard(start_ts=start_ts, end_ts=end_ts)
         forced_flow_scorecard = await store.get_forced_flow_scorecard(start_ts=start_ts, end_ts=end_ts)
         transition_scorecard = await store.get_transition_scorecard(start_ts=start_ts, end_ts=end_ts)
+        pattern_scorecard = await store.get_pattern_scorecard()
         journal_path = _profile_path(context.profile, "review", "review_journal_path", DEFAULT_REVIEW_JOURNAL)
         review_summary = summarize_review_journal(ReviewJournal(journal_path).read_records(), start_ts=start_ts, end_ts=end_ts)
         threshold = float(context.profile.scan.get("actionable_threshold", 75.0))
@@ -637,6 +644,8 @@ def command_review_week(context: ShellContext, end_date_str: str | None = None) 
         print(review_text)
         print()
         print(render_flow_state_scorecard_vi(flow_state_scorecard))
+        print()
+        print(render_pattern_scorecard_vi(pattern_scorecard))
         print()
         print(render_transition_scorecard_vi(transition_scorecard))
         print()

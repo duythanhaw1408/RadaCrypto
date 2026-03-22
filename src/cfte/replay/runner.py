@@ -211,6 +211,17 @@ def run_replay(
                     active_theses=list(thesis_state.values()),
                     futures_context=None # No futures in historical replay for now
                 )
+                
+                # Phase 14: Enrich Signals with TPFM Intelligence (Finding 5)
+                for record in thesis_state.values():
+                    s = record.signal
+                    s.matrix_cell = m5_snap.matrix_cell
+                    s.flow_state = m5_snap.flow_state_code
+                    s.matrix_alias_vi = m5_snap.matrix_alias_vi
+                    s.decision_summary_vi = m5_snap.decision_summary_vi
+                    if hasattr(m5_snap, "edge_profile") and m5_snap.edge_profile:
+                        s.edge_score = m5_snap.edge_profile.edge_score
+                        s.edge_confidence = m5_snap.edge_profile.confidence
                 transition_event = m5_snap.transition_event
                 latest_tpfm_snapshot = m5_snap
                 
@@ -228,6 +239,12 @@ def run_replay(
                     )
                     if store:
                         asyncio.run(store.save_flow_transition(transition_event))
+                
+                # Phase 14: Final E2E Pattern Persistence
+                if store:
+                    pattern_ev = m5_snap.metadata.get("pattern_event")
+                    if pattern_ev:
+                        asyncio.run(store.save_flow_pattern_event(pattern_ev))
                 
                 tpfm_m5_buffer.append(m5_snap)
                 if len(tpfm_m5_buffer) >= 6:
@@ -257,8 +274,24 @@ def run_replay(
             active_theses=list(thesis_state.values()),
             futures_context=None
         )
+        
+        # Phase 14: Enrich Signals with TPFM Intelligence (Finding 5)
+        for record in thesis_state.values():
+            s = record.signal
+            s.matrix_cell = m5_snap.matrix_cell
+            s.flow_state = m5_snap.flow_state_code
+            s.matrix_alias_vi = m5_snap.matrix_alias_vi
+            s.decision_summary_vi = m5_snap.decision_summary_vi
+            if hasattr(m5_snap, "edge_profile") and m5_snap.edge_profile:
+                s.edge_score = m5_snap.edge_profile.edge_score
+                s.edge_confidence = m5_snap.edge_profile.confidence
         import asyncio
         asyncio.run(store.save_tpfm_snapshot(m5_snap))
+
+        # Phase 14: Final E2E Pattern Persistence
+        pattern_ev = m5_snap.metadata.get("pattern_event")
+        if pattern_ev:
+            asyncio.run(store.save_flow_pattern_event(pattern_ev))
         
         # Flush M30/4H even if thresholds not met (Phase T1-T5 Refinement)
         tpfm_m5_buffer.append(m5_snap)

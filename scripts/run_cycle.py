@@ -112,6 +112,8 @@ def main():
                         help="Cho phép chu kỳ kết thúc dù live session chưa sinh snapshot M5")
     parser.add_argument("--skip-live", action="store_true",
                         help="Bỏ qua live loop, chỉ chạy scan + review")
+    parser.add_argument("--events-path", type=str, default=None,
+                        help="Path tới file replay cho bước SCAN (tùy chọn)")
     parser.add_argument("--symbol", default="BTCUSDT",
                         help="Symbol để theo dõi (mặc định: BTCUSDT)")
     args = parser.parse_args()
@@ -140,7 +142,10 @@ def main():
     results["health"] = run_command("HEALTH", profile_args + ["health"])
 
     # 3. Run-scan
-    results["scan"] = run_command("RUN-SCAN", profile_args + ["run-scan", "--limit", "5"])
+    scan_args = profile_args + ["run-scan", "--limit", "5"]
+    if args.events_path:
+        scan_args.extend(["--events", args.events_path])
+    results["scan"] = run_command("RUN-SCAN", scan_args)
 
     # 4. Run-live (short burst)
     if not args.skip_live:

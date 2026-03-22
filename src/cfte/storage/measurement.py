@@ -137,6 +137,7 @@ def render_daily_summary_vi(
     matrix_scorecard: list[dict[str, Any]] | None = None,
     flow_state_scorecard: list[dict[str, Any]] | None = None,
     forced_flow_scorecard: list[dict[str, Any]] | None = None,
+    pattern_scorecard: list[dict[str, Any]] | None = None,
 ) -> str:
     stage_parts = [
         f"{stage_label_vi(stage)}: {count}"
@@ -158,6 +159,10 @@ def render_daily_summary_vi(
     top_matrix = _pick_matrix_bucket(matrix_scorecard, reverse=True)
     top_flow = _pick_flow_bucket(flow_state_scorecard, reverse=True)
     top_forced = _pick_forced_bucket(forced_flow_scorecard, reverse=True)
+    
+    # Phase 14: Pattern-native pick
+    pattern_scorecard = pattern_scorecard or []
+    top_pattern = sorted(pattern_scorecard, key=lambda x: (x.get("win_rate_5m", 0), x.get("count", 0)), reverse=True)[0] if pattern_scorecard else None
     lines = [
         f"Tổng kết ngày {stats.get('label', 'N/A')}",
         f"- Luận điểm mới: {stats.get('opened_count', 0)} | score TB: {stats.get('avg_score', 0.0):.2f} | confidence TB: {stats.get('avg_confidence', 0.0):.2f}",
@@ -189,6 +194,10 @@ def render_daily_summary_vi(
         horizon, horizon_stats = _preferred_horizon_stats(top_forced)
         lines.append(
             f"- Forced flow đáng chú ý: {_forced_flow_bucket_label(top_forced)} | {horizon} edge {_fmt_pct(float(horizon_stats.get('avg_edge', 0.0) or 0.0))}"
+        )
+    if top_pattern:
+        lines.append(
+            f"- Pattern nổi bật: {top_pattern['pattern_code']} ({top_pattern['sequence_signature']}) | win rate {top_pattern['win_rate_5m']*100:.1f}% | RR {top_pattern['avg_rr']:.2f}"
         )
     return "\n".join(lines)
 
@@ -437,6 +446,21 @@ def render_transition_scorecard_vi(rows: list[dict[str, Any]]) -> str:
                 f"q={row.get('avg_transition_quality', 0.0):.2f}/s={row.get('avg_transition_speed', 0.0):.2f} | "
                 f"{_h(row, '1h')} | {_h(row, '4h')} | {_h(row, '24h')}"
             )
+        )
+    return "\n".join(lines)
+
+
+def render_pattern_scorecard_vi(rows: list[dict[str, Any]]) -> str:
+    if not rows:
+        return "Chưa có đủ dữ liệu pattern để lập pattern scorecard."
+    lines = [
+        "Bảng điểm Flow Patterns (Mẫu hình dòng tiền)",
+        "pattern | sequence | count | win rate (5m) | avg RR",
+    ]
+    for row in rows:
+        lines.append(
+            f"{row['pattern_code']} | {row['sequence_signature']} | {row['count']} | "
+            f"{row['win_rate_5m']*100:.1f}% | {row['avg_rr']:.2f}"
         )
     return "\n".join(lines)
 

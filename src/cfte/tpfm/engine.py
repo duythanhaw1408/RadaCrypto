@@ -409,10 +409,12 @@ class TPFMStateEngine:
         if closed_sequence:
             snapshot.metadata["closed_sequence"] = closed_sequence
 
-        # Phase D: Probability / Expectancy Engine
+        # Phase D: Probability / Expectancy Engine (Finding 3 Uplift)
         snapshot.edge_profile = self._probability_engine.evaluate_edge(
             matrix_cell=snapshot.matrix_cell,
-            sequence_length=snapshot.sequence_length
+            sequence_length=snapshot.sequence_length,
+            pattern_code=snapshot.metadata.get("pattern_event").pattern_code if snapshot.metadata.get("pattern_event") else None,
+            sequence_signature=snapshot.sequence_signature
         )
 
         # snapshot.transition_event is already populated by _detect_transitions if a shift occurred
@@ -1142,9 +1144,10 @@ class TPFMStateEngine:
         """Syncs ProbabilityEngine with real-world results from the database"""
         try:
             scorecard = await db_writer.get_matrix_scorecard()
+            pattern_scorecard = await db_writer.get_pattern_scorecard()
             if scorecard:
-                self._probability_engine.refresh_stats(scorecard)
-                print(f"✅ TPFM Probability Engine synced with {len(scorecard)} matrix cells from DB.")
+                self._probability_engine.refresh_stats(scorecard, pattern_scorecard=pattern_scorecard)
+                print(f"✅ TPFM Probability Engine synced with {len(scorecard)} cells and {len(pattern_scorecard)} patterns.")
                 return True
             return False
         except Exception as e:

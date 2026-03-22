@@ -13,80 +13,86 @@ class ProbabilityEdge:
 
 class ProbabilityEngine:
     def __init__(self):
-        # Default/Heuristic base stats as fallback
-        self._stats_db = {
+        # Heuristic fallbacks
+        self._cell_stats = {
             "POS_INIT__POS_INV": {"win_rate": 0.62, "rr": 1.5, "count": 0},
             "POS_INIT__NEG_INV": {"win_rate": 0.45, "rr": 2.1, "count": 0},
             "NEG_INIT__NEG_INV": {"win_rate": 0.65, "rr": 1.4, "count": 0},
             "NEG_INIT__POS_INV": {"win_rate": 0.48, "rr": 2.0, "count": 0},
         }
+        # Stats-native pattern/sequence cache
+        self._pattern_stats = {} # (pattern_code, sequence_signature) -> stats
         self._is_ready = False
 
-    def refresh_stats(self, scorecard: list[dict]):
+    def refresh_stats(self, cell_scorecard: list[dict], pattern_scorecard: list[dict] = None):
         """Updates internal stats from database scorecard results"""
-        for entry in scorecard:
+        # 1. Update Cell Heuristics
+        for entry in cell_scorecard:
             cell = entry.get("matrix_cell")
-            if not cell:
-                continue
-                
+            if not cell: continue
             horizons = entry.get("horizons", {})
-            # Prefer 5m horizon for win rate, fallback to any available
             stats_5m = horizons.get("5m") or horizons.get("15m") or horizons.get("1m")
+            if not stats_5m: continue
             
-            if not stats_5m:
-                continue
-                
-            total = stats_5m.get("count", 0)
-            wr = stats_5m.get("win_rate", 0.5)
-            # Derive RR from avg_mfe / abs(avg_mae) if possible, or use heuristic
-            # For now, let's use a very conservative derivation: 
-            # if avg_edge > 0, we trust it more.
-            
-            current = self._stats_db.get(cell, {"win_rate": 0.5, "rr": 1.5, "count": 0})
-            
-            if total >= 5: # Minimum sample to trust DB stats
-                self._stats_db[cell] = {
-                    "win_rate": wr,
-                    "rr": current["rr"], # Keep heuristic RR for now until formula refined
-                    "count": total
+            if stats_5m.get("count", 0) >= 5:
+                self._cell_stats[cell] = {
+                    "win_rate": stats_5m.get("win_rate", 0.5),
+                    "rr": self._cell_stats.get(cell, {}).get("rr", 1.5),
+                    "count": stats_5m.get("count", 0)
                 }
+        
+        # 2. Update Pattern-Native Stats (Phase 14 Uplift)
+        if pattern_scorecard:
+            for entry in pattern_scorecard:
+                key = (entry["pattern_code"], entry["sequence_signature"])
+                self._pattern_stats[key] = {
+                    "win_rate": entry["win_rate_5m"],
+                    "rr": entry["avg_rr"] or 1.5,
+                    "count": entry["count"]
+                }
+        
         self._is_ready = True
 
-    def evaluate_edge(self, matrix_cell: str, sequence_length: int = 1) -> ProbabilityEdge:
-        """Evaluates the mathematical edge of a specific flow state"""
-        base_stats = self._stats_db.get(matrix_cell, {"win_rate": 0.50, "rr": 1.0, "count": 0})
+    def evaluate_edge(self, matrix_cell: str, sequence_length: int = 1, 
+                      pattern_code: str = None, sequence_signature: str = None) -> ProbabilityEdge:
+        """Evaluates the mathematical edge using the most specific data available."""
+        # Start with cell-level baseline
+        base = self._cell_stats.get(matrix_cell, {"win_rate": 0.50, "rr": 1.5, "count": 0})
         
-        # Adjust win rate based on sequence maturity
-        # A sequence of 3-4 is optimal, >5 starts to exhaust
-        wr_modifier = 0.0
-        if sequence_length == 2:
-            wr_modifier = 0.02
-        elif 3 <= sequence_length <= 4:
-            wr_modifier = 0.05
-        elif sequence_length >= 5:
-            wr_modifier = -0.05 # Exhaustion risk lowers win rate
+        # Override with pattern-native stats if specific match exists (Finding 3)
+        stats = base
+        conf_bonus = 0.0
+        if pattern_code and sequence_signature:
+            p_stats = self._pattern_stats.get((pattern_code, sequence_signature))
+            if p_stats and p_stats["count"] >= 3:
+                stats = p_stats
+                conf_bonus = 0.1 # Bonus confidence for pattern-specific matches
+        
+        # Win rate adjustment for sequence maturity (if not already baked into p_stats)
+        wr_mod = 0.0
+        if not pattern_code: # Only apply heuristic mods if we don't have pattern-native stats
+            if sequence_length == 2: wr_mod = 0.02
+            elif 3 <= sequence_length <= 4: wr_mod = 0.05
+            elif sequence_length >= 5: wr_mod = -0.05
             
-        final_wr = min(0.95, max(0.05, base_stats["win_rate"] + wr_modifier))
-        
-        # Edge = (WinRate * RR) - (LossRate * 1)
+        final_wr = min(0.95, max(0.05, stats["win_rate"] + wr_mod))
         loss_rate = 1.0 - final_wr
-        edge_raw = (final_wr * base_stats["rr"]) - loss_rate
+        edge_raw = (final_wr * stats["rr"]) - loss_rate
         
-        # Normalize edge score between 0 and 1 (max realistic edge ~ 1.0)
-        edge_score = max(0.0, min(1.0, (edge_raw + 0.2) / 1.0)) # mapping -0.2 to 0, 0.8 to 1
+        # Normalize edge score
+        edge_score = max(0.0, min(1.0, (edge_raw + 0.2) / 1.0))
         
-        if base_stats["count"] >= 100:
-            confidence = "HIGH"
-        elif base_stats["count"] >= 20: 
-            confidence = "MEDIUM"
-        else:
-            confidence = "LOW"
-            
+        if stats["count"] >= 50: confidence = "HIGH"
+        elif stats["count"] >= 10: confidence = "MEDIUM"
+        else: confidence = "LOW"
+        
+        if conf_bonus > 0 and confidence == "LOW": confidence = "MEDIUM"
+
         return ProbabilityEdge(
-            setup_name=matrix_cell,
+            setup_name=pattern_code or matrix_cell,
             historical_win_rate=round(final_wr, 2),
-            expected_rr=base_stats["rr"],
-            sample_size=base_stats["count"],
+            expected_rr=round(stats["rr"], 2),
+            sample_size=stats["count"],
             edge_score=round(edge_score, 2),
             confidence=confidence
         )

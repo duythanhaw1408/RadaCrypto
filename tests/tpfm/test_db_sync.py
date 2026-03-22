@@ -33,6 +33,7 @@ async def test_probability_db_sync():
         }
     ]
     mock_db.get_matrix_scorecard = AsyncMock(return_value=mock_scorecard)
+    mock_db.get_pattern_scorecard = AsyncMock(return_value=[]) # Empty for this test
     
     # Trigger sync
     success = await engine.sync_probability_stats(mock_db)
@@ -42,7 +43,7 @@ async def test_probability_db_sync():
     # POS_INIT__POS_INV should have WR 0.8
     edge1 = engine._probability_engine.evaluate_edge("POS_INIT__POS_INV")
     assert edge1.historical_win_rate == 0.8
-    assert edge1.confidence == "MEDIUM" # 50 >= 20
+    assert edge1.confidence == "HIGH" # 50 >= 50
     
     # NEG_INIT__NEG_INV should have WR 0.3
     edge2 = engine._probability_engine.evaluate_edge("NEG_INIT__NEG_INV")
@@ -68,4 +69,4 @@ async def test_probability_db_sync():
     
     edge3 = engine._probability_engine.evaluate_edge("POS_INIT__NEG_INV")
     assert edge3.historical_win_rate == 0.7
-    assert edge3.confidence == "LOW" # 10 < 20
+    assert edge3.confidence == "MEDIUM" # 10 >= 10

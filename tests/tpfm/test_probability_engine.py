@@ -45,7 +45,7 @@ def test_probability_dynamic_loading():
     # Test loaded stats
     edge1 = engine.evaluate_edge("POS_INIT__POS_INV", sequence_length=1)
     assert edge1.historical_win_rate == 0.80
-    assert edge1.confidence == "MEDIUM" # 50 >= 20
+    assert edge1.confidence == "HIGH" # 50 >= 50
     
     edge2 = engine.evaluate_edge("NEG_INIT__NEG_INV", sequence_length=1)
     assert edge2.historical_win_rate == 0.30

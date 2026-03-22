@@ -763,6 +763,17 @@ class LiveThesisLoop:
                 active_theses=list(self.thesis_state.values()),
                 futures_context=futures_context
             )
+            
+            # Phase 14: Enrich Signals with TPFM Intelligence (Finding 5)
+            for record in self.thesis_state.values():
+                s = record.signal
+                s.matrix_cell = tpfm_snap.matrix_cell
+                s.flow_state = tpfm_snap.flow_state_code
+                s.matrix_alias_vi = tpfm_snap.matrix_alias_vi
+                s.decision_summary_vi = tpfm_snap.decision_summary_vi
+                if hasattr(tpfm_snap, "edge_profile") and tpfm_snap.edge_profile:
+                    s.edge_score = tpfm_snap.edge_profile.edge_score
+                    s.edge_confidence = tpfm_snap.edge_profile.confidence
             transition_event = tpfm_snap.transition_event
             
             if transition_event:
@@ -799,6 +810,11 @@ class LiveThesisLoop:
             
             # Persist
             await self.store.save_tpfm_snapshot(tpfm_snap)
+            
+            # Phase 14: Final E2E Pattern Persistence
+            pattern_event = tpfm_snap.metadata.get("pattern_event")
+            if pattern_event:
+                await self.store.save_flow_pattern_event(pattern_event)
             self._update_latest_tpfm_summary(tpfm_snap)
             self._latest_tpfm_snapshot = tpfm_snap
             if self._first_m5_seen_at is None:

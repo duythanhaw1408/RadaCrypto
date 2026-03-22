@@ -1593,3 +1593,21 @@ class ThesisSQLiteStore:
                 )
             )
             db.commit()
+    async def get_pattern_scorecard(self) -> list[dict]:
+        """Queries historical statistics for flow patterns and sequences."""
+        with sqlite3.connect(self.db_path) as db:
+            db.row_factory = sqlite3.Row
+            cursor = db.execute(
+                """
+                SELECT 
+                    pattern_code,
+                    sequence_signature,
+                    COUNT(*) as count,
+                    AVG(CASE WHEN r5_bps > 0 THEN 1 ELSE 0 END) as win_rate_5m,
+                    AVG(max_favorable_bps / NULLIF(ABS(max_adverse_bps), 0)) as avg_rr
+                FROM flow_pattern_outcome
+                GROUP BY pattern_code, sequence_signature
+                HAVING COUNT(*) >= 1
+                """
+            )
+            return [dict(row) for row in cursor.fetchall()]
