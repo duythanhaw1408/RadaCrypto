@@ -205,6 +205,19 @@ def render_trader_card(signal: ThesisSignal) -> str:
             f"Trạng thái: {stage_emoji} {stage_label} | {priority}",
             f"Hành động: {action_hint}",
             f"Chỉ số: Score {signal.score:>.1f} | Conf {signal.confidence:>.2f} | Cov {signal.coverage:>.2f}",
+        ]
+    )
+
+    # Enforce North Star Premium Metrics
+    edge_color = "🟩" if signal.edge_score >= 60 else ("🟨" if signal.edge_score > 0 else "⬜")
+    edge_text = f"{signal.edge_score:.1f}" if signal.edge_score > 0 else "N/A (Cần thêm sample)"
+    lines.append(f"📊 Lợi thế Thống kê: {edge_color} Edge Score {edge_text} | Tin cậy: {signal.edge_confidence}")
+
+    ai_text = signal.ai_brief_vi or "Đang chờ snapshot M5 đầu diện để AI Briefing..."
+    lines.append(f"💡 AI Decision Brief: {ai_text}")
+
+    lines.extend(
+        [
             f"Cơ sở: {why_now}",
             f"Rủi ro: {conflicts}",
             f"Vô hiệu: {invalidation} | Vào: {signal.entry_style}",

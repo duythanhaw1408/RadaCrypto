@@ -416,7 +416,7 @@ class TPFMStateEngine:
         )
 
         snapshot.transition_event = closed_sequence
-        return snapshot
+        return snapshot, closed_sequence
 
     def _apply_context_overlay(
         self, 

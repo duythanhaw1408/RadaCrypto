@@ -120,6 +120,9 @@ class ThesisSignal:
     decision_posture: str = ""
     decision_summary_vi: str = ""
     flow_alignment_score: float = 0.0
+    ai_brief_vi: str = ""
+    edge_score: float = 0.0
+    edge_confidence: str = "LOW"
 
 
 @dataclass(slots=True)
