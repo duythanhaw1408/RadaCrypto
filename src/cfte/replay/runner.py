@@ -203,7 +203,7 @@ def run_replay(
             
             # Check if 5 minutes have passed (300,000 ms)
             if payload.venue_ts - tpfm_window_start_ts >= 300000:
-                m5_snap, transition_event = tpfm.calculate_m5_snapshot(
+                m5_snap = tpfm.calculate_m5_snapshot(
                     window_start_ts=tpfm_window_start_ts,
                     window_end_ts=payload.venue_ts,
                     trades=tpfm_trades,
@@ -211,6 +211,7 @@ def run_replay(
                     active_theses=list(thesis_state.values()),
                     futures_context=None # No futures in historical replay for now
                 )
+                transition_event = m5_snap.transition_event
                 latest_tpfm_snapshot = m5_snap
                 
                 if transition_event and not store:
@@ -248,7 +249,7 @@ def run_replay(
 
     # Final TPFM flush at end of replay (Phase T1-T5 Refinement)
     if tpfm_trades and store:
-        m5_snap, _ = tpfm.calculate_m5_snapshot(
+        m5_snap = tpfm.calculate_m5_snapshot(
             window_start_ts=tpfm_window_start_ts or ordered_events[0].venue_ts,
             window_end_ts=ordered_events[-1].venue_ts,
             trades=tpfm_trades,

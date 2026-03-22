@@ -42,12 +42,13 @@ def test_tpfm_vnext_metrics_and_transitions():
         )
     ]
     
-    snap1, trans1 = engine.calculate_m5_snapshot(
+    snap1 = engine.calculate_m5_snapshot(
         window_start_ts=1700000000000,
         window_end_ts=1700000300000,
         trades=trades_1,
         snapshots=snapshots_1
     )
+    trans1 = snap1.transition_event
     
     assert snap1.matrix_cell != "UNKNOWN"
     assert trans1 is None # First snapshot, no transition
@@ -86,12 +87,13 @@ def test_tpfm_vnext_metrics_and_transitions():
         )
     ]
     
-    snap2, trans2 = engine.calculate_m5_snapshot(
+    snap2 = engine.calculate_m5_snapshot(
         window_start_ts=1700000300000,
         window_end_ts=1700000600000,
         trades=trades_2,
         snapshots=snapshots_2
     )
+    trans2 = snap2.transition_event
     
     assert snap2.matrix_cell != snap1.matrix_cell
     assert trans2 is not None

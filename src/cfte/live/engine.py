@@ -755,7 +755,7 @@ class LiveThesisLoop:
             futures_context = dict(f_ctx)
             futures_context.update(self._build_venue_context(trade.venue_ts))
 
-            tpfm_snap, transition_event = self.tpfm.calculate_m5_snapshot(
+            tpfm_snap = self.tpfm.calculate_m5_snapshot(
                 window_start_ts=self._tpfm_window_start_ts,
                 window_end_ts=trade.venue_ts,
                 trades=self._tpfm_trades,
@@ -763,6 +763,7 @@ class LiveThesisLoop:
                 active_theses=list(self.thesis_state.values()),
                 futures_context=futures_context
             )
+            transition_event = tpfm_snap.transition_event
             
             if transition_event:
                 self._last_transition_alias_vi = transition_event.transition_alias_vi

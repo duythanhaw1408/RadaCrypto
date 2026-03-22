@@ -4,7 +4,7 @@ let realDataLoaded = false;
 
 document.addEventListener("DOMContentLoaded", () => {
     initSessionTimer();
-    initMockLiveFeed();
+    // initMockLiveFeed(); // Finding 2: Disable demo masquerading
     loadRealData();
 
     // Refresh data every 1 minute
@@ -158,7 +158,7 @@ function updateIntelligenceHeroFromReplay(signal) {
     const summary = signal.decision_summary_vi || summarizeSignal(signal);
 
     if (headline) {
-        headline.textContent = `${setupLabel} | Snapshot scan`;
+        headline.innerHTML = `<span class="scan-tag">[SCAN]</span> ${setupLabel}`;
     }
     if (conclusion) {
         conclusion.textContent = summary;
@@ -205,7 +205,7 @@ function updateMatrixGridFromReplay(signal, status) {
         return;
     }
     updateMatrixColumn(matrixColumns[0], {
-        title: "Snapshot scan",
+        title: "[SCAN] Matrix Snapshot",
         state: humanizeSetup(signal.setup),
         grade: deriveGrade(signal),
         bias: String(signal.direction || "").includes("LONG") ? "Mua" : "Bán",
@@ -214,7 +214,7 @@ function updateMatrixGridFromReplay(signal, status) {
     if (matrixColumns.length >= 2) {
         updateMatrixColumn(matrixColumns[1], {
             title: "Nguồn dữ liệu",
-            state: status?.data_mode === "scan_only" ? "Replay thật" : "Khởi tạo",
+            state: status?.data_mode === "scan_only" ? "Chế độ Scan" : "Khởi tạo",
             grade: status?.latest_flow_grade || "N/A",
             bias: "Scan",
             className: "neutral",

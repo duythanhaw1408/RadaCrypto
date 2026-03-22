@@ -415,8 +415,8 @@ class TPFMStateEngine:
             sequence_length=snapshot.sequence_length
         )
 
-        snapshot.transition_event = closed_sequence
-        return snapshot, closed_sequence
+        # snapshot.transition_event is already populated by _detect_transitions if a shift occurred
+        return snapshot
 
     def _apply_context_overlay(
         self, 

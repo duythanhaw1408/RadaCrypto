@@ -58,8 +58,8 @@ jobs:
         PYTHONPATH: src
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       run: |
-        # GitHub-hosted runner thường bị geo-block bởi Binance. Hệ thống giờ đã có Bybit fallback và Anti-block.
-        # Chạy live để collect data thật.
+        # Chạy vNext Scan Cycle trên dữ liệu fixture/replay để cập nhật Intelligence cho Dashboard.
+        # Chế độ này không phải live trading, dùng để duy trì snapshot cho GitHub Pages.
         python scripts/run_cycle.py \
           --allow-missing \
           --profile configs/profiles/personal_binance.yaml
@@ -124,14 +124,15 @@ jobs:
           'last_run': datetime.now(tz=timezone.utc).isoformat(),
           'last_scan_time': datetime.now(tz=timezone.utc).isoformat(),
           'scan_count': ${{ github.run_number }},
-          'data_mode': 'scan_only',
-          'live_enabled': False,
+          'data_mode': 'scan',
+          'live_enabled': false,
+          'is_replay': true,
           'first_m5_seen_at': runtime.get('first_m5_seen_at'),
           'latest_flow_grade': runtime.get('latest_flow_grade') or derived_grade,
           'latest_transition': runtime.get('latest_transition', {}),
           'top_signal': top_signal,
           'workflows': [
-            {'name':'CFTE Scan Cycle (scan-only / 2h)','status':'success','last_run':datetime.now(tz=timezone.utc).isoformat(),'duration':'~2m'},
+            {'name':'CFTE vNext Scan Cycle (Hourly)','status':'success','last_run':datetime.now(tz=timezone.utc).isoformat(),'duration':'~2m'},
           ]
         }
         json.dump(status, open('docs/data/actions_status.json','w'), ensure_ascii=False)
