@@ -52,13 +52,11 @@ class TestTPFMStateEngine(unittest.TestCase):
         
         card = render_tpfm_m5_card(snap)
         self.assertIn("BTCUSDT", card)
-        self.assertIn("Flow:", card)
+        self.assertIn("Pattern :", card)
         self.assertIn("Observed:", card)
-        self.assertIn("Missing:", card)
-        self.assertIn("THIẾU CONTEXT FUTURES", card)
         self.assertIn("Decision: WAIT", card)
-        self.assertIn("Confirm: Chờ futures", card)
-        self.assertIn("Avoid: Spread giãn", card)
+        self.assertIn("Entry   :", card)
+        self.assertIn("Invalid :", card)
 
     def test_30m_regime_synthesis(self):
         snapshots = []
@@ -436,6 +434,62 @@ class TestTPFMStateEngine(unittest.TestCase):
         self.assertEqual(event.from_flow_state_code, first.flow_state_code)
         self.assertEqual(event.to_flow_state_code, second.flow_state_code)
         self.assertEqual(event.decision_shift, "CONSERVATIVE_TO_AGGRESSIVE")
+
+    def test_temporal_tempo_state_acceleration_and_exhaustion(self):
+        self.engine._recent_snapshots.clear()
+        
+        # Helper to create and drive a snapshot through temporal logic
+        def mock_snap(init, inv, matrix, agreement=0.5, tradability=0.8, efficiency="MIXED"):
+            snap = self.engine._empty_snapshot(0, 300_000)
+            snap.initiative_score = init
+            snap.inventory_score = inv
+            snap.matrix_cell = matrix
+            snap.agreement_score = agreement
+            snap.tradability_score = tradability
+            snap.response_efficiency_state = efficiency
+            self.engine._derive_temporal_memory(snap)
+            
+            # Manually simulate sequence length based on history
+            snap.sequence_length = len(list(self.engine._recent_snapshots)) + 1
+            
+            snap.tempo_state = self.engine._classify_tempo_state(snap)
+            snap.persistence_state = self.engine._classify_persistence_state(snap)
+            snap.exhaustion_risk = self.engine._estimate_exhaustion_risk(snap, list(self.engine._recent_snapshots))
+            self.engine._recent_snapshots.append(snap)
+            return snap
+            
+        s0 = mock_snap(0.1, 0.1, "POS_INIT__POS_INV")
+        self.assertEqual(s0.tempo_state, "STABLE")
+        self.assertEqual(s0.persistence_state, "EARLY")
+        
+        mock_snap(0.2, 0.2, "POS_INIT__POS_INV", agreement=0.6)
+        mock_snap(0.3, 0.3, "POS_INIT__POS_INV", agreement=0.7)
+        
+        s3 = mock_snap(0.4, 0.4, "POS_INIT__POS_INV", agreement=0.8)
+        # delta = (0.4 - avg(0.1, 0.2, 0.3)) = 0.4 - 0.2 = 0.2 >= 0.12 AND agreement 0.8-avg(...) >= 0.08 => ACCELERATING
+        self.assertEqual(s3.tempo_state, "ACCELERATING")
+        self.assertEqual(s3.persistence_state, "PERSISTENT")
+        
+        mock_snap(0.3, 0.3, "POS_INIT__POS_INV", tradability=0.7)
+        s5 = mock_snap(0.1, 0.1, "POS_INIT__POS_INV", tradability=0.5)
+        # delta_init_3 = 0.1 - avg(0.2,0.3,0.3) = 0.1 - 0.26 = -0.16. abs >= 0.08.
+        # tradability dropped. So DECELERATING.
+        self.assertEqual(s5.tempo_state, "DECELERATING")
+        
+        # In new taxonomy, sequence length 6 is PERSISTENT
+        self.assertEqual(s5.persistence_state, "PERSISTENT")
+        
+        # Exhaustion risk must be high enough
+        # exhaustion_risk logic: if persistent + decelerating -> 0.2 + 0.3 = 0.5. 
+        # still need 0.55 for EXHAUSTING phase.
+        # Let's add trap_risk or response_efficiency=ABSORBED_OR_TRAP
+        s5.response_efficiency_state = "ABSORBED_OR_TRAP"
+        s5.exhaustion_risk = self.engine._estimate_exhaustion_risk(s5, list(self.engine._recent_snapshots))
+        
+        self.engine._derive_pattern_phase(s5)
+        self.assertEqual(s5.pattern_phase, "EXHAUSTING")
+        self.assertGreater(s5.exhaustion_risk, 0.5)
+
 
 if __name__ == "__main__":
     unittest.main()

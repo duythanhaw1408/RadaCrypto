@@ -33,6 +33,38 @@ class TPFMAIExplainer:
         except Exception as e:
             return f"❌ Lỗi khi gọi AI: {str(e)}"
 
+    def explain_m5_brief(self, snap: TPFMSnapshot) -> str:
+        """Generates a concise Trader Brief for an M5 flow snapshot"""
+        if not self.api_key:
+            return "⚠️ Thiếu GEMINI_API_KEY."
+
+        prompt = f"""
+Bạn là một chuyên gia Scalping Order Flow. Hãy viết 1 đoạn nhận định cực ngắn (tối đa 60 từ) cho snapshot sau:
+
+THÔNG SỐ:
+- Cặp tiền: {snap.symbol}
+- Trạng thái Matrix: {snap.matrix_alias_vi} ({snap.matrix_cell})
+- Pattern: {snap.pattern_alias_vi} | Giai đoạn: {snap.pattern_phase}
+- Chuỗi Flow (Sequence): {snap.sequence_signature} | Dài: {snap.sequence_length}
+- Lợi thế thống kê (Edge): Thắng {snap.historical_win_rate:.0%} | RR {snap.expected_rr:.1f} | Điểm Edge: {snap.edge_score:.2f}
+- Bối cảnh đa khung (MTF): {json.dumps(snap.parent_context, ensure_ascii=False)}
+
+YÊU CẦU:
+1. Trả lời bằng tiếng Việt. 
+2. Đi thẳng vào vấn đề: "Có nên vào lệnh không? Tại sao?"
+3. Dựa trên sự kết hợp giữa Pattern hiện tại và Lợi thế thống kê.
+4. Phong cách: Thực chiến, quyết đoán, ngôn ngữ trader.
+
+BẮT ĐẦU:
+"""
+        try:
+            payload = {"contents": [{"parts": [{"text": prompt}]}]}
+            response = requests.post(self.url, json=payload, timeout=15)
+            response.raise_for_status()
+            return response.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
+        except:
+            return "N/A (AI Timeout)"
+
     def _build_prompt(self, report: TPFM4hStructural) -> str:
         # Format metrics for the prompt
         regime_shares = ", ".join([f"{k}: {v*100:.0f}%" for k, v in report.dominant_regime_share.items()])

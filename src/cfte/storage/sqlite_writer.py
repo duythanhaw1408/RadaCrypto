@@ -215,6 +215,42 @@ class ThesisSQLiteStore:
                 "basis_state": "TEXT DEFAULT 'BALANCED'",
                 "leader_confidence": "REAL DEFAULT 0.0",
                 "aligned_window_ms": "INTEGER DEFAULT 0",
+                "initiative_delta_1": "REAL DEFAULT 0.0",
+                "initiative_delta_3": "REAL DEFAULT 0.0",
+                "initiative_delta_5": "REAL DEFAULT 0.0",
+                "inventory_delta_1": "REAL DEFAULT 0.0",
+                "inventory_delta_3": "REAL DEFAULT 0.0",
+                "inventory_delta_5": "REAL DEFAULT 0.0",
+                "agreement_delta_3": "REAL DEFAULT 0.0",
+                "tradability_delta_3": "REAL DEFAULT 0.0",
+                "forced_flow_delta_3": "REAL DEFAULT 0.0",
+                "tempo_state": "TEXT DEFAULT 'UNKNOWN'",
+                "persistence_state": "TEXT DEFAULT 'UNKNOWN'",
+                "exhaustion_risk": "REAL DEFAULT 0.0",
+                "history_depth": "INTEGER DEFAULT 0",
+                "sequence_id": "TEXT DEFAULT ''",
+                "sequence_signature": "TEXT DEFAULT 'UNKNOWN'",
+                "sequence_length": "INTEGER DEFAULT 0",
+                "sequence_family": "TEXT DEFAULT 'UNKNOWN'",
+                "sequence_quality": "REAL DEFAULT 0.0",
+                "edge_score": "REAL DEFAULT 0.0",
+                "edge_confidence": "TEXT DEFAULT 'LOW'",
+                "historical_win_rate": "REAL DEFAULT 0.0",
+                "expected_rr": "REAL DEFAULT 0.0",
+                "pattern_code": "TEXT DEFAULT 'UNCLASSIFIED'",
+                "pattern_alias_vi": "TEXT DEFAULT 'Chưa phân loại pattern'",
+                "pattern_family": "TEXT DEFAULT 'NONE'",
+                "pattern_phase": "TEXT DEFAULT 'FORMING'",
+                "pattern_strength": "REAL DEFAULT 0.0",
+                "pattern_quality": "REAL DEFAULT 0.0",
+                "pattern_failure_risk": "REAL DEFAULT 0.0",
+                "sequence_start_ts": "REAL DEFAULT 0.0",
+                "sequence_duration_sec": "REAL DEFAULT 0.0",
+                "is_sequence_pivot": "INTEGER DEFAULT 0",
+                "parent_context_json": "TEXT DEFAULT '{}'",
+                "t_plus_1_price": "REAL DEFAULT 0.0",
+                "t_plus_5_price": "REAL DEFAULT 0.0",
+                "t_plus_12_price": "REAL DEFAULT 0.0",
             }
             for col, dft in m5_definitions.items():
                 if col not in m5_cols:
@@ -293,6 +329,86 @@ class ThesisSQLiteStore:
             for col, dft in transition_definitions.items():
                 if col not in transition_cols:
                     db.execute(f"ALTER TABLE tpfm_transition_event ADD COLUMN {col} {dft}")
+            
+            # Sequence Events Table
+            db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS tpfm_sequence_event (
+                    sequence_id TEXT PRIMARY KEY,
+                    symbol TEXT NOT NULL,
+                    venue TEXT NOT NULL,
+                    start_ts INTEGER NOT NULL,
+                    end_ts INTEGER NOT NULL,
+                    sequence_signature TEXT,
+                    sequence_family TEXT,
+                    sequence_length INTEGER,
+                    cumulative_initiative REAL,
+                    cumulative_inventory REAL,
+                    max_energy REAL,
+                    sequence_quality REAL,
+                    is_active INTEGER
+                )
+                """
+            )
+
+            # Phase 1: Matrix-Native Pattern Event
+            db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS flow_pattern_event (
+                    pattern_id TEXT PRIMARY KEY,
+                    snapshot_id TEXT NOT NULL,
+                    symbol TEXT NOT NULL,
+                    venue TEXT NOT NULL,
+                    timestamp INTEGER NOT NULL,
+                    pattern_code TEXT NOT NULL,
+                    pattern_alias_vi TEXT NOT NULL,
+                    pattern_family TEXT NOT NULL,
+                    pattern_phase TEXT NOT NULL,
+                    sequence_id TEXT NOT NULL,
+                    sequence_signature TEXT NOT NULL,
+                    sequence_length INTEGER NOT NULL,
+                    tempo_state TEXT NOT NULL,
+                    persistence_state TEXT NOT NULL,
+                    pattern_strength REAL NOT NULL,
+                    pattern_quality REAL NOT NULL,
+                    pattern_failure_risk REAL NOT NULL,
+                    matrix_cell TEXT NOT NULL,
+                    flow_state_code TEXT NOT NULL,
+                    metadata TEXT
+                )
+                """
+            )
+            try:
+                db.execute("CREATE INDEX IF NOT EXISTS idx_flow_pattern_symbol_ts ON flow_pattern_event (symbol, timestamp)")
+                db.execute("CREATE INDEX IF NOT EXISTS idx_flow_pattern_signature_ts ON flow_pattern_event (sequence_signature, timestamp)")
+            except:
+                pass
+            
+            # Phase 2: Pattern Performance Outcome
+            db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS flow_pattern_outcome (
+                    outcome_id TEXT PRIMARY KEY,
+                    snapshot_id TEXT NOT NULL,
+                    symbol TEXT NOT NULL,
+                    timestamp INTEGER NOT NULL,
+                    pattern_code TEXT,
+                    sequence_signature TEXT,
+                    start_px REAL,
+                    t1_px REAL, t5_px REAL, t12_px REAL,
+                    r1_bps REAL, r5_bps REAL, r12_bps REAL,
+                    max_favorable_bps REAL,
+                    max_adverse_bps REAL,
+                    metadata_json TEXT
+                )
+                """
+            )
+            try:
+                db.execute("CREATE INDEX IF NOT EXISTS idx_outcome_pattern ON flow_pattern_outcome (pattern_code)")
+                db.execute("CREATE INDEX IF NOT EXISTS idx_outcome_sym ON flow_pattern_outcome (symbol)")
+            except:
+                pass
+
             
             # System Writer Lock Table
             db.execute(
@@ -1160,6 +1276,11 @@ class ThesisSQLiteStore:
                 "replenishment_bid_score", "replenishment_ask_score",
                 "oi_expansion_ratio", "futures_aggression_ratio", "basis_state",
                 "leader_confidence", "aligned_window_ms",
+                "edge_score", "edge_confidence", "historical_win_rate", "expected_rr",
+                "pattern_code", "pattern_alias_vi", "pattern_family", "pattern_phase",
+                "pattern_strength", "pattern_quality", "pattern_failure_risk",
+                "sequence_start_ts", "sequence_duration_sec", "is_sequence_pivot",
+                "parent_context_json", "t_plus_1_price", "t_plus_5_price", "t_plus_12_price"
             ]
             values = (
                 snapshot.snapshot_id,
@@ -1251,6 +1372,24 @@ class ThesisSQLiteStore:
                 snapshot.basis_state,
                 snapshot.leader_confidence,
                 snapshot.aligned_window_ms,
+                snapshot.edge_profile.edge_score if snapshot.edge_profile else 0.0,
+                snapshot.edge_profile.confidence if snapshot.edge_profile else "UNKNOWN",
+                snapshot.edge_profile.historical_win_rate if snapshot.edge_profile else 0.0,
+                snapshot.edge_profile.expected_rr if snapshot.edge_profile else 0.0,
+                snapshot.pattern_code,
+                snapshot.pattern_alias_vi,
+                snapshot.pattern_family,
+                snapshot.pattern_phase,
+                snapshot.pattern_strength,
+                snapshot.pattern_quality,
+                snapshot.pattern_failure_risk,
+                snapshot.sequence_start_ts,
+                snapshot.sequence_duration_sec,
+                int(snapshot.is_sequence_pivot),
+                json.dumps(snapshot.parent_context, ensure_ascii=False),
+                snapshot.t_plus_1_price,
+                snapshot.t_plus_5_price,
+                snapshot.t_plus_12_price,
             )
             placeholders = ", ".join("?" for _ in values)
             db.execute(
@@ -1354,5 +1493,103 @@ class ThesisSQLiteStore:
                     event.decision_shift,
                     json.dumps(event.metadata, ensure_ascii=False),
                 ),
+            )
+            db.commit()
+
+    async def save_sequence_event(self, event: Any) -> None:
+        with sqlite3.connect(self.db_path) as db:
+            db.execute(
+                """
+                INSERT OR REPLACE INTO tpfm_sequence_event (
+                    sequence_id, symbol, venue, start_ts, end_ts,
+                    sequence_signature, sequence_family, sequence_length,
+                    cumulative_initiative, cumulative_inventory,
+                    max_energy, sequence_quality, is_active
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    event.sequence_id,
+                    event.symbol,
+                    event.venue,
+                    event.start_ts,
+                    event.end_ts,
+                    event.sequence_signature,
+                    event.sequence_family,
+                    event.sequence_length,
+                    event.cumulative_initiative,
+                    event.cumulative_inventory,
+                    event.max_energy,
+                    event.sequence_quality,
+                    int(event.is_active),
+                ),
+            )
+            db.commit()
+
+    async def save_flow_pattern_event(self, event: Any) -> None:
+        with sqlite3.connect(self.db_path) as db:
+            db.execute(
+                """
+                INSERT OR REPLACE INTO flow_pattern_event (
+                    pattern_id, snapshot_id, symbol, venue, timestamp, 
+                    pattern_code, pattern_alias_vi, pattern_family, 
+                    pattern_phase, sequence_id, sequence_signature, 
+                    sequence_length, tempo_state, persistence_state, 
+                    pattern_strength, pattern_quality, pattern_failure_risk, 
+                    matrix_cell, flow_state_code, metadata
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    event.pattern_id,
+                    event.snapshot_id,
+                    event.symbol,
+                    event.venue,
+                    event.timestamp,
+                    event.pattern_code,
+                    event.pattern_alias_vi,
+                    event.pattern_family,
+                    event.pattern_phase,
+                    event.sequence_id,
+                    event.sequence_signature,
+                    event.sequence_length,
+                    event.tempo_state,
+                    event.persistence_state,
+                    event.pattern_strength,
+                    event.pattern_quality,
+                    event.pattern_failure_risk,
+                    event.matrix_cell,
+                    event.flow_state_code,
+                    json.dumps(event.metadata, ensure_ascii=False) if event.metadata else "{}"
+                ),
+            )
+            db.commit()
+
+    async def save_pattern_outcome(self, outcome: Any) -> None:
+        with sqlite3.connect(self.db_path) as db:
+            db.execute(
+                """
+                INSERT INTO flow_pattern_outcome (
+                    outcome_id, snapshot_id, symbol, timestamp, pattern_code, sequence_signature,
+                    start_px, t1_px, t5_px, t12_px, r1_bps, r5_bps, r12_bps,
+                    max_favorable_bps, max_adverse_bps, metadata_json
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    outcome.outcome_id,
+                    outcome.snapshot_id,
+                    outcome.symbol,
+                    outcome.timestamp,
+                    outcome.pattern_code,
+                    outcome.sequence_signature,
+                    outcome.start_px,
+                    outcome.t1_px,
+                    outcome.t5_px,
+                    outcome.t12_px,
+                    outcome.r1_bps,
+                    outcome.r5_bps,
+                    outcome.r12_bps,
+                    outcome.max_favorable_bps,
+                    outcome.max_adverse_bps,
+                    json.dumps(outcome.metadata, ensure_ascii=False)
+                )
             )
             db.commit()

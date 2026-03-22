@@ -459,6 +459,9 @@ class LiveThesisLoop:
                         host=socket.gethostname()
                     )
                     await self.store.migrate_schema()
+                    
+                    # Sync TPFM Probability Engine with historical results
+                    await self.tpfm.sync_probability_stats(self.store)
 
                     futures_task = asyncio.create_task(self.futures_collector.stream_forever())
 

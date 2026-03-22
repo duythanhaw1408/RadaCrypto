@@ -8,6 +8,8 @@ from collections import Counter, deque
 
 from cfte.models.events import NormalizedTrade, TapeSnapshot
 from cfte.tpfm.models import TPFMSnapshot, FlowTransitionEvent, FlowDecisionView, TPFM30mRegime, TPFM4hStructural
+from cfte.tpfm.probability import ProbabilityEngine
+from cfte.tpfm.ai_explainer import TPFMAIExplainer
 
 _MATRIX_ALIASES_VI = {
     "POS_INIT__POS_INV": {
@@ -99,6 +101,14 @@ class TPFMStateEngine:
         self._prev_snapshot: Optional[TPFMSnapshot] = None
         self._rolling_delta = deque(maxlen=200) # For z-score
         self._recent_snapshots = deque(maxlen=12)
+        self._current_sequence: Optional['FlowSequenceEvent'] = None
+        
+        # Load local module safely inside module or import at top
+        from cfte.tpfm.probability import ProbabilityEngine
+        from cfte.tpfm.ai_explainer import TPFMAIExplainer
+        
+        self._probability_engine = ProbabilityEngine()
+        self._ai_explainer = TPFMAIExplainer()
         
     def calculate_m5_snapshot(
         self, 
@@ -107,8 +117,9 @@ class TPFMStateEngine:
         trades: List[NormalizedTrade],
         snapshots: List[TapeSnapshot], 
         active_theses: List = None,
-        futures_context: Dict[str, Any] = None
-    ) -> Tuple[TPFMSnapshot, Optional[FlowTransitionEvent]]:
+        futures_context: Dict[str, Any] = None,
+        use_ai_brief: bool = False
+    ) -> TPFMSnapshot:
         if not trades or not snapshots:
             return self._empty_snapshot(window_start_ts, window_end_ts)
 
@@ -350,15 +361,61 @@ class TPFMStateEngine:
         snapshot.decision_posture = m_contract["posture"]
 
         self._apply_input_quality_flags(snapshot, avg_freshness=avg_freshness, avg_gap=avg_gap, trade_count=len(trades))
-        # vNext: Sequence intelligence
+        # Phase 2: Sequence & MTF Intelligence
         self._apply_context_overlay(snapshot, futures_context)
         self._calc_forced_flow(snapshot, futures_context)
+        
+        # 1. Sequence Tracking (Pivot, Duration)
+        closed_sequence = self._derive_sequence_tracking(snapshot)
+        
+        # 2. MTF Integration (M30/H4)
+        self._derive_multi_timeframe_context(snapshot)
+        
+        # 3. Outcome Prediction (Skeleton)
+        self._estimate_outcome_targets(snapshot)
+        
+        # 4. Phase 3: Probability & Expectancy Engine
+        self._derive_probability_edge(snapshot)
+        
+        # 5. Phase 11: Agent Output Contract
+        if use_ai_brief:
+            self._derive_ai_brief(snapshot)
+        
+        # Phase 1: Matrix-Native Pattern Engine
+        self._derive_temporal_memory(snapshot)
+        snapshot.tempo_state = self._classify_tempo_state(snapshot)
+        snapshot.persistence_state = self._classify_persistence_state(snapshot)
+        
         self._derive_decision_view(snapshot, context=futures_context)
         snapshot.trap_risk = self._estimate_trap_risk(snapshot, previous=self._prev_snapshot)
+        
+        snapshot.exhaustion_risk = self._estimate_exhaustion_risk(snapshot, self._recent_snapshots)
+        self._derive_matrix_native_pattern(snapshot)
+        snapshot.sequence_signature = self._build_sequence_signature(snapshot)
+        self._derive_pattern_phase(snapshot)
+        snapshot.pattern_strength = self._estimate_pattern_strength(snapshot)
+        snapshot.pattern_quality = self._estimate_pattern_quality(snapshot)
+        snapshot.pattern_failure_risk = self._estimate_pattern_failure_risk(snapshot)
+        
+        pattern_event = self._build_flow_pattern_event(snapshot)
+        snapshot.metadata["pattern_event"] = pattern_event
+        
         self._detect_transitions(snapshot)
         self._finalize_output_contract(snapshot)
         self._recent_snapshots.append(snapshot)
         self._prev_snapshot = snapshot
+        
+        # If we need to return the sequence, we either return it as a third element or attach it to metadata
+        if closed_sequence:
+            snapshot.metadata["closed_sequence"] = closed_sequence
+
+        # Phase D: Probability / Expectancy Engine
+        snapshot.edge_profile = self._probability_engine.evaluate_edge(
+            matrix_cell=snapshot.matrix_cell,
+            sequence_length=snapshot.sequence_length
+        )
+
+        snapshot.transition_event = closed_sequence
         return snapshot
 
     def _apply_context_overlay(
@@ -788,6 +845,316 @@ class TPFMStateEngine:
         ctx.setdefault("basis_state", "BALANCED")
         ctx.setdefault("liquidation_intensity", 0.0)
         return ctx
+
+    # ==========================================
+    # Phase A: Temporal Intelligence (History)
+    # ==========================================
+    
+
+
+    # ==========================================
+    # Phase 1: Matrix-Native Pattern Engine
+    # ==========================================
+    
+    def _derive_temporal_memory(self, snapshot: TPFMSnapshot) -> None:
+        """Calculates temporal deltas compared to history."""
+        hist = list(self._recent_snapshots)
+        depth = len(hist)
+        snapshot.history_depth = depth
+        if depth == 0:
+            return
+            
+        def _avg(attr: str, n: int) -> float:
+            vals = [getattr(s, attr) for s in hist[-n:]]
+            return sum(vals) / len(vals)
+            
+        snapshot.initiative_delta_1 = snapshot.initiative_score - hist[-1].initiative_score
+        snapshot.inventory_delta_1 = snapshot.inventory_score - hist[-1].inventory_score
+        
+        n3 = min(3, depth)
+        snapshot.initiative_delta_3 = snapshot.initiative_score - _avg("initiative_score", n3)
+        snapshot.inventory_delta_3 = snapshot.inventory_score - _avg("inventory_score", n3)
+        snapshot.agreement_delta_3 = snapshot.agreement_score - _avg("agreement_score", n3)
+        snapshot.tradability_delta_3 = snapshot.tradability_score - _avg("tradability_score", n3)
+        
+        n5 = min(5, depth)
+        snapshot.initiative_delta_5 = snapshot.initiative_score - _avg("initiative_score", n5)
+        snapshot.inventory_delta_5 = snapshot.inventory_score - _avg("inventory_score", n5)
+
+    def _classify_tempo_state(self, snapshot: TPFMSnapshot) -> str:
+        if abs(snapshot.initiative_delta_3) >= 0.12 and snapshot.agreement_delta_3 >= 0.08:
+            return "ACCELERATING"
+        elif abs(snapshot.initiative_delta_3) >= 0.08 and (snapshot.tradability_delta_3 < 0 or snapshot.response_efficiency_state == 'ABSORBED_OR_TRAP'):
+            return "DECELERATING"
+        return "STABLE"
+
+    def _classify_persistence_state(self, snapshot: TPFMSnapshot) -> str:
+        if snapshot.sequence_length <= 1:
+            return "EARLY"
+        elif 2 <= snapshot.sequence_length <= 3:
+            return "BUILDING"
+        elif 4 <= snapshot.sequence_length <= 6:
+            return "PERSISTENT"
+        return "EXTENDED"
+
+    def _estimate_exhaustion_risk(self, snapshot: TPFMSnapshot, history: List[TPFMSnapshot]) -> float:
+        risk = 0.0
+        if snapshot.persistence_state in ("PERSISTENT", "EXTENDED"):
+            risk += 0.2
+        if snapshot.tempo_state == "DECELERATING":
+            risk += 0.3
+        if snapshot.response_efficiency_state == "ABSORBED_OR_TRAP":
+            risk += 0.2
+        if snapshot.trap_risk > 0.5:
+            risk += 0.2
+        return round(min(1.0, max(0.0, risk)), 2)
+
+    def _derive_matrix_native_pattern(self, snapshot: TPFMSnapshot) -> None:
+        cell = snapshot.matrix_cell
+        snapshot.pattern_family = cell
+        
+        if cell == "POS_INIT__POS_INV":
+            if snapshot.sequence_length >= 2:
+                snapshot.pattern_code = "CONTI_LONG"
+                snapshot.pattern_alias_vi = "Tiếp diễn Mua"
+            if snapshot.tempo_state == "DECELERATING" and snapshot.exhaustion_risk > 0.6:
+                snapshot.pattern_code = "EXHAUSTION_LONG"
+                snapshot.pattern_alias_vi = "Cạn kiệt lực Mua"
+        elif cell == "NEG_INIT__NEG_INV":
+            if snapshot.sequence_length >= 2:
+                snapshot.pattern_code = "CONTI_SHORT"
+                snapshot.pattern_alias_vi = "Tiếp diễn Bán"
+            if snapshot.tempo_state == "DECELERATING" and snapshot.exhaustion_risk > 0.6:
+                snapshot.pattern_code = "EXHAUSTION_SHORT"
+                snapshot.pattern_alias_vi = "Cạn kiệt lực Bán"
+        elif cell == "POS_INIT__NEG_INV":
+            snapshot.pattern_code = "TRAP_LONG"
+            snapshot.pattern_alias_vi = "Bẫy Mua (Hấp thụ Bán)"
+            if snapshot.trap_risk < 0.4 and snapshot.response_efficiency_state == "FOLLOW_THROUGH":
+                snapshot.pattern_code = "ABSORB_SHORT"
+                snapshot.pattern_alias_vi = "Hấp thụ ngược (Chống Bán)"
+        elif cell == "NEG_INIT__POS_INV":
+            snapshot.pattern_code = "TRAP_SHORT"
+            snapshot.pattern_alias_vi = "Bẫy Bán (Hấp thụ Mua)"
+            if snapshot.trap_risk < 0.4 and snapshot.response_efficiency_state == "FOLLOW_THROUGH":
+                snapshot.pattern_code = "ABSORB_LONG"
+                snapshot.pattern_alias_vi = "Hấp thụ ngược (Chống Mua)"
+                
+        # Forced flow overrides
+        if snapshot.forced_flow_state == "SQUEEZE_LED" and snapshot.delta_quote > 0:
+            snapshot.pattern_code = "SQUEEZE_LONG"
+            snapshot.pattern_alias_vi = "Squeeze Mua"
+        elif snapshot.forced_flow_state == "LIQUIDATION_LED" and snapshot.delta_quote < 0:
+            snapshot.pattern_code = "FLUSH_SHORT"
+            snapshot.pattern_alias_vi = "Xả Short (Flush)"
+
+    def _build_sequence_signature(self, snapshot: TPFMSnapshot) -> str:
+        cell_short = snapshot.matrix_cell.replace("_INIT", "").replace("_INV", "").replace("__", "_")
+        return f"{cell_short}x{snapshot.sequence_length}|{snapshot.tempo_state}|{snapshot.forced_flow_state}|{snapshot.response_efficiency_state}"
+
+    def _derive_pattern_phase(self, snapshot: TPFMSnapshot) -> None:
+        if snapshot.trap_risk > 0.75:
+            snapshot.pattern_phase = "FAILED"
+            return
+            
+        if snapshot.sequence_length == 1:
+            snapshot.pattern_phase = "FORMING"
+        elif snapshot.sequence_length >= 2 and snapshot.response_efficiency_state != "ABSORBED_OR_TRAP":
+            if snapshot.sequence_length >= 4:
+                snapshot.pattern_phase = "MATURE"
+            else:
+                snapshot.pattern_phase = "CONFIRMED"
+                
+        if snapshot.persistence_state in ("PERSISTENT", "EXTENDED") and snapshot.tempo_state == "DECELERATING" and snapshot.exhaustion_risk > 0.55:
+            snapshot.pattern_phase = "EXHAUSTING"
+
+    def _estimate_pattern_strength(self, snapshot: TPFMSnapshot) -> float:
+        return min(1.0, (abs(snapshot.initiative_score) + abs(snapshot.inventory_score) + snapshot.agreement_score) / 3.0)
+        
+    def _estimate_pattern_quality(self, snapshot: TPFMSnapshot) -> float:
+        q = snapshot.tradability_score
+        if snapshot.response_efficiency_state == "FOLLOW_THROUGH":
+            q += 0.2
+        return min(1.0, q)
+        
+    def _estimate_pattern_failure_risk(self, snapshot: TPFMSnapshot) -> float:
+        return min(1.0, snapshot.trap_risk * 0.5 + snapshot.exhaustion_risk * 0.5 + snapshot.conflict_score * 0.2)
+
+    def _build_flow_pattern_event(self, snapshot: TPFMSnapshot) -> 'FlowPatternEvent':
+        from cfte.tpfm.models import FlowPatternEvent
+        return FlowPatternEvent(
+            pattern_id=str(uuid.uuid4()),
+            snapshot_id=snapshot.snapshot_id,
+            symbol=snapshot.symbol,
+            venue=snapshot.venue,
+            timestamp=snapshot.window_end_ts,
+            pattern_code=snapshot.pattern_code,
+            pattern_alias_vi=snapshot.pattern_alias_vi,
+            pattern_family=snapshot.pattern_family,
+            pattern_phase=snapshot.pattern_phase,
+            sequence_id=snapshot.sequence_id,
+            sequence_signature=snapshot.sequence_signature,
+            sequence_length=snapshot.sequence_length,
+            tempo_state=snapshot.tempo_state,
+            persistence_state=snapshot.persistence_state,
+            pattern_strength=snapshot.pattern_strength,
+            pattern_quality=snapshot.pattern_quality,
+            pattern_failure_risk=snapshot.pattern_failure_risk,
+            matrix_cell=snapshot.matrix_cell,
+            flow_state_code=snapshot.flow_state_code,
+            metadata={"history_depth": snapshot.history_depth}
+        )
+        
+    # ==========================================
+    # Phase B: Sequence Engine (Chain Tracking)
+    # ==========================================
+    
+    def _derive_sequence_tracking(self, snapshot: TPFMSnapshot) -> Optional['FlowSequenceEvent']:
+        """Identifies and tracks consecutive flow matrices (Sequences)."""
+        from cfte.tpfm.models import FlowSequenceEvent  # local import for now
+        
+        current_cell = snapshot.matrix_cell
+        if "NEUTRAL_INIT__NEUTRAL_INV" in current_cell:
+            return None
+            
+        closed_sequence = None
+        is_pivot = False
+            
+        if self._current_sequence is None:
+            # Start new sequence
+            is_pivot = True
+            self._current_sequence = FlowSequenceEvent(
+                sequence_id=str(uuid.uuid4()),
+                symbol=snapshot.symbol,
+                venue=snapshot.venue,
+                started_ts=snapshot.window_start_ts,
+                ended_ts=snapshot.window_end_ts,
+                sequence_signature=current_cell,
+                sequence_family=self._transition_target_code(snapshot),
+                sequence_length=1,
+                sequence_bias="LONG" if snapshot.initiative_score > 0 else "SHORT" if snapshot.initiative_score < 0 else "NEUTRAL",
+                sequence_strength=abs(snapshot.initiative_score),
+                sequence_maturity="NEW",
+                sequence_quality=snapshot.tradability_score,
+                stack_alignment_hint="UNKNOWN",
+                current_cell=snapshot.matrix_cell,
+                current_flow_state=snapshot.flow_state_code,
+                resolution_hint="ONGOING",
+                metadata={"cumulative_initiative": snapshot.initiative_score, "cumulative_inventory": snapshot.inventory_score, "max_energy": snapshot.energy_score, "is_active": True}
+            )
+        elif self._current_sequence.sequence_signature == current_cell:
+            # Continue sequence
+            self._current_sequence.ended_ts = snapshot.window_end_ts
+            self._current_sequence.sequence_length += 1
+            self._current_sequence.metadata["cumulative_initiative"] += snapshot.initiative_score
+            self._current_sequence.metadata["cumulative_inventory"] += snapshot.inventory_score
+            self._current_sequence.metadata["max_energy"] = max(self._current_sequence.metadata["max_energy"], snapshot.energy_score)
+            self._current_sequence.sequence_strength = max(self._current_sequence.sequence_strength, abs(snapshot.initiative_score))
+            if self._current_sequence.sequence_length >= 5:
+                self._current_sequence.sequence_maturity = "MATURE"
+            elif self._current_sequence.sequence_length >= 3:
+                self._current_sequence.sequence_maturity = "ESTABLISHED"
+            
+            n = self._current_sequence.sequence_length
+            self._current_sequence.sequence_quality = (self._current_sequence.sequence_quality * (n - 1) + snapshot.tradability_score) / n
+        else:
+            # Break sequence (PIVOT)
+            is_pivot = True
+            closed_sequence = self._current_sequence
+            closed_sequence.metadata["is_active"] = False
+            closed_sequence.resolution_hint = f"BROKEN_BY_{current_cell}"
+            
+            # Start new sequence
+            self._current_sequence = FlowSequenceEvent(
+                sequence_id=str(uuid.uuid4()),
+                symbol=snapshot.symbol,
+                venue=snapshot.venue,
+                started_ts=snapshot.window_start_ts,
+                ended_ts=snapshot.window_end_ts,
+                sequence_signature=current_cell,
+                sequence_family=self._transition_target_code(snapshot),
+                sequence_length=1,
+                sequence_bias="LONG" if snapshot.initiative_score > 0 else "SHORT" if snapshot.initiative_score < 0 else "NEUTRAL",
+                sequence_strength=abs(snapshot.initiative_score),
+                sequence_maturity="NEW",
+                sequence_quality=snapshot.tradability_score,
+                stack_alignment_hint="UNKNOWN",
+                current_cell=snapshot.matrix_cell,
+                current_flow_state=snapshot.flow_state_code,
+                resolution_hint="ONGOING",
+                metadata={"cumulative_initiative": snapshot.initiative_score, "cumulative_inventory": snapshot.inventory_score, "max_energy": snapshot.energy_score, "is_active": True}
+            )
+            
+        # Phase 2: Populate snapshot temporal tracking attributes
+        snapshot.sequence_id = self._current_sequence.sequence_id
+        snapshot.sequence_signature = self._current_sequence.sequence_signature
+        snapshot.sequence_length = self._current_sequence.sequence_length
+        snapshot.sequence_family = self._current_sequence.sequence_family
+        snapshot.sequence_quality = self._current_sequence.sequence_quality
+        
+        snapshot.sequence_start_ts = self._current_sequence.started_ts
+        snapshot.sequence_duration_sec = (snapshot.window_end_ts - snapshot.sequence_start_ts) / 1000.0
+        snapshot.is_sequence_pivot = is_pivot
+        
+        return closed_sequence
+
+    def _derive_multi_timeframe_context(self, snapshot: TPFMSnapshot) -> None:
+        """Fetches and integrates M30/H4 context for the matrix stack."""
+        # Phase 2: MTF integration
+        snapshot.parent_context = {
+            "m30_regime": "UNKNOWN",
+            "h4_structural_bias": "UNKNOWN",
+            "m30_persistence": 0.0,
+            "stack_alignment": "NEUTRAL"
+        }
+
+    def _estimate_outcome_targets(self, snapshot: TPFMSnapshot) -> None:
+        """Predicts potential price levels for T+1, T+5, T+12 based on current momentum."""
+        # Use last_trade_px if available, else fallback to snapshot price
+        last_px = snapshot.metadata.get("last_trade_px", 0.0)
+        if last_px <= 0:
+            # Fallback to the latest TapeSnapshot mid_px if we have snapshots in the calculation
+            # But the snapshot doesn't have the TapeSnapshots list. 
+            # In calculate_m5_snapshot, we can pass it or use a default.
+            # For now, let's just use mid_px if it was stored or passed.
+            pass
+        
+        # Actually, let's just make it simpler: use a price from the snapshot metadata or a default
+        # Since this is a skeleton for Phase 2.
+        last_px = last_px or 50000.0 # Default for testing or use a real field if we add it
+        
+        snapshot.t_plus_1_price = last_px * (1 + snapshot.initiative_score * 0.0001)
+        snapshot.t_plus_5_price = last_px * (1 + snapshot.initiative_score * 0.0003)
+        snapshot.t_plus_12_price = last_px * (1 + snapshot.initiative_score * 0.0005)
+    def _derive_probability_edge(self, snapshot: TPFMSnapshot) -> None:
+        """Calculates the statistical edge for the current snapshot using ProbabilityEngine"""
+        edge_data = self._probability_engine.evaluate_edge(
+            snapshot.matrix_cell,
+            sequence_length=snapshot.sequence_length
+        )
+        
+        snapshot.historical_win_rate = edge_data.historical_win_rate
+        snapshot.expected_rr = edge_data.expected_rr
+        snapshot.edge_score = edge_data.edge_score
+        snapshot.edge_confidence = edge_data.confidence
+
+    async def sync_probability_stats(self, db_writer) -> bool:
+        """Syncs ProbabilityEngine with real-world results from the database"""
+        try:
+            scorecard = await db_writer.get_matrix_scorecard()
+            if scorecard:
+                self._probability_engine.refresh_stats(scorecard)
+                print(f"✅ TPFM Probability Engine synced with {len(scorecard)} matrix cells from DB.")
+                return True
+            return False
+        except Exception as e:
+            print(f"❌ Error syncing probability stats: {str(e)}")
+            return False
+
+    def _derive_ai_brief(self, snapshot: TPFMSnapshot) -> None:
+        """Generates a professional AI-driven trader brief for the snapshot"""
+        snapshot.flow_decision_brief = self._ai_explainer.explain_m5_brief(snapshot)
+
     def calculate_4h_structural(self, regimes: List[TPFM30mRegime]) -> TPFM4hStructural:
         """Synthesizes 8 30m regimes into a 4-hour structural report"""
         if not regimes:
