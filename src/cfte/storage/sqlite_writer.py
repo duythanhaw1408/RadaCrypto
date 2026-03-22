@@ -1603,8 +1603,8 @@ class ThesisSQLiteStore:
                     pattern_code,
                     sequence_signature,
                     COUNT(*) as count,
-                    AVG(CASE WHEN r5_bps > 0 THEN 1 ELSE 0 END) as win_rate_5m,
-                    AVG(max_favorable_bps / NULLIF(ABS(max_adverse_bps), 0)) as avg_rr
+                    IFNULL(AVG(CASE WHEN r5_bps > 0 THEN 1 ELSE 0 END), 0.0) as win_rate_5m,
+                    IFNULL(AVG(max_favorable_bps / NULLIF(ABS(max_adverse_bps), 0)), 0.0) as avg_rr
                 FROM flow_pattern_outcome
                 GROUP BY pattern_code, sequence_signature
                 HAVING COUNT(*) >= 1

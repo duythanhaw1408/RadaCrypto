@@ -344,11 +344,14 @@ def _check_profile(*, profile_path: Path, profile: Any) -> list[CheckResult]:
     else:
         checks.append(CheckResult("replay_events", "warning", "warn", "Thiếu dữ liệu replay mặc định", str(replay_events)))
 
-    symbol = str(profile.defaults.get("symbol", "")).strip()
+    live_symbol = str(profile.live.get("symbol", "")).strip() if getattr(profile, "live", None) else ""
+    default_symbol = str(profile.defaults.get("symbol", "")).strip() if getattr(profile, "defaults", None) else ""
+    symbol = live_symbol or default_symbol
+
     if symbol:
-        checks.append(CheckResult("default_symbol", "critical", "ok", f"Symbol mặc định: {symbol}"))
+        checks.append(CheckResult("default_symbol", "critical", "ok", f"Symbol vận hành: {symbol}"))
     else:
-        checks.append(CheckResult("default_symbol", "critical", "fail", "Hồ sơ chưa khai báo symbol mặc định"))
+        checks.append(CheckResult("default_symbol", "critical", "fail", "Hồ sơ chưa khai báo symbol (live hoặc default)"))
     return checks
 
 

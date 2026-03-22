@@ -14,7 +14,7 @@ from cfte.features.tape import (
 )
 from cfte.models.events import NormalizedDepthDiff, NormalizedTrade, ThesisSignal
 from cfte.replay.adapters import ReplayBookSnapshot, ReplayEvent
-from cfte.thesis.engines import evaluate_setups
+from cfte.thesis.engines import evaluate_setups, _apply_flow_context_to_signals
 from cfte.thesis.state import ThesisEventRecord, ThesisLifecycleRecord, apply_signal_update, close_signal_state
 from cfte.tpfm.engine import TPFMStateEngine
 from cfte.storage.sqlite_writer import ThesisSQLiteStore
@@ -304,6 +304,10 @@ def run_replay(
         if pattern_ev:
             asyncio.run(store.save_flow_pattern_event(pattern_ev))
         
+        final_outcomes = tpfm.flush_all_pending_outcomes(m5_snap)
+        for outcome in final_outcomes:
+            asyncio.run(store.save_pattern_outcome(outcome))
+        
         # Flush M30/4H even if thresholds not met (Phase T1-T5 Refinement)
         tpfm_m5_buffer.append(m5_snap)
         if tpfm_m5_buffer:
@@ -348,7 +352,11 @@ def persist_replay_summary(result: ReplayRunResult, output_path: str | Path) -> 
         "thesis_count": result.thesis_count,
         "fingerprint": result.fingerprint,
         "latest_tpfm": asdict(result.latest_tpfm_snapshot) if result.latest_tpfm_snapshot else {},
-        "top_signals": [asdict(s) for s in select_top_signals(result.thesis_events, limit=5)],
+        "top_signals": [
+            asdict(_apply_flow_context_to_signals([s], result.latest_tpfm_snapshot)[0]) 
+            if result.latest_tpfm_snapshot else asdict(s) 
+            for s in select_top_signals(result.thesis_events, limit=5)
+        ],
     }
     out.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
     return out

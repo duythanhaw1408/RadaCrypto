@@ -1738,3 +1738,30 @@ class TPFMStateEngine:
             })
                 
         return outcomes_to_save
+
+    def flush_all_pending_outcomes(self, last_snapshot: TPFMSnapshot) -> List[Any]:
+        """Force outcomes for all pending patterns using last known price."""
+        outcomes = []
+        current_px = last_snapshot.microprice
+        for entry in self._pending_patterns:
+            outcome = entry["outcome"]
+            meta = entry["meta"]
+            start_px = outcome.start_px
+            if start_px != 0:
+                if outcome.t1_px == 0:
+                    outcome.t1_px = current_px
+                    outcome.r1_bps = (current_px - start_px) / start_px * 10000
+                if outcome.t5_px == 0:
+                    outcome.t5_px = current_px
+                    outcome.r5_bps = (current_px - start_px) / start_px * 10000
+                if outcome.t12_px == 0:
+                    outcome.t12_px = current_px
+                    outcome.r12_bps = (current_px - start_px) / start_px * 10000
+                
+                outcome.max_favorable_bps = max(outcome.max_favorable_bps, (meta["max_px"] - start_px) / start_px * 10000)
+                outcome.max_adverse_bps = min(outcome.max_adverse_bps, (meta["min_px"] - start_px) / start_px * 10000)
+            
+            outcomes.append(outcome)
+        
+        self._pending_patterns = []
+        return outcomes

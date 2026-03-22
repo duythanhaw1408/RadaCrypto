@@ -165,9 +165,9 @@ def render_daily_summary_vi(
     top_pattern = sorted(pattern_scorecard, key=lambda x: (x.get("win_rate_5m", 0), x.get("count", 0)), reverse=True)[0] if pattern_scorecard else None
     lines = [
         f"Tổng kết ngày {stats.get('label', 'N/A')}",
-        f"- Luận điểm mới: {stats.get('opened_count', 0)} | score TB: {stats.get('avg_score', 0.0):.2f} | confidence TB: {stats.get('avg_confidence', 0.0):.2f}",
-        f"- Outcome đã chốt: {stats.get('outcomes_count', 0)} | hit rate: {hit_rate:.1f}% | edge TB: {_fmt_pct(stats.get('avg_edge', 0.0))}",
-        f"- Realism: khớp {stats.get('fill_count', 0)} lệnh ({fill_rate:.1f}%) | MAE TB: {stats.get('avg_mae', 0.0):.1f}bps | MFE TB: {stats.get('avg_mfe', 0.0):.1f}bps",
+        f"- Luận điểm mới: {stats.get('opened_count', 0)} | score TB: {(stats.get('avg_score') or 0.0):.2f} | confidence TB: {(stats.get('avg_confidence') or 0.0):.2f}",
+        f"- Outcome đã chốt: {stats.get('outcomes_count', 0)} | hit rate: {hit_rate:.1f}% | edge TB: {_fmt_pct(float(stats.get('avg_edge') or 0.0))}",
+        f"- Realism: khớp {stats.get('fill_count', 0)} lệnh ({fill_rate:.1f}%) | MAE TB: {(stats.get('avg_mae') or 0.0):.1f}bps | MFE TB: {(stats.get('avg_mfe') or 0.0):.1f}bps",
         f"- Setup xuất hiện nhiều nhất: {top_setup or 'chưa có'}",
         f"- Trạng thái mở mới: {', '.join(stage_parts) if stage_parts else 'chưa có'}",
         f"- Trạng thái đóng trong ngày: {', '.join(closed_parts) if closed_parts else 'chưa có'}",
@@ -197,7 +197,7 @@ def render_daily_summary_vi(
         )
     if top_pattern:
         lines.append(
-            f"- Pattern nổi bật: {top_pattern['pattern_code']} ({top_pattern['sequence_signature']}) | win rate {top_pattern['win_rate_5m']*100:.1f}% | RR {top_pattern['avg_rr']:.2f}"
+            f"- Pattern nổi bật: {top_pattern['pattern_code']} ({top_pattern['sequence_signature']}) | win rate {(top_pattern.get('win_rate_5m') or 0.0)*100:.1f}% | RR {(top_pattern.get('avg_rr') or 0.0):.2f}"
         )
     return "\n".join(lines)
 
@@ -460,7 +460,7 @@ def render_pattern_scorecard_vi(rows: list[dict[str, Any]]) -> str:
     for row in rows:
         lines.append(
             f"{row['pattern_code']} | {row['sequence_signature']} | {row['count']} | "
-            f"{row['win_rate_5m']*100:.1f}% | {row['avg_rr']:.2f}"
+            f"{(row.get('win_rate_5m') or 0.0)*100:.1f}% | {(row.get('avg_rr') or 0.0):.2f}"
         )
     return "\n".join(lines)
 
