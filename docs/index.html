@@ -3,267 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RadaCrypto | Intelligence Engine</title>
+    <title>RadaCrypto | Bản đồ dòng tiền Crypto</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Lightweight Charts CDN -->
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 </head>
-<body class="dark-theme">
-    <div class="app-container">
-        <!-- Header -->
-        <header class="app-header">
-            <div class="logo-area">
-                <img src="assets/logo.png" alt="RadaCrypto Logo" class="logo-img">
-                <span class="logo-text">Rada<span class="accent">Crypto</span></span>
-                <span class="version-badge">vNext</span>
+<body>
+    <header class="rada-header">
+        <div class="brand">
+            <span class="logo-text">RadaCrypto</span>
+            <div class="grade-badge" id="header-grade">Hạng --</div>
+        </div>
+        <div class="system-status">
+            <div class="status-item">
+                <span id="symbol-display">--/--</span>
             </div>
-            
-            <nav class="main-nav">
-                <button class="nav-item active">Tổng quan</button>
-                <button class="nav-item">Thị trường Live</button>
-                <button class="nav-item">Review nhật ký</button>
-                <button class="nav-item">Tuning hệ thống</button>
-            </nav>
+            <div class="status-item">
+                <span class="status-dot" id="system-dot"></span>
+                <span id="system-label">Đang khởi tạo...</span>
+            </div>
+            <div class="status-item">
+                <span id="mode-label">--</span>
+            </div>
+            <div class="status-item">
+                <span id="last-update">--:--:--</span>
+            </div>
+        </div>
+    </header>
 
-            <div class="status-area">
-                <div class="system-status healthy">
-                    <span class="status-dot"></span>
-                    <span class="status-text">Hệ thống: Sẵn sàng</span>
+    <main class="dashboard-grid">
+        <section class="chart-container">
+            <!-- Floating Data Info -->
+            <div class="floating-overlay" id="price-overlay">
+                <h2 id="current-price">--.---</h2>
+                <p id="price-change">--% (--.--) | 24h</p>
+            </div>
+
+            <div id="main-chart" class="chart-area"></div>
+            <div id="volume-chart" class="volume-delta-area"></div>
+
+            <section class="bottom-stack">
+                <div class="mtf-row" id="mtf-stack">
+                    <!-- MTF Blocks will be injected here -->
+                    <div class="mtf-card">
+                        <span class="mtf-timeframe">M5</span>
+                        <span class="mtf-alias">Đang tải...</span>
+                    </div>
                 </div>
-                <div class="session-timer">
-                    <span class="label">Phiên:</span>
-                    <span class="value">02:45:12</span>
-                </div>
-            </div>
-        </header>
+            </section>
+        </section>
 
-        <main class="dashboard-content">
-            <!-- VIEW: OVERVIEW -->
-            <div id="view-overview" class="app-view active">
-                <!-- Hero Intelligence Block -->
-                <section class="intel-hero">
-                    <div class="intel-main-card glass">
-                        <div class="card-header">
-                            <div class="symbol-info">
-                                <h1 class="symbol-name">BTCUSDT</h1>
-                                <span class="timeframe-badge">Vĩnh cửu</span>
-                            </div>
-                            <div class="intel-metrics">
-                                <div class="metric">
-                                    <span class="m-label">Độ giao dịch</span>
-                                    <span class="m-value grade-a">A+</span>
-                                </div>
-                                <div class="metric">
-                                    <span class="m-label">Bias hôm nay</span>
-                                    <span class="m-value bias-long">THUẬN MUA</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="intelligence-summary">
-                            <div class="status-headline">
-                                <span class="indicator buy"></span>
-                                <h2>Dòng tiền Mua đang dẫn dắt, Inventory Bid hấp thụ tốt</h2>
-                            </div>
-                            <p class="conclusion-text">Thuận pha mua mạnh. Có thể vào lệnh khi giá hồi về vùng Bid mạnh và xác nhận hấp thụ thành công.</p>
-                            
-                            <div class="intel-badges">
-                                <span class="badge">Flow: BÙNG NỔ MUA</span>
-                                <span class="badge">Matrix: ACCUMULATION</span>
-                                <span class="badge">Tư thế: TẤN CÔNG</span>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 4 Pillars -->
-                <section class="logic-pillars">
-                    <div class="pillar-card seen glass">
-                        <div class="pillar-header">
-                            <i class="icon-seen"></i>
-                            <h3>Đã thấy</h3>
-                        </div>
-                        <ul class="pillar-list">
-                            <li>Delta Spot: <span class="pos">+1.2M</span></li>
-                            <li>Delta Futures: <span class="pos">+4.5M</span></li>
-                            <li>OI: <span class="pos">Tăng (+2%)</span></li>
-                            <li>Xác nhận đa sàn: <span class="pos">Binance/Bybit</span></li>
-                            <li>Áp lực bán: <span class="neg">Thấp (Cạn kiệt)</span></li>
-                        </ul>
-                    </div>
-
-                    <div class="pillar-card infer glass">
-                        <div class="pillar-header">
-                            <i class="icon-infer"></i>
-                            <h3>Suy ra</h3>
-                        </div>
-                        <ul class="pillar-list">
-                            <li>Continuation: <span class="pos">Khả năng cao</span></li>
-                            <li>Absorption: <span class="pos">Bid đang đỡ giá</span></li>
-                            <li>Trap: <span class="neutral">Rủi ro thấp</span></li>
-                            <li>Squeeze: <span class="neutral">Chưa có dấu hiệu</span></li>
-                        </ul>
-                    </div>
-
-                    <div class="pillar-card missing glass">
-                        <div class="pillar-header">
-                            <i class="icon-missing"></i>
-                            <h3>Chưa thấy</h3>
-                        </div>
-                        <ul class="pillar-list">
-                            <li>Futures confirm: <span class="pos">Đã có</span></li>
-                            <li>Liquidation context: <span class="neg">Chưa thấy (+0)</span></li>
-                            <li>Transition: <span class="neutral">Chưa rõ (Đang chờ)</span></li>
-                        </ul>
-                    </div>
-
-                    <div class="pillar-card decision glass highlight">
-                        <div class="pillar-header">
-                            <i class="icon-decision"></i>
-                            <h3>Quyết định</h3>
-                        </div>
-                        <div class="decision-content">
-                            <div class="d-action">NÊN: Canh Mua (Long)</div>
-                            <div class="d-trigger">Trigger: Hồi m5 xác nhận</div>
-                            <div class="d-invalid">Vô hiệu: Thủng đáy m5</div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Matrix Overview -->
-                <section class="matrix-overview">
-                    <div class="matrix-column glass">
-                        <h4 class="m-title">Matrix M5</h4>
-                        <div class="m-state acc">Tích lũy</div>
-                        <div class="m-grade">Grade: A</div>
-                        <div class="m-bias">Bias: Mua</div>
-                    </div>
-                    <div class="matrix-column glass">
-                        <h4 class="m-title">Matrix 30m</h4>
-                        <div class="m-state neutral">Cân bằng</div>
-                        <div class="m-grade">Grade: B-</div>
-                        <div class="m-bias">Bias: Neutral</div>
-                    </div>
-                    <div class="matrix-column glass highlight">
-                        <h4 class="m-title">Matrix 4h</h4>
-                        <h4 class="m-state distribution">Phân phối</h4>
-                        <div class="m-grade">Grade: C</div>
-                        <div class="m-bias">Bias: Bán</div>
-                    </div>
-                </section>
-            </div>
-
-            <!-- VIEW: LIVE MARKET -->
-            <div id="view-live" class="app-view">
-                <section class="live-market-container glass">
-                    <div class="section-header">
-                        <h3>Dòng tiền Thị trường Live</h3>
-                        <div class="live-badge-glow">TRỰC TIẾP</div>
-                    </div>
-                    <div class="live-symbols-grid">
-                        <!-- Sẽ render bằng JS -->
-                    </div>
-                    <div class="live-signals-area">
-                         <!-- Bảng tín hiệu live -->
-                         <div class="section-header">
-                            <h4>Luận điểm Live</h4>
-                        </div>
-                        <table class="signals-table" id="live-signals-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Setup</th>
-                                    <th>Bias</th>
-                                    <th>Matrix</th>
-                                    <th>Grade</th>
-                                    <th>Hành động</th>
-                                    <th>Vô hiệu khi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Render bằng JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-            </div>
-
-            <!-- VIEW: JOURNAL -->
-            <div id="view-journal" class="app-view">
-                <section class="journal-container glass">
-                    <div class="section-header">
-                        <h3>Nhật ký Luận điểm (Review)</h3>
-                        <span class="count-badge">100 tín hiệu gần nhất</span>
-                    </div>
-                    <div class="journal-list" id="journal-list">
-                        <!-- Render bằng JS -->
-                        <div class="loading">Đang tải nhật ký...</div>
-                    </div>
-                </section>
-            </div>
-
-            <!-- VIEW: TUNING -->
-            <div id="view-tuning" class="app-view">
-                <section class="tuning-container glass">
-                    <div class="section-header">
-                        <h3>Tuning Hệ thống & Ngưỡng</h3>
-                    </div>
-                    <div class="tuning-grid">
-                        <div class="tuning-card glass">
-                            <h4>Ngưỡng Hội tụ (Convergence)</h4>
-                            <div class="tuning-stats">
-                                <div class="stat"><span>Delta StdDev:</span> <span class="val">2.5</span></div>
-                                <div class="stat"><span>OI Min Delta:</span> <span class="val">1.2%</span></div>
-                            </div>
-                        </div>
-                        <div class="tuning-card glass">
-                            <h4>Hiệu quả Signal</h4>
-                            <div class="tuning-stats">
-                                <div class="stat"><span>Hit Rate (Grade A):</span> <span class="val pos">72%</span></div>
-                                <div class="stat"><span>Avg Edge:</span> <span class="val pos">0.8%</span></div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </div>
-        </main>
-
-        <!-- Sidebar / Health Panel -->
-        <aside class="health-panel glass">
+        <aside class="decision-panel">
             <div class="panel-section">
-                <h3>Sức khỏe vận hành</h3>
-                <div class="health-grid">
-                    <div class="h-item">
-                        <span class="h-label">Runtime:</span>
-                        <span class="h-value ok">Ổn định</span>
-                    </div>
-                    <div class="h-item">
-                        <span class="h-label">Futures:</span>
-                        <span class="h-value ok">Tươi</span>
-                    </div>
-                    <div class="h-item">
-                        <span class="h-label">Đa sàn:</span>
-                        <span class="h-value warning">Divergence (OKX Stale)</span>
-                    </div>
+                <h3 class="section-title">Ma trận dòng tiền</h3>
+                <div class="matrix-display" id="matrix-display">
+                    <div class="matrix-cell-title" id="matrix-title">--</div>
+                    <div class="matrix-cell-desc" id="matrix-desc">--</div>
                 </div>
             </div>
 
             <div class="panel-section">
-                <h3>Cấu hình phiên</h3>
-                <div class="info-list">
-                    <div class="info-row">
-                        <span>Owner:</span>
-                        <span class="v">nguyens/Air</span>
-                    </div>
-                    <div class="info-row">
-                        <span>Run ID:</span>
-                        <span class="v">d024a...</span>
-                    </div>
+                <h3 class="section-title">Mẫu hình hiện tại</h3>
+                <div id="pattern-display" class="matrix-display">
+                    <div class="matrix-cell-title" id="pattern-title">--</div>
+                    <div class="matrix-cell-desc" id="pattern-desc">--</div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3 class="section-title">Hành động</h3>
+                <div class="action-card action-neutral" id="action-card">--</div>
+            </div>
+
+            <div class="panel-section">
+                <h3 class="section-title">Thực trạng</h3>
+                <div class="list-items" id="reasoning-list">
+                    <!-- Reasoning items injected here -->
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3 class="section-title">Xác suất lịch sử</h3>
+                <div id="probability-card" class="matrix-display">
+                    <div class="matrix-cell-title" id="prob-title">--% Win Rate</div>
+                    <div class="matrix-cell-desc" id="prob-desc">Mẫu thống kê còn mỏng.</div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3 class="section-title">Rủi ro & Vô hiệu</h3>
+                <div class="list-items" id="risk-list">
+                    <!-- Risks injected here -->
                 </div>
             </div>
         </aside>
-    </div>
-    <script src="js/app.js"></script>
+    </main>
+
+    <!-- Signal Log Table -->
+    <section class="bottom-log">
+        <h3 class="section-title" style="padding: 10px 20px 10px;">Tín hiệu gần nhất</h3>
+        <div class="log-table-wrapper">
+            <table class="log-table">
+                <thead>
+                    <tr>
+                        <th>Thời gian</th>
+                        <th>Setup</th>
+                        <th>Ma trận</th>
+                        <th>Hạng</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="signal-log-body">
+                    <!-- Rows injected here -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <script src="js/dashboard.js"></script>
 </body>
 </html>
