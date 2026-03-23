@@ -1,6 +1,6 @@
 {
   "overall_status": "healthy",
-  "generated_at": "2026-03-23T06:09:41.144344+00:00",
+  "generated_at": "2026-03-23T09:31:34.308193+00:00",
   "checks": [
     {
       "key": "python_version",
@@ -49,7 +49,7 @@
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact replay_summary sẵn sàng",
-      "detail": "2026-03-23T06:08:02.015307+00:00"
+      "detail": "2026-03-23T06:39:39.883724+00:00"
     },
     {
       "key": "daily_summary",
@@ -77,28 +77,28 @@
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact tuning_report sẵn sàng",
-      "detail": "2026-03-22T14:35:49.780626+00:00"
+      "detail": "2026-03-23T07:05:40.980361+00:00"
     },
     {
       "key": "health_report",
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact health_report sẵn sàng",
-      "detail": "2026-03-23T06:08:01.925727+00:00"
+      "detail": "2026-03-23T06:09:41.146274+00:00"
     },
     {
       "key": "live_runtime",
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact live_runtime sẵn sàng",
-      "detail": "2026-03-23T06:09:37.781553+00:00"
+      "detail": "2026-03-23T09:31:30.142421+00:00"
     },
     {
       "key": "live_runtime_owner",
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact live_runtime có owner rõ ràng",
-      "detail": "run_id=3e5912cf8b1344bf8e5b2e522baa8ec7 | pid=7014 | host=nguyens-MacBook-Air.local"
+      "detail": "run_id=12527d928d264cad8a2f35a61afc2c7b | pid=21030 | host=nguyens-MacBook-Air.local"
     },
     {
       "key": "live_runtime_status",
@@ -112,20 +112,20 @@
       "level": "warning",
       "status": "ok",
       "summary_vi": "Phiên live gần nhất đã sinh M5 đầu tiên",
-      "detail": "2026-03-23T06:05:14.699949+00:00"
+      "detail": "2026-03-23T09:08:21.426083+00:00"
     },
     {
       "key": "live_runtime_latest_matrix",
       "level": "warning",
       "status": "ok",
-      "summary_vi": "Matrix gần nhất: Thuận pha bán",
-      "detail": "grade=A"
+      "summary_vi": "Matrix gần nhất: Bán chủ động chưa có đè",
+      "detail": "grade=C"
     },
     {
       "key": "live_runtime_last_transition",
       "level": "warning",
       "status": "ok",
-      "summary_vi": "Chuyển pha gần nhất: None",
+      "summary_vi": "Chuyển pha gần nhất: Lật sang bán nhưng mang tính bẫy",
       "detail": null
     }
   ],

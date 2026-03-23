@@ -115,8 +115,11 @@ class RadaDashboard {
             }
         };
 
+        const status = await fetchJson("data/actions_status.json");
+        const mode = status?.data_mode || "scan";
+        const suffix = mode === "live" ? "_live" : "";
+
         const [
-            status,
             m5,
             m30,
             h4,
@@ -126,14 +129,13 @@ class RadaDashboard {
             logs,
             liveRuntime,
         ] = await Promise.all([
-            fetchJson("data/actions_status.json"),
-            fetchJson("data/tpfm_m5.json"),
+            fetchJson(`data/tpfm_m5${suffix}.json`),
             fetchJson("data/tpfm_m30.json"),
             fetchJson("data/tpfm_4h.json"),
-            fetchJson("data/summary_btcusdt.json"),
+            fetchJson(`data/summary_btcusdt${suffix}.json`),
             fetchJson("data/daily_summary.json"),
             fetchJson("data/health_status.json"),
-            fetchJson("data/thesis_log.json"),
+            fetchJson(`data/thesis_log${suffix}.json`),
             fetchJson("data/live_runtime.json"),
         ]);
 

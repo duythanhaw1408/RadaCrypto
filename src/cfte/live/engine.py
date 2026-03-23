@@ -310,46 +310,88 @@ class LiveThesisLoop:
     async def _sync_to_dashboard(self):
         """
         Syncs latest telemetry to the docs/data folder for the professional UI.
+        Uses _live.json suffixes to avoid colliding with scan artifacts.
+        Uses absolute paths to avoid working directory ambiguity.
         """
         try:
             # Dashboard target directory
-            dashboard_data_dir = Path("docs/data")
+            dashboard_data_dir = Path("docs/data").absolute()
             if not dashboard_data_dir.exists():
                 dashboard_data_dir.mkdir(parents=True, exist_ok=True)
 
             # 1. Sync Thesis Log (.jsonl to .json array)
-            src_log = Path("data/thesis/thesis_log.jsonl")
+            src_log = Path("data/thesis/thesis_log.jsonl").absolute()
             if src_log.exists():
                 try:
                     with src_log.open("r", encoding="utf-8") as f:
                         records = [json.loads(line) for line in f if line.strip()]
                     # Only sync last 100 for performance
-                    target_log = dashboard_data_dir / "thesis_log.json"
+                    target_log = dashboard_data_dir / "thesis_log_live.json"
                     with target_log.open("w", encoding="utf-8") as f:
                         json.dump(records[-100:], f, ensure_ascii=False)
                 except Exception:
                     pass
 
             # 2. Sync TPFM M5
-            m5_src = Path("data/review/tpfm_m5.json")
+            m5_src = Path("data/review/tpfm_m5.json").absolute()
             if m5_src.exists():
-                shutil.copy2(m5_src, dashboard_data_dir / "tpfm_m5.json")
+                shutil.copy2(m5_src, dashboard_data_dir / "tpfm_m5_live.json")
 
             telemetry_map = {
                 "data/review/daily_summary.json": "daily_summary.json",
                 "data/review/health_status.json": "health_status.json",
-                "data/replay/summary_btcusdt.json": "summary_btcusdt.json",
+                "data/replay/summary_btcusdt.json": "summary_btcusdt_live.json",
                 "data/review/tpfm_m30.json": "tpfm_m30.json",
                 "data/review/tpfm_4h.json": "tpfm_4h.json",
             }
 
             for src_rel, target_name in telemetry_map.items():
-                src_p = Path(src_rel)
+                src_p = Path(src_rel).absolute()
                 if src_p.exists():
                     shutil.copy2(src_p, dashboard_data_dir / target_name)
+            
+            # 3. Update actions_status.json to point to Live mode
+            await self._sync_actions_status(dashboard_data_dir)
                 
         except Exception:
             # Silent failure for sync, don't break the engine
+            pass
+
+    async def _sync_actions_status(self, dashboard_data_dir: Path):
+        """Updates actions_status.json to reflect the current Live session."""
+        try:
+            # Load current summary for telemetry enrichment (Mode A: from disk)
+            summary_path = Path("data/replay/summary_btcusdt.json").absolute()
+            summary_payload = {}
+            if summary_path.exists():
+                with summary_path.open("r", encoding="utf-8") as f:
+                    summary_payload = json.load(f)
+            
+            generated_at = datetime.now(tz=timezone.utc).isoformat()
+            top_signal = (summary_payload.get("top_signals") or [None])[0] or {}
+            
+            # Use the actual run_id from the summary if available to ensure alignment
+            contract = summary_payload.get("artifact_contract", {})
+            current_run_id = contract.get("run_id") or self._runtime_run_id
+            
+            status_payload = {
+                "last_run": generated_at,
+                "last_scan_time": generated_at,
+                "data_mode": "live",
+                "live_enabled": True,
+                "is_replay": False,
+                "artifact_run_id": current_run_id,
+                "artifact_window_end_ts": contract.get("window_end_ts"),
+                "artifact_generated_at": generated_at,
+                "latest_flow_grade": summary_payload.get("latest_tpfm", {}).get("tradability_grade") or "D",
+                "latest_transition": {},
+                "top_signal": top_signal,
+            }
+            
+            target_status = (dashboard_data_dir / "actions_status.json").absolute()
+            with target_status.open("w", encoding="utf-8") as f:
+                json.dump(status_payload, f, ensure_ascii=False, indent=2)
+        except Exception:
             pass
 
     async def _init_book(self) -> bool:

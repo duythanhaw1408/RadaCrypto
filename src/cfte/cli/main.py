@@ -89,7 +89,8 @@ def _profile_path(profile: PersonalProfile, section: str, key: str, fallback: Pa
 
 
 def _sync_scan_dashboard_artifacts(summary_out: Path, latest_grade: str | None = None) -> None:
-    dashboard_data_dir = Path("docs/data")
+    # Use absolute path for dashboard sync to be robust
+    dashboard_data_dir = Path("docs/data").absolute()
     dashboard_data_dir.mkdir(parents=True, exist_ok=True)
 
     telemetry_map = {
@@ -103,10 +104,16 @@ def _sync_scan_dashboard_artifacts(summary_out: Path, latest_grade: str | None =
     }
 
     for src_rel, target_name in telemetry_map.items():
-        src_path = Path(src_rel)
+        src_path = Path(src_rel).absolute()
         if src_path.exists():
-            target_path = dashboard_data_dir / target_name
+            target_path = (dashboard_data_dir / target_name).absolute()
+            old_size = target_path.stat().st_size if target_path.exists() else -1
             shutil.copy2(src_path, target_path)
+            new_size = target_path.stat().st_size
+            print(f"DEBUG SYNC: {src_path} ({src_path.stat().st_size}) -> {target_path} (before={old_size}, after={new_size})")
+        else:
+            print(f"DEBUG SYNC: Skip missing {src_path}")
+            pass
 
     if summary_out.exists():
         shutil.copy2(summary_out, dashboard_data_dir / "summary_btcusdt.json")
@@ -510,6 +517,7 @@ def command_run_live(
     use_trade: bool,
     min_runtime_seconds: float | None,
     run_until_first_m5: bool,
+    force_clean: bool = False,
 ) -> int:
     from cfte.live.engine import LiveThesisLoop
 
@@ -522,8 +530,29 @@ def command_run_live(
     if target_min_runtime_seconds is None and configured_min_runtime is not None:
         target_min_runtime_seconds = float(configured_min_runtime)
     target_run_until_first_m5 = run_until_first_m5 or bool(live_defaults.get("run_until_first_m5", False))
-    db_path = DEFAULT_STATE_DB
+    db_path = Path(DEFAULT_STATE_DB)
     thesis_log_path = _profile_path(context.profile, "live", "thesis_log", DEFAULT_THESIS_LOG)
+    runtime_report_path = _profile_path(context.profile, "review", "live_runtime_path", DEFAULT_LIVE_RUNTIME_REPORT)
+
+    if force_clean:
+        print("🧼 [CLEAN] Đang dọn dẹp môi trường (Force Clean)...")
+        if db_path.exists():
+            print(f"- Xóa database: {db_path}")
+            db_path.unlink()
+        # Xóa các tệp sqlite liên quan (-shm, -wal)
+        for ext in [".db-shm", ".db-wal"]:
+            side_file = db_path.with_suffix(ext)
+            if side_file.exists():
+                side_file.unlink()
+        
+        if runtime_report_path.exists():
+            print(f"- Xóa runtime report: {runtime_report_path}")
+            runtime_report_path.unlink()
+        
+        lock_path = runtime_report_path.with_suffix(runtime_report_path.suffix + ".lock")
+        if lock_path.exists():
+            print(f"- Xóa runtime lock: {lock_path}")
+            lock_path.unlink()
 
     print(f"Bắt đầu bộ máy live thesis cho {target_symbol}...")
     print(f"- Cơ sở dữ liệu trạng thái: {db_path}")
@@ -1214,6 +1243,7 @@ def build_parser() -> argparse.ArgumentParser:
     run_live.add_argument("--max-events", type=int, default=None)
     run_live.add_argument("--min-runtime-seconds", type=float, default=None, help="Thời gian chạy tối thiểu (giây).")
     run_live.add_argument("--run-until-first-m5", action="store_true")
+    run_live.add_argument("--force-clean", action="store_true", help="Xóa sạch database và lock cũ trước khi chạy.")
     run_live.add_argument("--use-trade", action="store_true", help="Dùng stream trade thay vì aggTrade.")
 
     review_day = sub.add_parser("review-day", help="Sinh tổng kết ngày từ SQLite và lưu file summary tiếng Việt.")
@@ -1257,6 +1287,7 @@ def main() -> int:
             use_trade=args.use_trade,
             min_runtime_seconds=args.min_runtime_seconds,
             run_until_first_m5=args.run_until_first_m5,
+            force_clean=args.force_clean,
         )
     if args.cmd == "review-day":
         summary_path = Path(args.summary) if args.summary else None

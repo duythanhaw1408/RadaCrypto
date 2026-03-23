@@ -289,7 +289,7 @@ def run_replay(
                 tpfm_snapshots = []
 
     # Final TPFM flush at end of replay (Phase T1-T5 Refinement)
-    if tpfm_trades and store:
+    if tpfm_trades:
         m5_snap = tpfm.calculate_m5_snapshot(
             window_start_ts=tpfm_window_start_ts or ordered_events[0].venue_ts,
             window_end_ts=ordered_events[-1].venue_ts,
@@ -303,21 +303,29 @@ def run_replay(
         latest_tpfm_snapshot = m5_snap
         all_m5_snapshots.append(m5_snap)
 
-        # Phase 14: Final E2E Pattern Persistence
-        pattern_ev = m5_snap.metadata.get("pattern_event")
-        if pattern_ev:
-            asyncio.run(store.save_flow_pattern_event(pattern_ev))
-        
-        final_outcomes = tpfm.flush_all_pending_outcomes(m5_snap)
-        for outcome in final_outcomes:
-            asyncio.run(store.save_pattern_outcome(outcome))
-        
-        # Flush M30/4H even if thresholds not met (Phase T1-T5 Refinement)
-        tpfm_m5_buffer.append(m5_snap)
-        if tpfm_m5_buffer:
-            regime = tpfm.calculate_30m_regime(tpfm_m5_buffer)
-            asyncio.run(store.save_tpfm_m30_regime(regime))
-            tpfm_m30_buffer.append(regime)
+        if store:
+            # Phase 14: Final E2E Pattern Persistence
+            pattern_ev = m5_snap.metadata.get("pattern_event")
+            if pattern_ev:
+                asyncio.run(store.save_flow_pattern_event(pattern_ev))
+            
+            final_outcomes = tpfm.flush_all_pending_outcomes(m5_snap)
+            for outcome in final_outcomes:
+                asyncio.run(store.save_pattern_outcome(outcome))
+            
+            # Flush M30/4H even if thresholds not met (Phase T1-T5 Refinement)
+            tpfm_m5_buffer.append(m5_snap)
+            if tpfm_m5_buffer:
+                regime = tpfm.calculate_30m_regime(tpfm_m5_buffer)
+                asyncio.run(store.save_tpfm_m30_regime(regime))
+                tpfm_m30_buffer.append(regime)
+        else:
+            # Consistent with live print
+            if m5_snap.transition_event:
+                print(
+                    f"🔄 [REPLAY] Chuyển đổi trạng thái flow: "
+                    f"{m5_snap.transition_event.from_state} -> {m5_snap.transition_event.to_state}"
+                )
             
             if tpfm_m30_buffer:
                 struct = tpfm.calculate_4h_structural(tpfm_m30_buffer)
