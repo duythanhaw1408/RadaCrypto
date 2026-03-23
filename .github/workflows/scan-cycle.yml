@@ -73,7 +73,7 @@ jobs:
         cp -f data/review/daily_summary.json docs/data/ 2>/dev/null || true
         cp -f data/review/weekly_review.json docs/data/ 2>/dev/null || true
         cp -f data/replay/summary_btcusdt.json docs/data/ 2>/dev/null || true
-        cp -f data/review/tpfm_m5.json docs/data/ 2>/dev/null || true
+        cp -f data/review/tpfm_m5_scan.json docs/data/tpfm_m5.json 2>/dev/null || true
         
         if [ -f data/thesis/thesis_log.jsonl ]; then
           python3 -c "
