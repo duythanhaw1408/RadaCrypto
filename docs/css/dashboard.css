@@ -95,7 +95,7 @@ main.dashboard-grid {
   flex: 1;
   display: grid;
   grid-template-columns: 1fr 350px;
-  grid-template-rows: 1fr auto;
+  grid-template-rows: 1fr auto auto; /* Charts | MTF | Logs */
   overflow: hidden;
 }
 
@@ -120,7 +120,7 @@ main.dashboard-grid {
 
 .decision-panel {
   grid-column: 2;
-  grid-row: 1 / span 2;
+  grid-row: 1 / span 3;
   background: var(--bg-panel);
   border-left: 1px solid var(--border);
   display: flex;
@@ -278,16 +278,26 @@ main.dashboard-grid {
   background: var(--text-muted);
 }
 
-/* Signal Log Table styling */
-.bottom-log {
-  grid-column: 1 / span 2;
+.signal-log-section {
+  grid-column: 1;
+  grid-row: 3;
   border-top: 1px solid var(--border);
   background: var(--bg-deep);
-  min-height: 200px;
+  height: 250px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.signal-log-section .section-header {
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border);
 }
 
 .log-table-wrapper {
-  padding: 0 20px 20px;
+  flex: 1;
+  padding: 0 20px;
+  overflow-y: auto;
 }
 
 .log-table {
@@ -313,6 +323,58 @@ main.dashboard-grid {
 
 .log-table tr:hover {
   background: var(--bg-card);
+}
+
+.log-setup {
+  font-weight: 600;
+}
+
+.grade-badge-small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.75rem;
+  background: rgba(59, 130, 246, 0.14);
+  color: var(--text-main);
+}
+
+.log-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.log-action.action-buy {
+  background: var(--accent-buy-dim);
+  color: var(--accent-buy);
+}
+
+.log-action.action-sell {
+  background: var(--accent-sell-dim);
+  color: var(--accent-sell);
+}
+
+.log-action.action-neutral {
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--text-muted);
+}
+
+/* Status-specific tones (vNext) */
+.log-action:contains("Đã vô hiệu") {
+  opacity: 0.6;
+  text-decoration: line-through;
+}
+
+.log-action:contains("Theo dõi sát") {
+  border: 1px solid var(--accent-info-dim);
 }
 
 .tag-grade {

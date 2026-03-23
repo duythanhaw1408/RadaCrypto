@@ -2,8 +2,13 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
+import uuid
+from datetime import datetime
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import Any
+from uuid import uuid4
 
 from cfte.books.local_book import LocalBook
 from cfte.features.tape import (
@@ -30,6 +35,7 @@ class ReplayRunResult:
     thesis_events: list[ThesisSignal]
     thesis_state: dict[str, ThesisLifecycleRecord]
     thesis_event_history: list[ThesisEventRecord]
+    run_id: str
     latest_tpfm_snapshot: Optional['TPFMSnapshot'] = None
 
 
@@ -139,6 +145,8 @@ def run_replay(
     tpfm_m5_buffer = []
     tpfm_m30_buffer = []
     latest_tpfm_snapshot = None
+    all_m5_snapshots: list[Any] = []
+    current_run_id = uuid4().hex
 
     for event in ordered_events:
         if event.event_type == "book_snapshot":
@@ -215,6 +223,7 @@ def run_replay(
                     active_theses=list(thesis_state.values()),
                     futures_context=None # No futures in historical replay for now
                 )
+                m5_snap.run_id = current_run_id
                 
                 # Phase 14: Enrich Signals with TPFM Intelligence (Finding 5)
                 for record in thesis_state.values():
@@ -231,6 +240,10 @@ def run_replay(
                         s.edge_confidence = m5_snap.edge_profile.confidence
                 transition_event = m5_snap.transition_event
                 latest_tpfm_snapshot = m5_snap
+
+                if store:
+                    asyncio.run(store.save_tpfm_snapshot(m5_snap))
+                all_m5_snapshots.append(m5_snap)
                 
                 if transition_event and not store:
                      # Log to stdout if no store, consistent with live print
@@ -285,19 +298,10 @@ def run_replay(
             active_theses=list(thesis_state.values()),
             futures_context=None
         )
+        m5_snap.run_id = current_run_id
         
-        # Phase 14: Enrich Signals with TPFM Intelligence (Finding 5)
-        for record in thesis_state.values():
-            s = record.signal
-            s.matrix_cell = m5_snap.matrix_cell
-            s.flow_state = m5_snap.flow_state_code
-            s.matrix_alias_vi = m5_snap.matrix_alias_vi
-            s.decision_summary_vi = m5_snap.decision_summary_vi
-            if hasattr(m5_snap, "edge_profile") and m5_snap.edge_profile:
-                s.edge_score = m5_snap.edge_profile.edge_score
-                s.edge_confidence = m5_snap.edge_profile.confidence
-        import asyncio
-        asyncio.run(store.save_tpfm_snapshot(m5_snap))
+        latest_tpfm_snapshot = m5_snap
+        all_m5_snapshots.append(m5_snap)
 
         # Phase 14: Final E2E Pattern Persistence
         pattern_ev = m5_snap.metadata.get("pattern_event")
@@ -329,6 +333,15 @@ def run_replay(
             if state_event is not None:
                 thesis_event_history.append(state_event)
 
+    # Export all M5 snapshots to JSON for dashboard scan mode
+    try:
+        m5_path = Path("data/review/tpfm_m5_scan.json")
+        m5_path.parent.mkdir(parents=True, exist_ok=True)
+        snapshots_json = [asdict(s) for s in all_m5_snapshots]
+        m5_path.write_text(json.dumps(snapshots_json, ensure_ascii=False, indent=2), encoding="utf-8")
+    except Exception as e:
+        print(f"⚠️ [REPLAY] Lỗi xuất M5 JSON: {e}")
+
     return ReplayRunResult(
         instrument_key=instrument_key,
         event_count=len(ordered_events),
@@ -338,6 +351,7 @@ def run_replay(
         thesis_events=thesis_events,
         thesis_state=thesis_state,
         thesis_event_history=thesis_event_history,
+        run_id=current_run_id,
         latest_tpfm_snapshot=latest_tpfm_snapshot,
     )
 
@@ -345,16 +359,23 @@ def run_replay(
 def persist_replay_summary(result: ReplayRunResult, output_path: str | Path) -> Path:
     out = Path(output_path)
     out.parent.mkdir(parents=True, exist_ok=True)
+    latest_tpfm = asdict(result.latest_tpfm_snapshot) if result.latest_tpfm_snapshot else {}
     summary = {
         "instrument_key": result.instrument_key,
         "event_count": result.event_count,
         "feature_windows": result.feature_windows,
         "thesis_count": result.thesis_count,
         "fingerprint": result.fingerprint,
-        "latest_tpfm": asdict(result.latest_tpfm_snapshot) if result.latest_tpfm_snapshot else {},
+        "artifact_contract": {
+            "mode": "scan",
+            "run_id": result.run_id,
+            "generated_at": datetime.utcnow().isoformat() + "Z",
+            "window_end_ts": latest_tpfm.get("window_end_ts", 0),
+            "source": "replay_scan",
+        },
+        "latest_tpfm": latest_tpfm,
         "top_signals": [
             asdict(_apply_flow_context_to_signals([s], result.latest_tpfm_snapshot)[0]) 
-            if result.latest_tpfm_snapshot else asdict(s) 
             for s in select_top_signals(result.thesis_events, limit=5)
         ],
     }

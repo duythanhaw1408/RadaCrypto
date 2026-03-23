@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
 import shutil
+import json
 
 from cfte.books.binance_depth import BinanceDepthReconciler
 from cfte.collectors.binance_public import BinancePublicCollector, build_public_streams, try_fetch_depth_snapshot
@@ -110,6 +111,7 @@ class LiveThesisLoop:
         self._collector_health: dict[str, CollectorHealthSnapshot] = {}
         self._context_health: dict[str, str | float | bool | int | list[str] | None] = {}
         self._latest_tpfm_summary: dict[str, str | float | bool | int | list[str] | None] = {}
+        self._dashboard_m5_history = deque(maxlen=100)
         
         # TPFM State
         self.tpfm = TPFMStateEngine(symbol=self.symbol)
@@ -295,35 +297,56 @@ class LiveThesisLoop:
 
         return sorted(set(flags))
 
+    async def _dashboard_sync_loop(self):
+        """Periodic background task to sync dashboard data."""
+        while not self._stop_event.is_set():
+            await self._sync_to_dashboard()
+            # Wait for 30s or until stop
+            for _ in range(30):
+                if self._stop_event.is_set():
+                    break
+                await asyncio.sleep(1)
+
     async def _sync_to_dashboard(self):
         """
-        Syncs the latest thesis_log.jsonl to the dashboard/data folder if it exists.
-        This provides a seamless local development experience.
+        Syncs latest telemetry to the docs/data folder for the professional UI.
         """
         try:
-            # Source path
-            src_path = Path("data/thesis/thesis_log.jsonl")
-            if not src_path.exists():
-                return
-
-            # Target path
-            dashboard_data_dir = Path("dashboard/data")
+            # Dashboard target directory
+            dashboard_data_dir = Path("docs/data")
             if not dashboard_data_dir.exists():
-                # Try to create it if dashboard exists
-                if Path("dashboard").exists():
-                    dashboard_data_dir.mkdir(parents=True, exist_ok=True)
-                else:
-                    return
+                dashboard_data_dir.mkdir(parents=True, exist_ok=True)
 
-            target_path = dashboard_data_dir / "thesis_log.jsonl"
-            
-            # Simple copy
-            shutil.copy2(src_path, target_path)
-            
-            # Also sync any TPFM M5 cards if they exist
+            # 1. Sync Thesis Log (.jsonl to .json array)
+            src_log = Path("data/thesis/thesis_log.jsonl")
+            if src_log.exists():
+                try:
+                    with src_log.open("r", encoding="utf-8") as f:
+                        records = [json.loads(line) for line in f if line.strip()]
+                    # Only sync last 100 for performance
+                    target_log = dashboard_data_dir / "thesis_log.json"
+                    with target_log.open("w", encoding="utf-8") as f:
+                        json.dump(records[-100:], f, ensure_ascii=False)
+                except Exception:
+                    pass
+
+            # 2. Sync TPFM M5
             m5_src = Path("data/review/tpfm_m5.json")
             if m5_src.exists():
                 shutil.copy2(m5_src, dashboard_data_dir / "tpfm_m5.json")
+
+            telemetry_map = {
+                "data/review/daily_summary.json": "daily_summary.json",
+                "data/review/health_status.json": "health_status.json",
+                "data/replay/summary_btcusdt.json": "summary_btcusdt.json",
+                "data/review/tpfm_m30.json": "tpfm_m30.json",
+                "data/review/tpfm_4h.json": "tpfm_4h.json",
+            }
+
+            for src_rel, target_name in telemetry_map.items():
+                src_p = Path(src_rel)
+                if src_p.exists():
+                    shutil.copy2(src_p, dashboard_data_dir / target_name)
                 
         except Exception:
             # Silent failure for sync, don't break the engine
@@ -458,7 +481,10 @@ class LiveThesisLoop:
                         pid=os.getpid(),
                         host=socket.gethostname()
                     )
-                    await self.store.migrate_schema()
+
+                    # Schema Migration
+                    if not self.store.schema_synced:
+                        await self.store.migrate_schema()
                     
                     # Sync TPFM Probability Engine with historical results
                     await self.tpfm.sync_probability_stats(self.store)
@@ -490,6 +516,7 @@ class LiveThesisLoop:
 
                     monitor = OutcomeMonitor(self.store)
                     monitor_task = asyncio.create_task(monitor.run_forever())
+                    dashboard_sync_task = asyncio.create_task(self._dashboard_sync_loop())
 
                     # Primary Collector Assignment
                     streams = build_public_streams([self.symbol], use_agg_trade=self.use_agg_trade)
@@ -629,32 +656,6 @@ class LiveThesisLoop:
                                 run_until_first_m5=run_until_first_m5,
                             ):
                                 break
-                            if (
-                                max_events is not None
-                                and processed >= max_events
-                                and not deferred_exit_notice_sent
-                            ):
-                                wait_reasons: list[str] = []
-                                if min_runtime_seconds is not None and (
-                                    time.monotonic() - session_started_monotonic
-                                ) < min_runtime_seconds:
-                                    wait_reasons.append(f"đủ {min_runtime_seconds:.0f}s runtime")
-                                if run_until_first_m5 and not self._has_m5_snapshot():
-                                    wait_reasons.append("snapshot M5 đầu tiên")
-                                if wait_reasons:
-                                    print(
-                                        "⏳ Đã chạm max-events nhưng tiếp tục chạy để chờ "
-                                        + " và ".join(wait_reasons)
-                                        + "."
-                                    )
-                                    deferred_exit_notice_sent = True
-
-                        if status == "completed" or self._stop_event.is_set():
-                            break
-
-                        retry_count += 1
-                        print("Khởi động lại loop tìm kiếm dữ liệu mới...")
-                        await asyncio.sleep(5)
 
                     except Exception as exc:
                         status = "runtime_error"
@@ -666,12 +667,13 @@ class LiveThesisLoop:
                         retry_count += 1
                     finally:
                         self._refresh_collector_health(
-                            spot_collector=collector if "collector" in locals() else None,
+                            spot_collector=primary_collector if "primary_collector" in locals() else None,
                             bybit_collector=bybit_collector if "bybit_collector" in locals() else None,
                             okx_collector=okx_collector if "okx_collector" in locals() else None,
                         )
                         monitor.stop()
                         monitor_task.cancel()
+                        dashboard_sync_task.cancel()
                         if "futures_task" in locals():
                             futures_task.cancel()
                         if "bybit_task" in locals():
@@ -763,6 +765,7 @@ class LiveThesisLoop:
                 active_theses=list(self.thesis_state.values()),
                 futures_context=futures_context
             )
+            tpfm_snap.run_id = self._runtime_run_id
             
             # Phase 14: Enrich Signals with TPFM Intelligence (Finding 5)
             for record in self.thesis_state.values():
@@ -822,6 +825,18 @@ class LiveThesisLoop:
             pattern_outcomes = tpfm_snap.metadata.get("pattern_outcomes", [])
             for outcome in pattern_outcomes:
                 await self.store.save_pattern_outcome(outcome)
+            
+            # Dashboard History & Export
+            self._dashboard_m5_history.append(tpfm_snap)
+            try:
+                m5_path = Path("data/review/tpfm_m5.json")
+                m5_path.parent.mkdir(parents=True, exist_ok=True)
+                # Convert deque to list of dicts for JSON
+                snapshots_json = [asdict(s) for s in self._dashboard_m5_history]
+                m5_path.write_text(json.dumps(snapshots_json, ensure_ascii=False, indent=2), encoding="utf-8")
+            except Exception as e:
+                print(f"⚠️ [DASHBOARD] Lỗi xuất M5 JSON: {e}")
+
             self._update_latest_tpfm_summary(tpfm_snap)
             self._latest_tpfm_snapshot = tpfm_snap
             if self._first_m5_seen_at is None:
@@ -931,28 +946,12 @@ class LiveThesisLoop:
                 for event in events:
                     await self.store.append_event(event)
                     if self.thesis_log is not None:
-                        self.thesis_log.append_record(
-                            {
-                                "flow": "live",
-                                "event_type": event.event_type,
-                                "thesis_id": event.thesis_id,
-                                "from_stage": event.from_stage,
-                                "to_stage": event.to_stage,
-                                "event_ts": event.event_ts,
-                                "summary_vi": event.summary_vi,
-                                "score": event.score,
-                                "confidence": event.confidence,
-                                "symbol": self.symbol,
-                                "instrument_key": self.instrument_key,
-                                "setup": signal.setup,
-                                "direction": signal.direction,
-                                "matrix_alias_vi": signal.matrix_alias_vi,
-                                "matrix_cell": signal.matrix_cell,
-                                "flow_state": signal.flow_state,
-                                "decision_posture": signal.decision_posture,
-                                "flow_alignment_score": signal.flow_alignment_score,
-                            }
-                        )
+                        record = asdict(event)
+                        record["flow"] = "live"
+                        record["profile"] = self.ux.get("profile_name", "default")
+                        record["symbol"] = self.symbol
+                        record["instrument_key"] = self.instrument_key
+                        self.thesis_log.append_record(record)
                 # After processing all events for this signal, sync to dashboard
                 await self._sync_to_dashboard()
 

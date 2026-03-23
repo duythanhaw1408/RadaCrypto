@@ -1,29 +1,450 @@
 {
-  "label": "2026-03-21",
-  "summary_vi": "Tổng kết ngày 2026-03-21\n- Luận điểm mới: 0 | score TB: 0.00 | confidence TB: 0.00\n- Outcome đã chốt: 0 | hit rate: 0.0% | edge TB: +0.00%\n- Realism: khớp 0 lệnh (0.0%) | MAE TB: 0.0bps | MFE TB: 0.0bps\n- Setup xuất hiện nhiều nhất: chưa có\n- Trạng thái mở mới: chưa có\n- Trạng thái đóng trong ngày: chưa có\n- Review cá nhân: vào=0, bỏ=0, phớt lờ=0\n- Hữu ích / nhiễu: hữu ích=0, trung tính=0, nhiễu=0",
-  "start_ts": 1774026000000,
-  "end_ts": 1774112400000,
-  "opened_count": 0,
-  "avg_score": 0.0,
-  "avg_confidence": 0.0,
-  "stage_dist": {},
-  "setup_dist": {},
-  "closed_stage_dist": {},
-  "outcomes_count": 0,
-  "fill_count": 0,
-  "avg_mae": 0.0,
-  "avg_mfe": 0.0,
-  "avg_return": 0.0,
-  "avg_edge": 0.0,
-  "positive_outcomes": 0,
+  "label": "2026-03-23",
+  "summary_vi": "Tổng kết ngày 2026-03-23\n- Luận điểm mới: 4 | score TB: 66.19 | confidence TB: 0.86\n- Outcome đã chốt: 8 | hit rate: 50.0% | edge TB: +0.06%\n- Realism: khớp 3 lệnh (37.5%) | MAE TB: -20.5bps | MFE TB: 38.0bps\n- Setup xuất hiện nhiều nhất: stealth_accumulation\n- Trạng thái mở mới: Đã bị vô hiệu: 4\n- Trạng thái đóng trong ngày: Đã bị vô hiệu: 4\n- Review cá nhân: vào=0, bỏ=0, phớt lờ=0\n- Hữu ích / nhiễu: hữu ích=0, trung tính=0, nhiễu=0\n- Matrix nổi bật: Thuận pha mua | FUTURES_LED/UNCONFIRMED/NONE | grade B | 4h edge -0.01%\n- Flow state nổi bật: LONG_CONTINUATION__TRAP | NONE/BID_DEFENSE/AGGRESSIVE | grade B | 4h edge -0.01%\n- Forced flow đáng chú ý: NONE | NONE/BALANCED | grade B | 4h edge -0.01%\n- Pattern nổi bật: BREAKOUT_FORMING_LONG (POS_NEUTRALx3|STABLE|NONE|FOLLOW_THROUGH) | win rate 100.0% | RR 0.02",
+  "start_ts": 1774198800000,
+  "end_ts": 1774285200000,
+  "opened_count": 4,
+  "avg_score": 66.195,
+  "avg_confidence": 0.8625,
+  "stage_dist": {
+    "INVALIDATED": 4
+  },
+  "setup_dist": {
+    "stealth_accumulation": 1,
+    "failed_breakout": 1,
+    "distribution": 1,
+    "breakout_ignition": 1
+  },
+  "closed_stage_dist": {
+    "INVALIDATED": 4
+  },
+  "outcomes_count": 8,
+  "fill_count": 3,
+  "avg_mae": -20.538649170010085,
+  "avg_mfe": 38.02167648468322,
+  "avg_return": 0.409607875852124,
+  "avg_edge": 0.05521912911954342,
+  "positive_outcomes": 4,
   "review_summary": {
     "total_reviews": 0,
     "decision_counts": {},
     "usefulness_counts": {},
     "setup_rows": []
   },
-  "matrix_scorecard": [],
-  "flow_state_scorecard": [],
-  "forced_flow_scorecard": [],
-  "transition_scorecard": []
+  "matrix_scorecard": [
+    {
+      "matrix_cell": "POS_INIT__POS_INV",
+      "matrix_alias_vi": "Thuận pha mua",
+      "spot_futures_relation": "FUTURES_LED",
+      "venue_confirmation_state": "UNCONFIRMED",
+      "liquidation_bias": "NONE",
+      "tradability_grade": "B",
+      "total_signals": 4,
+      "avg_score": 66.195,
+      "avg_confidence": 0.8625,
+      "horizons": {
+        "1h": {
+          "count": 4,
+          "wins": 2,
+          "win_rate": 0.5,
+          "avg_edge": 0.11951399047952337,
+          "avg_mae": -20.538649170010085,
+          "avg_mfe": 38.02167648468322
+        },
+        "4h": {
+          "count": 4,
+          "wins": 2,
+          "win_rate": 0.5,
+          "avg_edge": -0.009075732240436521,
+          "avg_mae": 0.0,
+          "avg_mfe": 0.0
+        }
+      }
+    }
+  ],
+  "flow_state_scorecard": [
+    {
+      "flow_state_code": "LONG_CONTINUATION__TRAP",
+      "forced_flow_state": "NONE",
+      "inventory_defense_state": "BID_DEFENSE",
+      "decision_posture": "AGGRESSIVE",
+      "tradability_grade": "B",
+      "total_signals": 4,
+      "avg_score": 66.195,
+      "avg_confidence": 0.8625,
+      "avg_trap_risk": 0.3,
+      "avg_forced_flow_intensity": 0.0,
+      "avg_context_quality_score": 0.7999999999999999,
+      "horizons": {
+        "1h": {
+          "count": 4,
+          "wins": 2,
+          "win_rate": 0.5,
+          "avg_edge": 0.11951399047952337,
+          "avg_mae": -20.538649170010085,
+          "avg_mfe": 38.02167648468322
+        },
+        "4h": {
+          "count": 4,
+          "wins": 2,
+          "win_rate": 0.5,
+          "avg_edge": -0.009075732240436521,
+          "avg_mae": 0.0,
+          "avg_mfe": 0.0
+        }
+      }
+    }
+  ],
+  "forced_flow_scorecard": [
+    {
+      "forced_flow_state": "NONE",
+      "liquidation_bias": "NONE",
+      "basis_state": "BALANCED",
+      "tradability_grade": "B",
+      "total_signals": 4,
+      "avg_score": 66.195,
+      "avg_confidence": 0.8625,
+      "avg_forced_flow_intensity": 0.0,
+      "avg_liquidation_intensity": 0.0,
+      "avg_trap_risk": 0.3,
+      "horizons": {
+        "1h": {
+          "count": 4,
+          "wins": 2,
+          "win_rate": 0.5,
+          "avg_edge": 0.11951399047952337,
+          "avg_mae": -20.538649170010085,
+          "avg_mfe": 38.02167648468322
+        },
+        "4h": {
+          "count": 4,
+          "wins": 2,
+          "win_rate": 0.5,
+          "avg_edge": -0.009075732240436521,
+          "avg_mae": 0.0,
+          "avg_mfe": 0.0
+        }
+      }
+    }
+  ],
+  "transition_scorecard": [
+    {
+      "transition_code": "TRAP_TO_LONG",
+      "transition_family": "TRAP",
+      "transition_alias_vi": "Pha mua có dấu hiệu bẫy",
+      "total_signals": 4,
+      "avg_transition_speed": 0.24,
+      "avg_transition_quality": 0.59,
+      "avg_persistence_score": 0.75,
+      "avg_trap_risk": 0.3,
+      "forced_ratio": 0.0,
+      "horizons": {
+        "1h": {
+          "count": 4,
+          "wins": 2,
+          "win_rate": 0.5,
+          "avg_edge": 0.11951399047952337,
+          "avg_mae": -20.538649170010085,
+          "avg_mfe": 38.02167648468322
+        },
+        "4h": {
+          "count": 4,
+          "wins": 2,
+          "win_rate": 0.5,
+          "avg_edge": -0.009075732240436521,
+          "avg_mae": 0.0,
+          "avg_mfe": 0.0
+        }
+      }
+    }
+  ],
+  "pattern_scorecard": [
+    {
+      "pattern_code": "ABSORB_LONG",
+      "sequence_signature": "NEG_POSx1|DECELERATING|NONE|FOLLOW_THROUGH",
+      "count": 1,
+      "win_rate_5m": 0.0,
+      "avg_rr": 0.0
+    },
+    {
+      "pattern_code": "ABSORB_LONG",
+      "sequence_signature": "NEG_POSx4|STABLE|NONE|FOLLOW_THROUGH",
+      "count": 1,
+      "win_rate_5m": 0.0,
+      "avg_rr": 0.005064702975467226
+    },
+    {
+      "pattern_code": "ABSORB_SHORT",
+      "sequence_signature": "POS_NEGx1|STABLE|NONE|FOLLOW_THROUGH",
+      "count": 2,
+      "win_rate_5m": 0.5,
+      "avg_rr": 0.9987145609713544
+    },
+    {
+      "pattern_code": "ABSORB_SHORT",
+      "sequence_signature": "POS_NEGx2|STABLE|NONE|FOLLOW_THROUGH",
+      "count": 1,
+      "win_rate_5m": 0.0,
+      "avg_rr": 0.34547907320286886
+    },
+    {
+      "pattern_code": "ABSORB_SHORT",
+      "sequence_signature": "POS_NEGx6|STABLE|NONE|FOLLOW_THROUGH",
+      "count": 1,
+      "win_rate_5m": 0.0,
+      "avg_rr": 0.20150193413235906
+    },
+    {
+      "pattern_code": "BALANCE",
+      "sequence_signature": "NEUTRAL_NEUTRALx0|DECELERATING|NONE|ABSORBED_OR_TRAP",
+      "count": 1,
+      "win_rate_5m": 0.0,
+      "avg_rr": 0.7164827868862856
+    },
+    {
+      "pattern_code": "BREAKDOWN_FORMING_SHORT",
+      "sequence_signature": "NEG_NEUTRALx1|DECELERATING|NONE|ABSORBED_OR_TRAP",
+      "count": 4,
+      "win_rate_5m": 0.0,
+      "avg_rr": 2.57620257253742
+    },
+    {
+      "pattern_code": "BREAKDOWN_FORMING_SHORT",
+      "sequence_signature": "NEG_NEUTRALx1|STABLE|NONE|ABSORBED_OR_TRAP",
+      "count": 4,
+      "win_rate_5m": 0.0,
+      "avg_rr": 0.6558355722522476
+    },
+    {
+      "pattern_code": "BREAKDOWN_FORMING_SHORT",
+      "sequence_signature": "NEG_NEUTRALx1|STABLE|NONE|FOLLOW_THROUGH",
+      "count": 1,
+      "win_rate_5m": 0.0,
+      "avg_rr": 0.9667513752362954
+    },
+    {
+      "pattern_code": "BREAKDOWN_FORMING_SHORT",
+      "sequence_signature": "NEG_NEUTRALx2|DECELERATING|NONE|ABSORBED_OR_TRAP",
+      "count": 1,
+      "win_rate_5m": 0.0,
+      "avg_rr": 0.4334979966612044
+    },
+    {
+      "pattern_code": "BREAKDOWN_FORMING_SHORT",
+      "sequence_signature": "NEG_NEUTRALx2|STABLE|NONE|ABSORBED_OR_TRAP",
+      "count": 3,
+      "win_rate_5m": 0.0,
+      "avg_rr": 58.701830426232725
+    },
+    {
+      "pattern_code": "BREAKOUT_FORMING_LONG",
+      "sequence_signature": "POS_NEUTRALx1|DECELERATING|NONE|ABSORBED_OR_TRAP",
+      "count": 1,
+      "win_rate_5m": 0.0,
+      "avg_rr": 38.86026320892014
+    },
+    {
+      "pattern_code": "BREAKOUT_FORMING_LONG",
+      "sequence_signature": "POS_NEUTRALx1|STABLE|NONE|FOLLOW_THROUGH",
+      "count": 8,
+      "win_rate_5m": 0.125,
+      "avg_rr": 0.38716485031478837
+    },
+    {
+      "pattern_code": "BREAKOUT_FORMING_LONG",
+      "sequence_signature": "POS_NEUTRALx1|STABLE|NONE|MIXED",
+      "count": 3,
+      "win_rate_5m": 0.0,
+      "avg_rr": 0.9552459526012701
+    },
+    {
+      "pattern_code": "BREAKOUT_FORMING_LONG",
+      "sequence_signature": "POS_NEUTRALx2|DECELERATING|NONE|MIXED",
+      "count": 1,
+      "win_rate_5m": 0.0,
+      "avg_rr": 2.3287693271373064
+    },
+    {
+      "pattern_code": "BREAKOUT_FORMING_LONG",
+      "sequence_signature": "POS_NEUTRALx2|STABLE|NONE|FOLLOW_THROUGH",
+      "count": 2,
+      "win_rate_5m": 0.0,
+      "avg_rr": 0.5009389720078569
+    },
+    {
+      "pattern_code": "BREAKOUT_FORMING_LONG",
+      "sequence_signature": "POS_NEUTRALx3|STABLE|NONE|FOLLOW_THROUGH",
+      "count": 1,
+      "win_rate_5m": 1.0,
+      "avg_rr": 0.017568554806647572
+    },
+    {
+      "pattern_code": "BREAKOUT_FORMING_LONG",
+      "sequence_signature": "POS_NEUTRALx4|STABLE|NONE|ABSORBED_OR_TRAP",
+      "count": 1,
+      "win_rate_5m": 0.0,
+      "avg_rr": 2.825565276186305
+    },
+    {
+      "pattern_code": "CONTI_LONG",
+      "sequence_signature": "POS_POSx2|ACCELERATING|NONE|ABSORBED_OR_TRAP",
+      "count": 1,
+      "win_rate_5m": 1.0,
+      "avg_rr": 1.5822588766618486
+    },
+    {
+      "pattern_code": "CONTI_LONG",
+      "sequence_signature": "POS_POSx2|ACCELERATING|NONE|MIXED",
+      "count": 1,
+      "win_rate_5m": 0.0,
+      "avg_rr": 0.40928436242752236
+    },
+    {
+      "pattern_code": "CONTI_LONG",
+      "sequence_signature": "POS_POSx2|STABLE|NONE|MIXED",
+      "count": 2,
+      "win_rate_5m": 0.0,
+      "avg_rr": 0.0
+    },
+    {
+      "pattern_code": "CONTI_LONG",
+      "sequence_signature": "POS_POSx4|STABLE|NONE|ABSORBED_OR_TRAP",
+      "count": 1,
+      "win_rate_5m": 0.0,
+      "avg_rr": 1.8681423474186323
+    },
+    {
+      "pattern_code": "CONTI_LONG",
+      "sequence_signature": "POS_POSx5|STABLE|NONE|ABSORBED_OR_TRAP",
+      "count": 1,
+      "win_rate_5m": 0.0,
+      "avg_rr": 1.5373383223286883
+    },
+    {
+      "pattern_code": "CONTI_SHORT",
+      "sequence_signature": "NEG_NEGx2|ACCELERATING|NONE|MIXED",
+      "count": 1,
+      "win_rate_5m": 0.0,
+      "avg_rr": 0.2693153808583984
+    },
+    {
+      "pattern_code": "CONTI_SHORT",
+      "sequence_signature": "NEG_NEGx2|STABLE|NONE|ABSORBED_OR_TRAP",
+      "count": 2,
+      "win_rate_5m": 0.5,
+      "avg_rr": 2.0763181987220225
+    },
+    {
+      "pattern_code": "CONTI_SHORT",
+      "sequence_signature": "NEG_NEGx4|STABLE|NONE|ABSORBED_OR_TRAP",
+      "count": 1,
+      "win_rate_5m": 0.0,
+      "avg_rr": 3.2829635312592296
+    },
+    {
+      "pattern_code": "CONTI_SHORT",
+      "sequence_signature": "NEG_NEGx5|STABLE|NONE|ABSORBED_OR_TRAP",
+      "count": 1,
+      "win_rate_5m": 0.0,
+      "avg_rr": 3.282378919502473
+    },
+    {
+      "pattern_code": "FLUSH_SHORT",
+      "sequence_signature": "NEG_NEUTRALx1|STABLE|LIQUIDATION_LED|ABSORBED_OR_TRAP",
+      "count": 1,
+      "win_rate_5m": 1.0,
+      "avg_rr": 5.816279432717391
+    },
+    {
+      "pattern_code": "PASSIVE_ACCUMULATION",
+      "sequence_signature": "NEUTRAL_POSx1|STABLE|NONE|FOLLOW_THROUGH",
+      "count": 1,
+      "win_rate_5m": 0.0,
+      "avg_rr": 0.12785014975232162
+    },
+    {
+      "pattern_code": "TRAP_LONG",
+      "sequence_signature": "POS_NEGx1|DECELERATING|NONE|ABSORBED_OR_TRAP",
+      "count": 1,
+      "win_rate_5m": 0.0,
+      "avg_rr": 1.1805149451662285
+    },
+    {
+      "pattern_code": "TRAP_LONG",
+      "sequence_signature": "POS_NEGx1|STABLE|NONE|ABSORBED_OR_TRAP",
+      "count": 2,
+      "win_rate_5m": 0.0,
+      "avg_rr": 1.32166963436147
+    },
+    {
+      "pattern_code": "TRAP_LONG",
+      "sequence_signature": "POS_NEGx1|STABLE|NONE|MIXED",
+      "count": 3,
+      "win_rate_5m": 0.0,
+      "avg_rr": 2.4662183474624078
+    },
+    {
+      "pattern_code": "TRAP_LONG",
+      "sequence_signature": "POS_NEGx2|DECELERATING|NONE|ABSORBED_OR_TRAP",
+      "count": 1,
+      "win_rate_5m": 1.0,
+      "avg_rr": 3.093440943178935
+    },
+    {
+      "pattern_code": "TRAP_LONG",
+      "sequence_signature": "POS_NEGx4|STABLE|NONE|MIXED",
+      "count": 1,
+      "win_rate_5m": 0.0,
+      "avg_rr": 0.5319293594241736
+    },
+    {
+      "pattern_code": "TRAP_SHORT",
+      "sequence_signature": "NEG_POSx1|DECELERATING|NONE|ABSORBED_OR_TRAP",
+      "count": 3,
+      "win_rate_5m": 0.0,
+      "avg_rr": 2.1075565810687453
+    },
+    {
+      "pattern_code": "TRAP_SHORT",
+      "sequence_signature": "NEG_POSx1|STABLE|NONE|ABSORBED_OR_TRAP",
+      "count": 1,
+      "win_rate_5m": 0.0,
+      "avg_rr": 0.9545122139431912
+    },
+    {
+      "pattern_code": "TRAP_SHORT",
+      "sequence_signature": "NEG_POSx1|STABLE|NONE|MIXED",
+      "count": 3,
+      "win_rate_5m": 0.0,
+      "avg_rr": 2.3674366221306102
+    },
+    {
+      "pattern_code": "TRAP_SHORT",
+      "sequence_signature": "NEG_POSx2|DECELERATING|NONE|ABSORBED_OR_TRAP",
+      "count": 3,
+      "win_rate_5m": 0.3333333333333333,
+      "avg_rr": 1.0020480397009464
+    },
+    {
+      "pattern_code": "TRAP_SHORT",
+      "sequence_signature": "NEG_POSx2|STABLE|NONE|MIXED",
+      "count": 1,
+      "win_rate_5m": 0.0,
+      "avg_rr": 0.3004086848256222
+    },
+    {
+      "pattern_code": "TRAP_SHORT",
+      "sequence_signature": "NEG_POSx3|DECELERATING|NONE|MIXED",
+      "count": 1,
+      "win_rate_5m": 0.0,
+      "avg_rr": 1.3556469810624723
+    },
+    {
+      "pattern_code": "TRAP_SHORT",
+      "sequence_signature": "NEG_POSx4|STABLE|NONE|ABSORBED_OR_TRAP",
+      "count": 2,
+      "win_rate_5m": 0.0,
+      "avg_rr": 0.8593136117249242
+    }
+  ]
 }

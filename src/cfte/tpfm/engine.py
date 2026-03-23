@@ -205,8 +205,16 @@ class TPFMStateEngine:
             neutral_label="NEUTRAL_INV",
         )
 
-        prices = [t.price for t in trades]
-        high, low = max(prices), min(prices)
+        if trades:
+            prices = [t.price for t in trades]
+            open_px = trades[0].price
+            close_px = trades[-1].price
+            high, low = max(prices), min(prices)
+            volume_quote = sum(t.quote_qty for t in trades)
+        else:
+            # Fallback to microprice if no trades in window
+            open_px = close_px = high = low = snapshots[-1].microprice
+            volume_quote = 0.0
         range_bps = ((high - low) / low) * 10000.0
         z_range = self._soft_clamp(range_bps / 50.0)
         energy_score = (0.35 * z_burst + 0.25 * z_range + 0.20 * z_delta + 0.20 * z_persistence)
@@ -301,6 +309,11 @@ class TPFMStateEngine:
             window_start_ts=window_start_ts,
             window_end_ts=window_end_ts,
             microprice=snapshots[-1].microprice,
+            open_px=open_px,
+            high_px=high,
+            low_px=low,
+            close_px=close_px,
+            volume_quote=volume_quote,
             initiative_score=initiative_score,
             initiative_polarity=initiative_polarity,
             initiative_strength=abs(initiative_score),

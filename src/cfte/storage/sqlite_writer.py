@@ -28,6 +28,7 @@ class ThesisSQLiteStore:
     def __init__(self, db_path: str | Path) -> None:
         self.db_path = Path(db_path)
         self._lock_id = "primary_writer"
+        self.schema_synced = False
 
     def _pid_is_alive(self, pid: int) -> bool:
         if pid <= 0: return False
@@ -168,6 +169,12 @@ class ThesisSQLiteStore:
                 "symbol": "TEXT NOT NULL DEFAULT 'BTCUSDT'",
                 "window_start_ts": "INTEGER NOT NULL DEFAULT 0",
                 "window_end_ts": "INTEGER NOT NULL DEFAULT 0",
+                "run_id": "TEXT DEFAULT ''",
+                "microprice": "REAL DEFAULT 0.0",
+                "open_px": "REAL DEFAULT 0.0",
+                "high_px": "REAL DEFAULT 0.0",
+                "low_px": "REAL DEFAULT 0.0",
+                "close_px": "REAL DEFAULT 0.0",
                 "initiative_score": "REAL", "initiative_polarity": "TEXT", "initiative_strength": "REAL",
                 "inventory_score": "REAL", "inventory_polarity": "TEXT", "inventory_strength": "REAL",
                 "axis_confidence": "REAL",
@@ -256,6 +263,9 @@ class ThesisSQLiteStore:
             for col, dft in m5_definitions.items():
                 if col not in m5_cols:
                     db.execute(f"ALTER TABLE tpfm_m5_snapshot ADD COLUMN {col} {dft}")
+
+            # Mark as synced
+            self.schema_synced = True
 
             # TPFM M30 Migrations
             db.execute("CREATE TABLE IF NOT EXISTS tpfm_m30_regime (regime_id TEXT PRIMARY KEY)")
@@ -1256,7 +1266,8 @@ class ThesisSQLiteStore:
     async def save_tpfm_snapshot(self, snapshot: Any) -> None:
         with sqlite3.connect(self.db_path) as db:
             columns = [
-                "snapshot_id", "symbol", "window_start_ts", "window_end_ts",
+                "snapshot_id", "symbol", "window_start_ts", "window_end_ts", "run_id",
+                "microprice", "open_px", "high_px", "low_px", "close_px",
                 "initiative_score", "initiative_polarity", "initiative_strength",
                 "inventory_score", "inventory_polarity", "inventory_strength", "axis_confidence",
                 "energy_score", "energy_state", "response_efficiency_score", "response_efficiency_state",
@@ -1289,6 +1300,12 @@ class ThesisSQLiteStore:
                 snapshot.symbol,
                 snapshot.window_start_ts,
                 snapshot.window_end_ts,
+                snapshot.run_id,
+                snapshot.microprice,
+                snapshot.open_px,
+                snapshot.high_px,
+                snapshot.low_px,
+                snapshot.close_px,
                 snapshot.initiative_score,
                 snapshot.initiative_polarity,
                 snapshot.initiative_strength,

@@ -555,7 +555,17 @@ def _apply_flow_context_to_signals(
     tpfm_snapshot: Any,
 ) -> list[ThesisSignal]:
     if not tpfm_snapshot:
-        return signals
+        return [
+            replace(
+                s,
+                matrix_cell="BOOTSTRAP",
+                matrix_alias_vi="Đang khởi tạo M5",
+                flow_state="INITIALIZING",
+                tradability_grade="D",
+                decision_posture="WAIT",
+                decision_summary_vi="Đang chờ nhịp Flow đầu tiên...",
+            ) for s in signals
+        ]
 
     adjusted_signals: list[ThesisSignal] = []
     matrix_cell = getattr(tpfm_snapshot, "matrix_cell", "UNKNOWN")

@@ -16,6 +16,13 @@ class ThesisEventRecord:
     summary_vi: str
     score: float
     confidence: float
+    setup: str = ""
+    direction: str = ""
+    matrix_cell: str = ""
+    matrix_alias_vi: str = ""
+    flow_state: str = ""
+    decision_posture: str = ""
+    flow_alignment_score: float = 0.0
 
 
 @dataclass(slots=True)
@@ -40,6 +47,13 @@ def _build_stage_event(signal: ThesisSignal, current_stage: Stage, next_stage: S
         summary_vi=summarize_lifecycle_transition(current_stage=current_stage, next_stage=next_stage),
         score=signal.score,
         confidence=signal.confidence,
+        setup=signal.setup,
+        direction=signal.direction,
+        matrix_cell=signal.matrix_cell,
+        matrix_alias_vi=signal.matrix_alias_vi,
+        flow_state=signal.flow_state,
+        decision_posture=signal.decision_posture,
+        flow_alignment_score=signal.flow_alignment_score,
     )
 
 
@@ -53,6 +67,13 @@ def _build_open_event(signal: ThesisSignal, event_ts: int) -> ThesisEventRecord:
         summary_vi=f"Khởi tạo luận điểm ở trạng thái '{stage_label_vi(signal.stage)}'.",
         score=signal.score,
         confidence=signal.confidence,
+        setup=signal.setup,
+        direction=signal.direction,
+        matrix_cell=signal.matrix_cell,
+        matrix_alias_vi=signal.matrix_alias_vi,
+        flow_state=signal.flow_state,
+        decision_posture=signal.decision_posture,
+        flow_alignment_score=signal.flow_alignment_score,
     )
 
 

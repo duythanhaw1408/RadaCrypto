@@ -72,8 +72,8 @@ jobs:
         cp -f data/review/health_status.json docs/data/ 2>/dev/null || true
         cp -f data/review/daily_summary.json docs/data/ 2>/dev/null || true
         cp -f data/review/weekly_review.json docs/data/ 2>/dev/null || true
-        cp -f data/review/live_runtime.json docs/data/ 2>/dev/null || true
         cp -f data/replay/summary_btcusdt.json docs/data/ 2>/dev/null || true
+        cp -f data/review/tpfm_m5.json docs/data/ 2>/dev/null || true
         
         if [ -f data/thesis/thesis_log.jsonl ]; then
           python3 -c "
@@ -84,7 +84,7 @@ jobs:
         "
         fi
 
-        # Export TPFM Layers from SQLite
+        # Export TPFM Layers from SQLite when replay exporter does not provide a run-owned artifact.
         python3 -c "
         import sqlite3, json, os
         db_path = 'data/state/state.db'
@@ -92,9 +92,9 @@ jobs:
         conn = sqlite3.connect(db_path)
         conn.row_factory = sqlite3.Row
         
-        # M5 snapshots
-        m5 = [dict(r) for r in conn.execute('SELECT * FROM tpfm_m5_snapshot ORDER BY window_end_ts DESC LIMIT 50').fetchall()]
-        json.dump(m5, open('docs/data/tpfm_m5.json','w'), ensure_ascii=False)
+        if not os.path.exists('docs/data/tpfm_m5.json'):
+          m5 = [dict(r) for r in conn.execute('SELECT * FROM tpfm_m5_snapshot ORDER BY window_end_ts DESC LIMIT 50').fetchall()]
+          json.dump(m5, open('docs/data/tpfm_m5.json','w'), ensure_ascii=False)
         
         # 30m regimes
         m30 = [dict(r) for r in conn.execute('SELECT * FROM tpfm_m30_regime ORDER BY window_end_ts DESC LIMIT 50').fetchall()]
@@ -122,12 +122,11 @@ jobs:
         python3 -c "
         import json, os
         from datetime import datetime, timezone
-        runtime = {}
         summary = {}
-        if os.path.exists('data/review/live_runtime.json'):
-          runtime = json.load(open('data/review/live_runtime.json'))
         if os.path.exists('data/replay/summary_btcusdt.json'):
           summary = json.load(open('data/replay/summary_btcusdt.json'))
+        contract = summary.get('artifact_contract', {})
+        generated_at = contract.get('generated_at') or datetime.now(tz=timezone.utc).isoformat()
         top_signal = (summary.get('top_signals') or [None])[0] or {}
         derived_grade = top_signal.get('tradability_grade') or (
           'A' if top_signal.get('stage') == 'ACTIONABLE'
@@ -135,18 +134,20 @@ jobs:
           else 'C' if top_signal else None
         )
         status = {
-          'last_run': datetime.now(tz=timezone.utc).isoformat(),
-          'last_scan_time': datetime.now(tz=timezone.utc).isoformat(),
+          'last_run': generated_at,
+          'last_scan_time': generated_at,
           'scan_count': ${{ github.run_number }},
-          'data_mode': 'scan',
+          'data_mode': contract.get('mode', 'scan'),
           'live_enabled': False,
           'is_replay': True,
-          'first_m5_seen_at': runtime.get('first_m5_seen_at'),
-          'latest_flow_grade': runtime.get('latest_flow_grade') or derived_grade,
-          'latest_transition': runtime.get('latest_transition', {}),
+          'artifact_run_id': contract.get('run_id'),
+          'artifact_window_end_ts': contract.get('window_end_ts'),
+          'artifact_generated_at': generated_at,
+          'latest_flow_grade': summary.get('latest_tpfm', {}).get('tradability_grade') or derived_grade,
+          'latest_transition': {},
           'top_signal': top_signal,
           'workflows': [
-            {'name':'CFTE vNext Scan Cycle (Hourly)','status':'success','last_run':datetime.now(tz=timezone.utc).isoformat(),'duration':'~2m'},
+            {'name':'CFTE vNext Scan Cycle (Hourly)','status':'success','last_run':generated_at,'duration':'~2m'},
           ]
         }
         json.dump(status, open('docs/data/actions_status.json','w'), ensure_ascii=False)

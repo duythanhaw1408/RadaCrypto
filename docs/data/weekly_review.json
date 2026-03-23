@@ -1,0 +1,370 @@
+{
+  "label": "2026-03-13..2026-03-19",
+  "summary_vi": "Review tuần 2026-03-13..2026-03-19\n- Tổng luận điểm mở mới: 4 | outcome hoàn tất: 4\n- Score TB: 68.00 | Confidence TB: 0.88 | Edge TB: +0.00%\n- Setup hiệu quả nhất tạm thời: breakout_ignition\n- Setup nhiễu nhất tạm thời: stealth_accumulation\n- Setup bị chấm nhiễu nhiều nhất trong journal: failed_breakout\n- Review cá nhân tuần: vào=1, bỏ=0, phớt lờ=0\n- Tuning ưu tiên: SHORT_CONTINUATION -> 70.0\n- Gợi ý review: siết threshold với setup có edge âm, kiểm tra confidence nếu hit rate không tăng theo score.\n- Matrix tốt nhất: Thuận pha bán | SPOT_LED/CONFIRMED/NONE | grade A | 1h edge +0.00%\n- Matrix yếu nhất: Thuận pha bán | SPOT_LED/CONFIRMED/NONE | grade A | 1h edge +0.00%\n- Flow state tốt nhất: SHORT_CONTINUATION | NONE/ASK_DEFENSE/AGGRESSIVE | grade A | 1h edge +0.00%\n- Flow state yếu nhất: SHORT_CONTINUATION | NONE/ASK_DEFENSE/AGGRESSIVE | grade A | 1h edge +0.00%\n- Transition tốt nhất: Chưa có transition | 1h edge +0.00%\n- Transition yếu nhất: Chưa có transition | 1h edge +0.00%\n- Forced flow tốt nhất: NONE | NONE/DISCOUNT | grade A | 1h edge +0.00%\n- Forced flow rủi ro nhất: NONE | NONE/DISCOUNT | grade A | 1h edge +0.00%",
+  "stats": {
+    "label": "2026-03-13..2026-03-19",
+    "start_ts": 1773386049859,
+    "end_ts": 1773990849859,
+    "opened_count": 4,
+    "avg_score": 68.0,
+    "avg_confidence": 0.88,
+    "stage_dist": {
+      "INVALIDATED": 4
+    },
+    "setup_dist": {
+      "stealth_accumulation": 1,
+      "failed_breakout": 1,
+      "distribution": 1,
+      "breakout_ignition": 1
+    },
+    "closed_stage_dist": {
+      "INVALIDATED": 4
+    },
+    "outcomes_count": 4,
+    "fill_count": 0,
+    "avg_mae": 0.0,
+    "avg_mfe": 0.0,
+    "avg_return": 0.6096821010946694,
+    "avg_edge": 0.0,
+    "positive_outcomes": 2
+  },
+  "scorecard": [
+    {
+      "setup": "breakout_ignition",
+      "total_signals": 1,
+      "avg_score": 69.0,
+      "avg_confidence": 0.88,
+      "resolved_count": 0,
+      "invalidated_count": 1,
+      "horizons": {
+        "1h": {
+          "count": 1,
+          "wins": 1,
+          "win_rate": 1.0,
+          "avg_return": 0.6096821010946694,
+          "avg_edge": 0.6096821010946694,
+          "avg_mae": 0.0,
+          "avg_mfe": 0.0
+        }
+      }
+    },
+    {
+      "setup": "distribution",
+      "total_signals": 1,
+      "avg_score": 73.0,
+      "avg_confidence": 0.88,
+      "resolved_count": 0,
+      "invalidated_count": 1,
+      "horizons": {
+        "1h": {
+          "count": 1,
+          "wins": 0,
+          "win_rate": 0.0,
+          "avg_return": 0.6096821010946694,
+          "avg_edge": -0.6096821010946694,
+          "avg_mae": 0.0,
+          "avg_mfe": 0.0
+        }
+      }
+    },
+    {
+      "setup": "failed_breakout",
+      "total_signals": 1,
+      "avg_score": 67.0,
+      "avg_confidence": 0.88,
+      "resolved_count": 0,
+      "invalidated_count": 1,
+      "horizons": {
+        "1h": {
+          "count": 1,
+          "wins": 0,
+          "win_rate": 0.0,
+          "avg_return": 0.6096821010946694,
+          "avg_edge": -0.6096821010946694,
+          "avg_mae": 0.0,
+          "avg_mfe": 0.0
+        }
+      }
+    },
+    {
+      "setup": "stealth_accumulation",
+      "total_signals": 1,
+      "avg_score": 63.0,
+      "avg_confidence": 0.88,
+      "resolved_count": 0,
+      "invalidated_count": 1,
+      "horizons": {
+        "1h": {
+          "count": 1,
+          "wins": 1,
+          "win_rate": 1.0,
+          "avg_return": 0.6096821010946694,
+          "avg_edge": 0.6096821010946694,
+          "avg_mae": 0.0,
+          "avg_mfe": 0.0
+        }
+      }
+    }
+  ],
+  "matrix_scorecard": [
+    {
+      "matrix_cell": "NEG_INIT__NEG_INV",
+      "matrix_alias_vi": "Thuận pha bán",
+      "spot_futures_relation": "SPOT_LED",
+      "venue_confirmation_state": "CONFIRMED",
+      "liquidation_bias": "NONE",
+      "tradability_grade": "A",
+      "total_signals": 4,
+      "avg_score": 68.0,
+      "avg_confidence": 0.88,
+      "horizons": {
+        "1h": {
+          "count": 4,
+          "wins": 2,
+          "win_rate": 0.5,
+          "avg_edge": 0.0,
+          "avg_mae": 0.0,
+          "avg_mfe": 0.0
+        }
+      }
+    }
+  ],
+  "flow_state_scorecard": [
+    {
+      "flow_state_code": "SHORT_CONTINUATION",
+      "forced_flow_state": "NONE",
+      "inventory_defense_state": "ASK_DEFENSE",
+      "decision_posture": "AGGRESSIVE",
+      "tradability_grade": "A",
+      "total_signals": 4,
+      "avg_score": 68.0,
+      "avg_confidence": 0.88,
+      "avg_trap_risk": 0.0,
+      "avg_forced_flow_intensity": 0.0,
+      "avg_context_quality_score": 0.9869999999999999,
+      "horizons": {
+        "1h": {
+          "count": 4,
+          "wins": 2,
+          "win_rate": 0.5,
+          "avg_edge": 0.0,
+          "avg_mae": 0.0,
+          "avg_mfe": 0.0
+        }
+      }
+    }
+  ],
+  "forced_flow_scorecard": [
+    {
+      "forced_flow_state": "NONE",
+      "liquidation_bias": "NONE",
+      "basis_state": "DISCOUNT",
+      "tradability_grade": "A",
+      "total_signals": 4,
+      "avg_score": 68.0,
+      "avg_confidence": 0.88,
+      "avg_forced_flow_intensity": 0.0,
+      "avg_liquidation_intensity": 0.0,
+      "avg_trap_risk": 0.0,
+      "horizons": {
+        "1h": {
+          "count": 4,
+          "wins": 2,
+          "win_rate": 0.5,
+          "avg_edge": 0.0,
+          "avg_mae": 0.0,
+          "avg_mfe": 0.0
+        }
+      }
+    }
+  ],
+  "transition_scorecard": [
+    {
+      "transition_code": "NO_TRANSITION_CONTEXT",
+      "transition_family": "UNKNOWN",
+      "transition_alias_vi": "Chưa có transition",
+      "total_signals": 4,
+      "avg_transition_speed": 0.0,
+      "avg_transition_quality": 0.0,
+      "avg_persistence_score": 0.0,
+      "avg_trap_risk": 0.0,
+      "forced_ratio": 0.0,
+      "horizons": {
+        "1h": {
+          "count": 4,
+          "wins": 2,
+          "win_rate": 0.5,
+          "avg_edge": 0.0,
+          "avg_mae": 0.0,
+          "avg_mfe": 0.0
+        }
+      }
+    }
+  ],
+  "review_summary": {
+    "total_reviews": 1,
+    "decision_counts": {
+      "taken": 1
+    },
+    "usefulness_counts": {
+      "useful": 1
+    },
+    "setup_rows": [
+      {
+        "setup": "failed_breakout",
+        "total": 1,
+        "taken": 1,
+        "skipped": 0,
+        "ignored": 0,
+        "useful_count": 1,
+        "noise_count": 0,
+        "useful_rate": 1.0,
+        "noise_rate": 0.0
+      }
+    ]
+  },
+  "tuning_suggestions": [
+    {
+      "setup": "breakout_ignition",
+      "current_threshold": 70.0,
+      "suggested_threshold": 70.0,
+      "threshold_delta": 0.0,
+      "avg_edge_24h": 0.0,
+      "win_rate_24h": 0.0,
+      "noise_rate": 0.0,
+      "useful_rate": 0.0,
+      "avg_mae": 0.0,
+      "avg_mfe": 0.0,
+      "sample_size_24h": 0,
+      "review_samples": 0,
+      "rationale_vi": [
+        "mẫu ít, giữ nguyên"
+      ]
+    },
+    {
+      "setup": "distribution",
+      "current_threshold": 70.0,
+      "suggested_threshold": 70.0,
+      "threshold_delta": 0.0,
+      "avg_edge_24h": 0.0,
+      "win_rate_24h": 0.0,
+      "noise_rate": 0.0,
+      "useful_rate": 0.0,
+      "avg_mae": 0.0,
+      "avg_mfe": 0.0,
+      "sample_size_24h": 0,
+      "review_samples": 0,
+      "rationale_vi": [
+        "mẫu ít, giữ nguyên"
+      ]
+    },
+    {
+      "setup": "failed_breakout",
+      "current_threshold": 70.0,
+      "suggested_threshold": 70.0,
+      "threshold_delta": 0.0,
+      "avg_edge_24h": 0.0,
+      "win_rate_24h": 0.0,
+      "noise_rate": 0.0,
+      "useful_rate": 1.0,
+      "avg_mae": 0.0,
+      "avg_mfe": 0.0,
+      "sample_size_24h": 0,
+      "review_samples": 1,
+      "rationale_vi": [
+        "mẫu ít, giữ nguyên"
+      ]
+    },
+    {
+      "setup": "stealth_accumulation",
+      "current_threshold": 70.0,
+      "suggested_threshold": 70.0,
+      "threshold_delta": 0.0,
+      "avg_edge_24h": 0.0,
+      "win_rate_24h": 0.0,
+      "noise_rate": 0.0,
+      "useful_rate": 0.0,
+      "avg_mae": 0.0,
+      "avg_mfe": 0.0,
+      "sample_size_24h": 0,
+      "review_samples": 0,
+      "rationale_vi": [
+        "mẫu ít, giữ nguyên"
+      ]
+    }
+  ],
+  "flow_state_tuning_suggestions": [
+    {
+      "flow_state_code": "SHORT_CONTINUATION",
+      "forced_flow_state": "NONE",
+      "inventory_defense_state": "ASK_DEFENSE",
+      "decision_posture": "AGGRESSIVE",
+      "tradability_grade": "A",
+      "current_threshold": 70.0,
+      "suggested_threshold": 70.0,
+      "threshold_delta": 0.0,
+      "action": "keep",
+      "horizon": "1h",
+      "avg_edge": 0.0,
+      "win_rate": 0.5,
+      "avg_mae": 0.0,
+      "avg_mfe": 0.0,
+      "avg_trap_risk": 0.0,
+      "avg_forced_flow_intensity": 0.0,
+      "avg_context_quality_score": 0.9869999999999999,
+      "sample_size": 4,
+      "rationale_vi": [
+        "flow state continuation"
+      ]
+    }
+  ],
+  "forced_flow_tuning_suggestions": [],
+  "matrix_tuning_suggestions": [
+    {
+      "matrix_cell": "NEG_INIT__NEG_INV",
+      "matrix_alias_vi": "Thuận pha bán",
+      "spot_futures_relation": "SPOT_LED",
+      "venue_confirmation_state": "CONFIRMED",
+      "liquidation_bias": "NONE",
+      "tradability_grade": "A",
+      "current_threshold": 70.0,
+      "suggested_threshold": 70.0,
+      "threshold_delta": 0.0,
+      "action": "keep",
+      "horizon": "1h",
+      "avg_edge": 0.0,
+      "win_rate": 0.5,
+      "avg_mae": 0.0,
+      "avg_mfe": 0.0,
+      "sample_size": 4,
+      "rationale_vi": [
+        "dữ liệu trung tính"
+      ]
+    }
+  ],
+  "transition_tuning_suggestions": [
+    {
+      "transition_code": "NO_TRANSITION_CONTEXT",
+      "transition_family": "UNKNOWN",
+      "transition_alias_vi": "Chưa có transition",
+      "current_threshold": 70.0,
+      "suggested_threshold": 71.0,
+      "threshold_delta": 1.0,
+      "action": "keep",
+      "horizon": "1h",
+      "avg_edge": 0.0,
+      "win_rate": 0.5,
+      "avg_mae": 0.0,
+      "avg_mfe": 0.0,
+      "avg_transition_quality": 0.0,
+      "avg_transition_speed": 0.0,
+      "avg_persistence_score": 0.0,
+      "avg_trap_risk": 0.0,
+      "forced_ratio": 0.0,
+      "sample_size": 4,
+      "rationale_vi": [
+        "chất lượng transition thấp (0.00)"
+      ]
+    }
+  ]
+}

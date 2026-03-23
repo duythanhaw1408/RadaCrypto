@@ -3,7 +3,8 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
-from dataclasses import dataclass
+import shutil
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -85,6 +86,90 @@ def _profile_path(profile: PersonalProfile, section: str, key: str, fallback: Pa
         section_map = getattr(profile, section)
         value = section_map.get(key)
     return Path(str(value)) if value is not None else fallback
+
+
+def _sync_scan_dashboard_artifacts(summary_out: Path, latest_grade: str | None = None) -> None:
+    dashboard_data_dir = Path("docs/data")
+    dashboard_data_dir.mkdir(parents=True, exist_ok=True)
+
+    telemetry_map = {
+        "data/review/tpfm_m5_scan.json": "tpfm_m5.json",
+        "data/review/tpfm_m30.json": "tpfm_m30.json",
+        "data/review/tpfm_4h.json": "tpfm_4h.json",
+        "data/review/daily_summary.json": "daily_summary.json",
+        "data/review/health_status.json": "health_status.json",
+        "data/review/weekly_review.json": "weekly_review.json",
+        "data/review/cycle_status.json": "cycle_status.json",
+    }
+
+    for src_rel, target_name in telemetry_map.items():
+        src_path = Path(src_rel)
+        if src_path.exists():
+            target_path = dashboard_data_dir / target_name
+            shutil.copy2(src_path, target_path)
+
+    if summary_out.exists():
+        shutil.copy2(summary_out, dashboard_data_dir / "summary_btcusdt.json")
+
+    thesis_log_src = Path("data/thesis/thesis_log.jsonl")
+    if thesis_log_src.exists():
+        records: list[dict[str, Any]] = []
+        with thesis_log_src.open("r", encoding="utf-8") as handle:
+            for line in handle:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    records.append(json.loads(line))
+                except json.JSONDecodeError:
+                    continue
+        (dashboard_data_dir / "thesis_log.json").write_text(
+            json.dumps(records[-100:], ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+
+    live_runtime = dashboard_data_dir / "live_runtime.json"
+    if live_runtime.exists():
+        live_runtime.unlink()
+
+    summary_payload: dict[str, Any] = {}
+    if summary_out.exists():
+        try:
+            summary_payload = json.loads(summary_out.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            summary_payload = {}
+
+    contract = summary_payload.get("artifact_contract", {})
+    top_signal = ((summary_payload.get("top_signals") or [None])[0] or {})
+    generated_at = contract.get("generated_at") or datetime.now(tz=timezone.utc).isoformat()
+    derived_grade = (
+        summary_payload.get("latest_tpfm", {}).get("tradability_grade")
+        or latest_grade
+        or top_signal.get("tradability_grade")
+        or (
+            "A" if top_signal.get("stage") == "ACTIONABLE"
+            else "B" if top_signal.get("stage") == "WATCHLIST"
+            else "C" if top_signal
+            else "D"
+        )
+    )
+    status_payload = {
+        "last_run": generated_at,
+        "last_scan_time": generated_at,
+        "data_mode": contract.get("mode", "scan"),
+        "live_enabled": False,
+        "is_replay": True,
+        "artifact_run_id": contract.get("run_id"),
+        "artifact_window_end_ts": contract.get("window_end_ts"),
+        "artifact_generated_at": generated_at,
+        "latest_flow_grade": derived_grade,
+        "latest_transition": {},
+        "top_signal": top_signal,
+    }
+    (dashboard_data_dir / "actions_status.json").write_text(
+        json.dumps(status_payload, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
 
 
 def _format_header(title: str, profile: PersonalProfile) -> str:
@@ -257,6 +342,14 @@ def run_replay_research(
         max_window_trades=max_window_trades,
     )
     persist_replay_summary(result, summary_out)
+
+    try:
+        latest_grade = result.latest_tpfm_snapshot.tradability_grade if result.latest_tpfm_snapshot else "D"
+        _sync_scan_dashboard_artifacts(summary_out, latest_grade=latest_grade)
+        print("✅ [CLI] Đã đồng bộ dữ liệu Replay lên Dashboard (Mode: scan)")
+    except Exception as e:
+        print(f"⚠️ [CLI] Lỗi đồng bộ Dashboard: {e}")
+
     print(render_replay_summary_vi(result))
     print(f"Đã lưu tóm tắt replay tại: {summary_out}")
     return 0
@@ -320,9 +413,34 @@ def command_run_scan(context: ShellContext, events_path: Path, limit: int | None
     summary_out = _profile_path(context.profile, "defaults", "summary_out", DEFAULT_REPLAY_SUMMARY)
     persist_replay_summary(result, summary_out)
     print(f"Đã lưu summary scan tại: {summary_out}")
+    try:
+        latest_grade = result.latest_tpfm_snapshot.tradability_grade if result.latest_tpfm_snapshot else "D"
+        _sync_scan_dashboard_artifacts(summary_out, latest_grade=latest_grade)
+        print("Đã đồng bộ artifact scan lên Dashboard.")
+    except Exception as exc:
+        print(f"⚠️  Không thể đồng bộ Dashboard scan: {exc}")
 
     thesis_log_path = _profile_path(context.profile, "scan", "thesis_log", DEFAULT_THESIS_LOG)
-    ThesisLogWriter(thesis_log_path).append_scan_result(
+    if thesis_log_path.exists():
+        thesis_log_path.unlink() # Fresh log for new scan
+    
+    # Isolation: Move historical events to a separate file to keep primary log clean (Finding 2)
+    events_log_path = thesis_log_path.with_name("scan_thesis_events.jsonl")
+    if events_log_path.exists():
+        events_log_path.unlink()
+    
+    events_log = ThesisLogWriter(events_log_path)
+    for event in result.thesis_event_history:
+        record = asdict(event)
+        record["flow"] = "scan"
+        record["instrument_key"] = result.instrument_key
+        # Add symbol for dashboard consistency
+        _, symbol = result.instrument_key.split(":")[:2]
+        record["symbol"] = symbol
+        events_log.append_record(record)
+
+    thesis_log = ThesisLogWriter(thesis_log_path)
+    thesis_log.append_scan_result(
         profile_name=context.profile.name,
         events_path=str(events_path),
         instrument_key=result.instrument_key,
@@ -332,6 +450,7 @@ def command_run_scan(context: ShellContext, events_path: Path, limit: int | None
         total_signals=len(result.thesis_events),
     )
     print(f"Đã ghi log thesis scan tại: {thesis_log_path}")
+    print(f"Lịch sử sự kiện scan chi tiết tại: {events_log_path}")
 
     print(f"Đã quét replay cho {result.instrument_key} với {result.feature_windows} cửa sổ đặc trưng.")
     print(f"Ngưỡng ưu tiên từ hồ sơ cá nhân: {actionable_threshold:.2f} điểm.")
