@@ -4,127 +4,216 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RadaCrypto | Bản đồ dòng tiền Crypto</title>
+    <meta name="description" content="Hệ thống phân tích dòng tiền Crypto chuyên sâu — Flow Intelligence Engine">
     <link rel="stylesheet" href="css/dashboard.css">
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- Lightweight Charts CDN -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 </head>
 <body>
-    <header class="rada-header">
-        <div class="brand">
-            <span class="logo-text">RadaCrypto</span>
-            <div class="grade-badge" id="header-grade">Hạng --</div>
+
+    <!-- ═══════════ 1. HEADER ═══════════ -->
+    <header id="rada-header">
+        <div class="header-left">
+            <span class="logo">Rada<span class="logo-accent">Crypto</span></span>
+            <div class="header-divider"></div>
+            <span class="header-symbol" id="header-symbol">BTCUSDT</span>
+            <span class="header-price" id="header-price">--,---</span>
         </div>
-        <div class="system-status">
-            <div class="status-item">
-                <span id="symbol-display">--/--</span>
+        <div class="header-center">
+            <div class="grade-pill" id="header-grade">
+                <span class="grade-letter" id="grade-letter">D</span>
+                <span class="grade-label">Hạng thị trường</span>
             </div>
-            <div class="status-item">
-                <span class="status-dot" id="system-dot"></span>
-                <span id="system-label">Đang khởi tạo...</span>
+        </div>
+        <div class="header-right">
+            <div class="mode-badge" id="mode-badge">
+                <span class="mode-dot" id="mode-dot"></span>
+                <span id="mode-text">QUÉT DỮ LIỆU</span>
             </div>
-            <div class="status-item">
-                <span id="mode-label">--</span>
-            </div>
-            <div class="status-item">
-                <span id="last-update">--:--:--</span>
-            </div>
+            <div class="header-divider"></div>
+            <span class="header-meta" id="system-status">Đang khởi tạo...</span>
+            <span class="header-meta header-time" id="last-update">--:--</span>
         </div>
     </header>
 
-    <main class="dashboard-grid">
-        <section class="chart-container">
-            <!-- Floating Data Info -->
-            <div class="floating-overlay" id="price-overlay">
-                <h2 id="current-price">--.---</h2>
-                <p id="price-change">--% (--.--) | 24h</p>
+    <!-- ═══════════ MAIN LAYOUT ═══════════ -->
+    <main id="app-main">
+
+        <!-- ═══ LEFT: Charts ═══ -->
+        <section class="chart-zone">
+            <div class="price-floating" id="price-floating">
+                <div class="floating-price" id="floating-price">--,---</div>
+                <div class="floating-change" id="floating-change">-- | --</div>
             </div>
+            <div id="main-chart" class="chart-canvas"></div>
+            <div id="volume-chart" class="volume-canvas"></div>
 
-            <div id="main-chart" class="chart-area"></div>
-            <div id="volume-chart" class="volume-delta-area"></div>
-
-            <section class="bottom-stack">
-                <div class="mtf-row" id="mtf-stack">
-                    <!-- MTF Blocks will be injected here -->
-                    <div class="mtf-card">
-                        <span class="mtf-timeframe">M5</span>
-                        <span class="mtf-alias">Đang tải...</span>
-                    </div>
+            <!-- MTF Stack -->
+            <div class="mtf-strip" id="mtf-strip">
+                <div class="mtf-card" id="mtf-m5" data-tf="M5">
+                    <div class="mtf-tf">M5</div>
+                    <div class="mtf-alias" id="mtf-m5-alias">--</div>
+                    <div class="mtf-grade" id="mtf-m5-grade">--</div>
                 </div>
-            </section>
+                <div class="mtf-card" id="mtf-m30" data-tf="M30">
+                    <div class="mtf-tf">M30</div>
+                    <div class="mtf-alias" id="mtf-m30-alias">--</div>
+                    <div class="mtf-grade" id="mtf-m30-grade">--</div>
+                </div>
+                <div class="mtf-card" id="mtf-4h" data-tf="4H">
+                    <div class="mtf-tf">4H</div>
+                    <div class="mtf-alias" id="mtf-4h-alias">--</div>
+                    <div class="mtf-grade" id="mtf-4h-grade">--</div>
+                </div>
+            </div>
         </section>
 
-        <aside class="decision-panel">
-            <div class="panel-section">
-                <h3 class="section-title">Ma trận dòng tiền</h3>
-                <div class="matrix-display" id="matrix-display">
-                    <div class="matrix-cell-title" id="matrix-title">--</div>
-                    <div class="matrix-cell-desc" id="matrix-desc">--</div>
+        <!-- ═══ RIGHT: Intelligence Panel ═══ -->
+        <aside class="intel-panel" id="intel-panel">
+
+            <!-- Flow Matrix 3×3 -->
+            <div class="panel-block">
+                <h3 class="block-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                    Ma trận dòng tiền
+                </h3>
+                <div class="matrix-grid" id="matrix-grid">
+                    <!-- 9 cells injected by JS -->
+                </div>
+                <div class="matrix-label" id="matrix-label">
+                    <span class="matrix-alias" id="matrix-alias">--</span>
+                    <span class="matrix-flow" id="matrix-flow">--</span>
                 </div>
             </div>
 
-            <div class="panel-section">
-                <h3 class="section-title">Mẫu hình hiện tại</h3>
-                <div id="pattern-display" class="matrix-display">
-                    <div class="matrix-cell-title" id="pattern-title">--</div>
-                    <div class="matrix-cell-desc" id="pattern-desc">--</div>
+            <!-- Decision Card -->
+            <div class="panel-block">
+                <h3 class="block-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                    Quyết định
+                </h3>
+                <div class="decision-card" id="decision-card">
+                    <div class="decision-posture" id="decision-posture">CHỜ</div>
+                    <div class="decision-summary" id="decision-summary">Đang tải dữ liệu...</div>
                 </div>
             </div>
 
-            <div class="panel-section">
-                <h3 class="section-title">Hành động</h3>
-                <div class="action-card action-neutral" id="action-card">--</div>
-            </div>
-
-            <div class="panel-section">
-                <h3 class="section-title">Thực trạng</h3>
-                <div class="list-items" id="reasoning-list">
-                    <!-- Reasoning items injected here -->
+            <!-- Gauges -->
+            <div class="panel-block">
+                <h3 class="block-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                    Chỉ số chất lượng
+                </h3>
+                <div class="gauge-row">
+                    <div class="gauge-item">
+                        <svg class="gauge-svg" viewBox="0 0 80 80">
+                            <circle class="gauge-bg" cx="40" cy="40" r="34"/>
+                            <circle class="gauge-fill" id="gauge-quality" cx="40" cy="40" r="34" stroke-dasharray="213.6" stroke-dashoffset="213.6"/>
+                        </svg>
+                        <div class="gauge-value" id="gauge-quality-val">0%</div>
+                        <div class="gauge-label">Chất lượng</div>
+                    </div>
+                    <div class="gauge-item">
+                        <svg class="gauge-svg" viewBox="0 0 80 80">
+                            <circle class="gauge-bg" cx="40" cy="40" r="34"/>
+                            <circle class="gauge-fill gauge-fill-blue" id="gauge-agreement" cx="40" cy="40" r="34" stroke-dasharray="213.6" stroke-dashoffset="213.6"/>
+                        </svg>
+                        <div class="gauge-value" id="gauge-agreement-val">0%</div>
+                        <div class="gauge-label">Đồng thuận</div>
+                    </div>
+                    <div class="gauge-item">
+                        <svg class="gauge-svg" viewBox="0 0 80 80">
+                            <circle class="gauge-bg" cx="40" cy="40" r="34"/>
+                            <circle class="gauge-fill gauge-fill-amber" id="gauge-edge" cx="40" cy="40" r="34" stroke-dasharray="213.6" stroke-dashoffset="213.6"/>
+                        </svg>
+                        <div class="gauge-value" id="gauge-edge-val">0%</div>
+                        <div class="gauge-label">Xác suất</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="panel-section">
-                <h3 class="section-title">Xác suất lịch sử</h3>
-                <div id="probability-card" class="matrix-display">
-                    <div class="matrix-cell-title" id="prob-title">--% Win Rate</div>
-                    <div class="matrix-cell-desc" id="prob-desc">Mẫu thống kê còn mỏng.</div>
+            <!-- Pattern + Entry Conditions -->
+            <div class="panel-block">
+                <h3 class="block-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    Mẫu hình & Điều kiện
+                </h3>
+                <div class="info-card" id="pattern-card">
+                    <div class="info-row">
+                        <span class="info-key">Mẫu hình</span>
+                        <span class="info-val" id="pattern-name">--</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-key">Giai đoạn</span>
+                        <span class="info-val" id="pattern-phase">--</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-key">Điều kiện vào</span>
+                        <span class="info-val info-val-highlight" id="entry-condition">--</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-key">Tránh nếu</span>
+                        <span class="info-val info-val-warn" id="avoid-if">--</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-key">Vô hiệu khi</span>
+                        <span class="info-val info-val-danger" id="invalid-if">--</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="panel-section">
-                <h3 class="section-title">Rủi ro & Vô hiệu</h3>
-                <div class="list-items" id="risk-list">
-                    <!-- Risks injected here -->
+            <!-- Observed Facts + Risks -->
+            <div class="panel-block">
+                <h3 class="block-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Thực trạng thị trường
+                </h3>
+                <div class="facts-list" id="observed-facts">
+                    <!-- injected by JS -->
+                </div>
+            </div>
+
+            <div class="panel-block">
+                <h3 class="block-title title-warn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    Rủi ro & Cảnh báo
+                </h3>
+                <div class="risk-list" id="risk-flags">
+                    <!-- injected by JS -->
                 </div>
             </div>
         </aside>
-
-        <!-- Signal Log Table -->
-        <div class="signal-log-section glass-card">
-            <div class="section-header">
-                <h3 class="section-title">Tín hiệu gần nhất</h3>
-            </div>
-            <div class="log-table-wrapper">
-                <table class="log-table">
-                    <thead>
-                        <tr>
-                            <th>Thời gian</th>
-                            <th>Setup</th>
-                            <th>Ma trận</th>
-                            <th>Hạng</th>
-                            <th>Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody id="signal-log-body">
-                        <!-- Signals appended here -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
     </main>
+
+    <!-- ═══════════ SIGNAL TABLE ═══════════ -->
+    <section class="signal-section" id="signal-section">
+        <div class="signal-header">
+            <h3 class="block-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                Tín hiệu gần nhất
+            </h3>
+        </div>
+        <div class="signal-table-wrap">
+            <table class="signal-table">
+                <thead>
+                    <tr>
+                        <th>Setup</th>
+                        <th>Hướng</th>
+                        <th>Điểm</th>
+                        <th>Ma trận</th>
+                        <th>Hạng</th>
+                        <th>Hành động</th>
+                        <th>Flow</th>
+                    </tr>
+                </thead>
+                <tbody id="signal-tbody">
+                    <!-- injected by JS -->
+                </tbody>
+            </table>
+        </div>
+    </section>
 
     <script src="js/dashboard.js"></script>
 </body>
