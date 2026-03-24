@@ -340,7 +340,6 @@ class LiveThesisLoop:
             telemetry_map = {
                 "data/review/daily_summary.json": "daily_summary.json",
                 "data/review/health_status.json": "health_status.json",
-                "data/replay/summary_btcusdt.json": "summary_btcusdt_live.json",
                 "data/review/tpfm_m30.json": "tpfm_m30.json",
                 "data/review/tpfm_4h.json": "tpfm_4h.json",
             }
@@ -350,29 +349,61 @@ class LiveThesisLoop:
                 if src_p.exists():
                     shutil.copy2(src_p, dashboard_data_dir / target_name)
             
-            # 3. Update actions_status.json to point to Live mode
+            # 3. Generate and Sync TRUE Live Summary
+            await self._sync_live_summary(dashboard_data_dir)
+            
+            # 4. Update actions_status.json to point to Live mode using actual session ID
             await self._sync_actions_status(dashboard_data_dir)
                 
         except Exception:
             # Silent failure for sync, don't break the engine
             pass
 
-    async def _sync_actions_status(self, dashboard_data_dir: Path):
-        """Updates actions_status.json to reflect the current Live session."""
+    async def _sync_live_summary(self, dashboard_data_dir: Path):
+        """Generates a synthetic summary matching the Replay Summary schema using Live data."""
         try:
-            # Load current summary for telemetry enrichment (Mode A: from disk)
-            summary_path = Path("data/replay/summary_btcusdt.json").absolute()
-            summary_payload = {}
-            if summary_path.exists():
-                with summary_path.open("r", encoding="utf-8") as f:
-                    summary_payload = json.load(f)
-            
             generated_at = datetime.now(tz=timezone.utc).isoformat()
-            top_signal = (summary_payload.get("top_signals") or [None])[0] or {}
             
-            # Use the actual run_id from the summary if available to ensure alignment
-            contract = summary_payload.get("artifact_contract", {})
-            current_run_id = contract.get("run_id") or self._runtime_run_id
+            # Extract top signals from active state
+            active_list = list(self.thesis_state.values())
+            # Sort by score desc, limited to 5
+            top_records = sorted(active_list, key=lambda x: x.signal.score, reverse=True)[:5]
+            top_signals = [asdict(r.signal) for r in top_records]
+            
+            latest_tpfm = asdict(self._latest_tpfm_snapshot) if self._latest_tpfm_snapshot else {}
+            
+            summary = {
+                "instrument_key": self.instrument_key,
+                "artifact_contract": {
+                    "mode": "live",
+                    "run_id": self._runtime_run_id,
+                    "generated_at": generated_at,
+                    "window_end_ts": int(datetime.now().timestamp() * 1000),
+                    "source": "live_engine"
+                },
+                "latest_tpfm": latest_tpfm,
+                "top_signals": top_signals
+            }
+            
+            target_path = (dashboard_data_dir / "summary_btcusdt_live.json").absolute()
+            with target_path.open("w", encoding="utf-8") as f:
+                json.dump(summary, f, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+
+    async def _sync_actions_status(self, dashboard_data_dir: Path):
+        """Updates actions_status.json to reflect the current Live session using internal state."""
+        try:
+            generated_at = datetime.now(tz=timezone.utc).isoformat()
+            
+            # Extract basic telemetry from state
+            active_list = list(self.thesis_state.values())
+            top_signal = {}
+            if active_list:
+                top_record = max(active_list, key=lambda x: x.signal.score)
+                top_signal = asdict(top_record.signal)
+            
+            latest_tpfm = asdict(self._latest_tpfm_snapshot) if self._latest_tpfm_snapshot else {}
             
             status_payload = {
                 "last_run": generated_at,
@@ -380,10 +411,10 @@ class LiveThesisLoop:
                 "data_mode": "live",
                 "live_enabled": True,
                 "is_replay": False,
-                "artifact_run_id": current_run_id,
-                "artifact_window_end_ts": contract.get("window_end_ts"),
+                "artifact_run_id": self._runtime_run_id,
+                "artifact_window_end_ts": int(datetime.now().timestamp() * 1000),
                 "artifact_generated_at": generated_at,
-                "latest_flow_grade": summary_payload.get("latest_tpfm", {}).get("tradability_grade") or "D",
+                "latest_flow_grade": latest_tpfm.get("tradability_grade") or "D",
                 "latest_transition": {},
                 "top_signal": top_signal,
             }

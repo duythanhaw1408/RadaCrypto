@@ -1,12 +1,12 @@
 {
-  "last_run": "2026-03-23T10:04:15.786436+00:00",
-  "last_scan_time": "2026-03-23T10:04:15.786436+00:00",
+  "last_run": "2026-03-24T09:18:35.755544+00:00",
+  "last_scan_time": "2026-03-24T09:18:35.755544+00:00",
   "data_mode": "live",
   "live_enabled": true,
   "is_replay": false,
-  "artifact_run_id": "31cf369e004547d2ac27724c6947a66d",
-  "artifact_window_end_ts": 1711000597000,
-  "artifact_generated_at": "2026-03-23T10:04:15.786436+00:00",
+  "artifact_run_id": "1a80e4a2194b4968b5e47445db45b87b",
+  "artifact_window_end_ts": 1774343915755,
+  "artifact_generated_at": "2026-03-24T09:18:35.755544+00:00",
   "latest_flow_grade": "D",
   "latest_transition": {},
   "top_signal": {
@@ -14,51 +14,42 @@
     "instrument_key": "BINANCE:BTCUSDT:SPOT",
     "setup": "stealth_accumulation",
     "direction": "LONG_BIAS",
-    "stage": "DETECTED",
-    "score": 53.0,
-    "confidence": 0.77,
-    "coverage": 0.94,
+    "stage": "ACTIONABLE",
+    "score": 88.0,
+    "confidence": 0.9,
+    "coverage": 1.0,
     "why_now": [
-      "Delta mua dương: 12734.92",
-      "Spread còn mỏng: 0.31 bps",
-      "Hấp thụ chủ động cao: 1386440.57",
-      "Giá khớp giữ trên microprice",
-      "Đồng thuận TPFM theo đúng chiều dòng tiền chính",
-      "Matrix TPFM: Thuận pha mua",
-      "Decision TPFM: Đứng ngoài. Matrix chưa đủ sạch để hành động."
+      "Delta mua dương: 160.39",
+      "Bid L1 áp đảo: 0.85",
+      "Nhịp trade tăng: 9.76/s",
+      "Spread còn mỏng: 0.00 bps",
+      "Hấp thụ chủ động cao: 595694.52"
     ],
     "conflicts": [
-      "Mất ưu thế bid tại L1",
-      "Setup hiện tại chỉ là adapter phụ; flow đang ưu tiên Kích hoạt bứt phá",
-      "TPFM đang ở posture WAIT, chưa nên để setup dẫn quyết định.",
-      "Chất lượng thị trường (Grade D) không đủ để trade setup này."
+      "Giá khớp trượt dưới microprice",
+      "Cảnh báo: Sàn khác (okx) đang dẫn nhịp trước Binance."
     ],
-    "invalidation": "Initiative mất dương hoặc inventory không còn đỡ.",
-    "entry_style": "Microprice retest + Bid replenishment",
+    "invalidation": "Mất bid hỗ trợ dưới 70966.70",
+    "entry_style": "Canh hồi về bid và giữ microprice",
     "targets": [
       "TP1: 1 ATR giả lập",
       "TP2: 2 ATR giả lập"
     ],
     "timeframe": "1h",
     "regime_bucket": "NEUTRAL",
-    "flow_state": "LONG_CONTINUATION",
-    "matrix_cell": "POS_INIT__POS_INV",
-    "matrix_alias_vi": "Thuận pha mua",
+    "flow_state": "INITIALIZING",
+    "matrix_cell": "BOOTSTRAP",
+    "matrix_alias_vi": "Đang khởi tạo M5",
     "tradability_grade": "D",
     "decision_posture": "WAIT",
-    "decision_summary_vi": "Đứng ngoài. Matrix chưa đủ sạch để hành động.",
-    "flow_alignment_score": 0.5,
+    "decision_summary_vi": "Đang chờ nhịp Flow đầu tiên...",
+    "flow_alignment_score": 0.0,
     "ai_brief_vi": "",
     "edge_score": 0.0,
     "edge_confidence": "LOW",
-    "pattern_code": "CONTI_LONG",
-    "pattern_phase": "CONFIRMED",
-    "sequence_signature": "POS_POSx2|STABLE|NONE|MIXED",
-    "metadata": {
-      "matrix_cell_at_entry": "POS_INIT__POS_INV",
-      "flow_state_at_entry": "LONG_CONTINUATION",
-      "flow_grade_at_entry": "D",
-      "transition_code_at_entry": "UNKNOWN"
-    }
+    "pattern_code": "",
+    "pattern_phase": "",
+    "sequence_signature": "",
+    "metadata": {}
   }
 }
