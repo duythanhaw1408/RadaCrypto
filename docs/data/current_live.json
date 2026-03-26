@@ -1,0 +1,18 @@
+{
+  "schema_version": "v1",
+  "mode": "live",
+  "run_id": "ddc211624bf6474c907bcde362e0f624",
+  "published_at": "2026-03-26T04:40:47.844871+00:00",
+  "paths": {
+    "status": "runs/ddc211624bf6474c907bcde362e0f624/actions_status.json",
+    "summary": "runs/ddc211624bf6474c907bcde362e0f624/summary_btcusdt_live.json",
+    "frames": "runs/ddc211624bf6474c907bcde362e0f624/flow_frames_live.json",
+    "timeline": "runs/ddc211624bf6474c907bcde362e0f624/flow_timeline_live.json",
+    "stack": "runs/ddc211624bf6474c907bcde362e0f624/flow_stack_live.json",
+    "logs": "runs/ddc211624bf6474c907bcde362e0f624/thesis_log_live.json",
+    "realtime": "runs/ddc211624bf6474c907bcde362e0f624/realtime_events_live.json",
+    "m5": "runs/ddc211624bf6474c907bcde362e0f624/tpfm_m5_live.json",
+    "m30": "runs/ddc211624bf6474c907bcde362e0f624/tpfm_m30_live.json",
+    "h4": "runs/ddc211624bf6474c907bcde362e0f624/tpfm_4h_live.json"
+  }
+}

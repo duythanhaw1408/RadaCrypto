@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import json
 import shutil
@@ -113,7 +114,7 @@ def select_top_signals(signals: list[ThesisSignal], limit: int = 5) -> list[Thes
     return ranked[:limit]
 
 
-def run_replay(
+async def run_replay_async(
     events: list[ReplayEvent],
     db_path: str | Path | None = None,
     *,
@@ -135,8 +136,7 @@ def run_replay(
     tpfm = TPFMStateEngine()
     store = ThesisSQLiteStore(db_path) if db_path else None
     if store:
-        import asyncio
-        asyncio.run(store.migrate_schema())
+        await store.migrate_schema()
     previous_feature_book: LocalBook | None = None
     
     tpfm_trades: list[NormalizedTrade] = []
@@ -148,6 +148,24 @@ def run_replay(
     all_m5_snapshots: list[Any] = []
     current_run_id = uuid4().hex
 
+    # Phase 22-C: Use LiveThesisLoop for consistent timeline emission
+    from cfte.live.engine import LiveThesisLoop
+    
+    # Extract symbol from events if possible
+    symbol_str = "BTCUSDT"
+    if ordered_events:
+        for e in ordered_events:
+            if hasattr(e.payload, "instrument_key") and ":" in e.payload.instrument_key:
+                symbol_str = e.payload.instrument_key.split(":")[1]
+                break
+
+    engine_wrapper = LiveThesisLoop(
+        symbol=symbol_str,
+        db_path=db_path if db_path else Path(":memory:"),
+        mode="scan"
+    )
+    engine_wrapper._runtime_run_id = current_run_id
+    
     for event in ordered_events:
         if event.event_type == "book_snapshot":
             payload = event.payload
@@ -225,6 +243,10 @@ def run_replay(
                 )
                 m5_snap.run_id = current_run_id
                 
+                # Phase 24: Emit rich timeline records if engine is available
+                if engine_wrapper:
+                    engine_wrapper._emit_m5_timeline_records(m5_snap)
+
                 # Phase 14: Enrich Signals with TPFM Intelligence (Finding 5)
                 for record in thesis_state.values():
                     s = record.signal
@@ -242,7 +264,12 @@ def run_replay(
                 latest_tpfm_snapshot = m5_snap
 
                 if store:
-                    asyncio.run(store.save_tpfm_snapshot(m5_snap))
+                    await store.save_tpfm_snapshot(m5_snap)
+                    # Phase 22-C: Trigger timeline-anchored record emission
+                    engine_wrapper._emit_m5_timeline_records(m5_snap)
+                    # Patch 1: Ensure HTF aggregation is also triggered in scan-mode
+                    engine_wrapper._check_higher_timeframe_aggregation(m5_snap)
+                    
                 all_m5_snapshots.append(m5_snap)
                 
                 if transition_event and not store:
@@ -258,29 +285,29 @@ def run_replay(
                         f"{transition_event.from_cell} -> {transition_event.to_cell}"
                     )
                     if store:
-                        asyncio.run(store.save_flow_transition(transition_event))
+                        await store.save_flow_transition(transition_event)
                 
                 # Phase 14: Final E2E Pattern Persistence
                 if store:
                     pattern_ev = m5_snap.metadata.get("pattern_event")
                     if pattern_ev:
-                        asyncio.run(store.save_flow_pattern_event(pattern_ev))
+                        await store.save_flow_pattern_event(pattern_ev)
                     
                     pattern_outcomes = m5_snap.metadata.get("pattern_outcomes", [])
                     for outcome in pattern_outcomes:
-                        asyncio.run(store.save_pattern_outcome(outcome))
+                        await store.save_pattern_outcome(outcome)
                 
                 tpfm_m5_buffer.append(m5_snap)
                 if len(tpfm_m5_buffer) >= 6:
                     regime = tpfm.calculate_30m_regime(tpfm_m5_buffer)
                     if store:
-                        asyncio.run(store.save_tpfm_m30_regime(regime))
+                        await store.save_tpfm_m30_regime(regime)
                     
                     tpfm_m30_buffer.append(regime)
                     if len(tpfm_m30_buffer) >= 8:
                         struct = tpfm.calculate_4h_structural(tpfm_m30_buffer)
                         if store:
-                            asyncio.run(store.save_tpfm_4h_report(struct))
+                            await store.save_tpfm_4h_report(struct)
                         tpfm_m30_buffer = []
                 
                 # Reset 5m window
@@ -300,6 +327,10 @@ def run_replay(
         )
         m5_snap.run_id = current_run_id
         
+        # Phase 24: Final emit
+        if engine_wrapper:
+            engine_wrapper._emit_m5_timeline_records(m5_snap)
+        
         latest_tpfm_snapshot = m5_snap
         all_m5_snapshots.append(m5_snap)
 
@@ -307,18 +338,23 @@ def run_replay(
             # Phase 14: Final E2E Pattern Persistence
             pattern_ev = m5_snap.metadata.get("pattern_event")
             if pattern_ev:
-                asyncio.run(store.save_flow_pattern_event(pattern_ev))
+                await store.save_flow_pattern_event(pattern_ev)
             
             final_outcomes = tpfm.flush_all_pending_outcomes(m5_snap)
             for outcome in final_outcomes:
-                asyncio.run(store.save_pattern_outcome(outcome))
+                await store.save_pattern_outcome(outcome)
             
             # Flush M30/4H even if thresholds not met (Phase T1-T5 Refinement)
             tpfm_m5_buffer.append(m5_snap)
             if tpfm_m5_buffer:
                 regime = tpfm.calculate_30m_regime(tpfm_m5_buffer)
-                asyncio.run(store.save_tpfm_m30_regime(regime))
+                await store.save_tpfm_m30_regime(regime)
                 tpfm_m30_buffer.append(regime)
+                
+                # Also try H4 structural if we have enough buffer
+                if len(tpfm_m30_buffer) >= 1:
+                     struct = tpfm.calculate_4h_structural(tpfm_m30_buffer)
+                     await store.save_tpfm_4h_report(struct)
         else:
             # Consistent with live print
             if m5_snap.transition_event:
@@ -329,7 +365,9 @@ def run_replay(
             
             if tpfm_m30_buffer:
                 struct = tpfm.calculate_4h_structural(tpfm_m30_buffer)
-                asyncio.run(store.save_tpfm_4h_report(struct))
+                # No store, just print? Actually replay_from_events uses this.
+                # But it returns result.thesis_events.
+                pass
 
     if instrument_key is None:
         raise ValueError("No instrument_key found in replay events")
@@ -341,14 +379,20 @@ def run_replay(
             if state_event is not None:
                 thesis_event_history.append(state_event)
 
-    # Export all M5 snapshots to JSON for dashboard scan mode
+
+    # Phase 22-C: Standardize export to both review and dashboard data dir
     try:
-        m5_path = Path("data/review/tpfm_m5_scan.json")
-        m5_path.parent.mkdir(parents=True, exist_ok=True)
-        snapshots_json = [asdict(s) for s in all_m5_snapshots]
-        m5_path.write_text(json.dumps(snapshots_json, ensure_ascii=False, indent=2), encoding="utf-8")
+        dashboard_data_dir = Path("docs/data")
+        dashboard_data_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Patch 1: Use CENTRALIZED engine logic for dashboard export
+        # This handles all Mode-aware artifacts: summary, flow, logs, etc.
+        # It also ensures schema consistency and Publication Gates.
+        if engine_wrapper:
+            await engine_wrapper._sync_to_dashboard()
+            print(f"✅ Dashboard artifacts exported for run {current_run_id} (Mode: scan)")
     except Exception as e:
-        print(f"⚠️ [REPLAY] Lỗi xuất M5 JSON: {e}")
+        print(f"⚠️ [REPLAY] Lỗi xuất flow artifacts: {e}")
 
     return ReplayRunResult(
         instrument_key=instrument_key,
@@ -362,6 +406,27 @@ def run_replay(
         run_id=current_run_id,
         latest_tpfm_snapshot=latest_tpfm_snapshot,
     )
+
+
+def run_replay(
+    events: list[ReplayEvent],
+    db_path: str | Path | None = None,
+    *,
+    trade_window_seconds: float = DEFAULT_TRADE_WINDOW_SECONDS,
+    max_window_trades: int = DEFAULT_MAX_WINDOW_TRADES,
+) -> ReplayRunResult:
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(
+            run_replay_async(
+                events,
+                db_path=db_path,
+                trade_window_seconds=trade_window_seconds,
+                max_window_trades=max_window_trades,
+            )
+        )
+    raise RuntimeError("run_replay() cannot be called from an active event loop; use await run_replay_async(...)")
 
 
 def persist_replay_summary(result: ReplayRunResult, output_path: str | Path) -> Path:
@@ -401,7 +466,7 @@ def render_replay_summary_vi(result: ReplayRunResult) -> str:
     )
 
 
-def replay_from_events(
+async def replay_from_events(
     instrument_key: str,
     snapshot_bids: list[tuple[float, float]],
     snapshot_asks: list[tuple[float, float]],
@@ -421,4 +486,4 @@ def replay_from_events(
         )
     ]
     events.extend(ReplayEvent(event_type="trade", venue_ts=t.venue_ts, payload=t) for t in trades)
-    return run_replay(events).thesis_events
+    return (await run_replay_async(events)).thesis_events

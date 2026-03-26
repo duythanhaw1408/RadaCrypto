@@ -88,19 +88,33 @@ def _profile_path(profile: PersonalProfile, section: str, key: str, fallback: Pa
     return Path(str(value)) if value is not None else fallback
 
 
+def _write_json_atomic(path: Path, payload: dict[str, Any] | list[dict[str, Any]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = path.with_suffix(path.suffix + ".tmp")
+    tmp_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    tmp_path.replace(path)
+
+
+def _filter_records_for_run(records: list[dict[str, Any]], run_id: str) -> list[dict[str, Any]]:
+    if not records:
+        return []
+    has_run_key = any("run_id" in record for record in records if isinstance(record, dict))
+    if not has_run_key:
+        return records
+    return [record for record in records if isinstance(record, dict) and record.get("run_id") == run_id]
+
+
 def _sync_scan_dashboard_artifacts(summary_out: Path, latest_grade: str | None = None) -> None:
     # Use absolute path for dashboard sync to be robust
     dashboard_data_dir = Path("docs/data").absolute()
     dashboard_data_dir.mkdir(parents=True, exist_ok=True)
 
     telemetry_map = {
-        "data/review/tpfm_m5_scan.json": "tpfm_m5.json",
-        "data/review/tpfm_m30.json": "tpfm_m30.json",
-        "data/review/tpfm_4h.json": "tpfm_4h.json",
+        "data/review/tpfm_m5_scan.json": "tpfm_m5_scan.json",
+        "data/review/tpfm_m30.json": "tpfm_m30_scan.json",
+        "data/review/tpfm_4h.json": "tpfm_4h_scan.json",
         "data/review/daily_summary.json": "daily_summary.json",
         "data/review/health_status.json": "health_status.json",
-        "data/review/weekly_review.json": "weekly_review.json",
-        "data/review/cycle_status.json": "cycle_status.json",
     }
 
     for src_rel, target_name in telemetry_map.items():
@@ -116,7 +130,7 @@ def _sync_scan_dashboard_artifacts(summary_out: Path, latest_grade: str | None =
             pass
 
     if summary_out.exists():
-        shutil.copy2(summary_out, dashboard_data_dir / "summary_btcusdt.json")
+        shutil.copy2(summary_out, dashboard_data_dir / "summary_btcusdt_scan.json")
 
     thesis_log_src = Path("data/thesis/thesis_log.jsonl")
     if thesis_log_src.exists():
@@ -130,8 +144,16 @@ def _sync_scan_dashboard_artifacts(summary_out: Path, latest_grade: str | None =
                     records.append(json.loads(line))
                 except json.JSONDecodeError:
                     continue
-        (dashboard_data_dir / "thesis_log.json").write_text(
+        
+        # Sync Log
+        (dashboard_data_dir / "thesis_log_scan.json").write_text(
             json.dumps(records[-100:], ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        
+        # Sync as Realtime Events (Full parity for scan)
+        (dashboard_data_dir / "realtime_events_scan.json").write_text(
+            json.dumps(records[-50:], ensure_ascii=False, indent=2),
             encoding="utf-8",
         )
 
@@ -173,10 +195,58 @@ def _sync_scan_dashboard_artifacts(summary_out: Path, latest_grade: str | None =
         "latest_transition": {},
         "top_signal": top_signal,
     }
-    (dashboard_data_dir / "actions_status.json").write_text(
-        json.dumps(status_payload, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
+    _write_json_atomic((dashboard_data_dir / "actions_status.json").absolute(), status_payload)
+
+    # Atomic per-run scan bundle + manifest for dashboard reads
+    published_run_id = contract.get("run_id")
+    if published_run_id:
+        run_dir = (dashboard_data_dir / "runs" / published_run_id).absolute()
+        run_dir.mkdir(parents=True, exist_ok=True)
+
+        _write_json_atomic((run_dir / "actions_status.json").absolute(), status_payload)
+        if summary_payload:
+            _write_json_atomic((run_dir / "summary_btcusdt_scan.json").absolute(), summary_payload)
+
+        for name in (
+            "flow_frames_scan.json",
+            "flow_timeline_scan.json",
+            "flow_stack_scan.json",
+            "tpfm_m5_scan.json",
+            "tpfm_m30_scan.json",
+            "tpfm_4h_scan.json",
+            "thesis_log_scan.json",
+            "realtime_events_scan.json",
+        ):
+            src = (dashboard_data_dir / name).absolute()
+            if not src.exists():
+                continue
+            try:
+                payload = json.loads(src.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                continue
+            if isinstance(payload, list):
+                payload = _filter_records_for_run(payload, published_run_id)
+            _write_json_atomic((run_dir / name).absolute(), payload)
+
+        manifest = {
+            "schema_version": "v1",
+            "mode": "scan",
+            "run_id": published_run_id,
+            "published_at": generated_at,
+            "paths": {
+                "status": f"runs/{published_run_id}/actions_status.json",
+                "summary": f"runs/{published_run_id}/summary_btcusdt_scan.json",
+                "frames": f"runs/{published_run_id}/flow_frames_scan.json",
+                "timeline": f"runs/{published_run_id}/flow_timeline_scan.json",
+                "stack": f"runs/{published_run_id}/flow_stack_scan.json",
+                "logs": f"runs/{published_run_id}/thesis_log_scan.json",
+                "realtime": f"runs/{published_run_id}/realtime_events_scan.json",
+                "m5": f"runs/{published_run_id}/tpfm_m5_scan.json",
+                "m30": f"runs/{published_run_id}/tpfm_m30_scan.json",
+                "h4": f"runs/{published_run_id}/tpfm_4h_scan.json",
+            },
+        }
+        _write_json_atomic((dashboard_data_dir / "current_scan.json").absolute(), manifest)
 
 
 def _format_header(title: str, profile: PersonalProfile) -> str:
@@ -287,7 +357,7 @@ def _render_live_runtime_status_lines(payload: dict[str, Any]) -> list[str]:
     return lines
 
 
-def doctor(context: ShellContext) -> int:
+async def doctor(context: ShellContext) -> int:
     from cfte.cli.reliability import build_runtime_report, persist_runtime_report, render_runtime_report_vi
 
     required = [
@@ -332,7 +402,7 @@ def _profile_max_window_trades(section: dict[str, Any]) -> int:
     return int(value)
 
 
-def run_replay_research(
+async def run_replay_research(
     events_path: Path,
     summary_out: Path,
     *,
@@ -340,10 +410,10 @@ def run_replay_research(
     max_window_trades: int = 400,
 ) -> int:
     from cfte.replay.adapters import load_replay_events
-    from cfte.replay.runner import persist_replay_summary, render_replay_summary_vi, run_replay
+    from cfte.replay.runner import persist_replay_summary, render_replay_summary_vi, run_replay_async
 
     events = load_replay_events(events_path)
-    result = run_replay(
+    result = await run_replay_async(
         events,
         trade_window_seconds=trade_window_seconds,
         max_window_trades=max_window_trades,
@@ -362,7 +432,7 @@ def run_replay_research(
     return 0
 
 
-def _load_replay_result(
+async def _load_replay_result(
     events_path: Path,
     db_path: Path | None = None,
     *,
@@ -370,10 +440,10 @@ def _load_replay_result(
     max_window_trades: int = 400,
 ):
     from cfte.replay.adapters import load_replay_events
-    from cfte.replay.runner import run_replay
+    from cfte.replay.runner import run_replay_async
 
     events = load_replay_events(events_path)
-    return run_replay(
+    return await run_replay_async(
         events,
         db_path=db_path,
         trade_window_seconds=trade_window_seconds,
@@ -381,13 +451,13 @@ def _load_replay_result(
     )
 
 
-def command_replay(context: ShellContext, events_path: Path, summary_out: Path) -> int:
+async def command_replay(context: ShellContext, events_path: Path, summary_out: Path) -> int:
     trade_window_seconds = _profile_trade_window_seconds(context.profile.scan)
     max_window_trades = _profile_max_window_trades(context.profile.scan)
     print(_format_header("replay", context.profile))
     print(f"Đang chạy replay từ: {events_path}")
     print(f"Cửa sổ replay: {trade_window_seconds:.0f}s / {max_window_trades} trades")
-    return run_replay_research(
+    return await run_replay_research(
         events_path=events_path,
         summary_out=summary_out,
         trade_window_seconds=trade_window_seconds,
@@ -395,7 +465,7 @@ def command_replay(context: ShellContext, events_path: Path, summary_out: Path) 
     )
 
 
-def command_run_scan(context: ShellContext, events_path: Path, limit: int | None) -> int:
+async def command_run_scan(context: ShellContext, events_path: Path, limit: int | None) -> int:
     from cfte.replay.runner import persist_replay_summary, select_top_signals
     from cfte.storage.sqlite_writer import ThesisSQLiteStore
     from cfte.storage.thesis_log import ThesisLogWriter
@@ -404,9 +474,9 @@ def command_run_scan(context: ShellContext, events_path: Path, limit: int | None
     print(_format_header("run-scan", context.profile))
     
     # Ensure schema is up to date for TPFM
-    asyncio.run(ThesisSQLiteStore(DEFAULT_STATE_DB).migrate_schema())
+    await ThesisSQLiteStore(DEFAULT_STATE_DB).migrate_schema()
     
-    result = _load_replay_result(
+    result = await _load_replay_result(
         events_path,
         db_path=DEFAULT_STATE_DB,
         trade_window_seconds=_profile_trade_window_seconds(context.profile.scan),
@@ -477,7 +547,7 @@ def command_run_scan(context: ShellContext, events_path: Path, limit: int | None
     return 0
 
 
-def command_bootstrap(context: ShellContext) -> int:
+async def command_bootstrap(context: ShellContext) -> int:
     import sqlite3
     from cfte.cli.reliability import build_runtime_report, persist_runtime_report, render_runtime_report_vi
     from cfte.storage.sqlite_writer import ThesisSQLiteStore
@@ -493,10 +563,7 @@ def command_bootstrap(context: ShellContext) -> int:
             conn.executescript((Path('sql/sqlite') / sql_name).read_text(encoding='utf-8'))
         conn.commit()
 
-    async def _bootstrap() -> None:
-        await ThesisSQLiteStore(DEFAULT_STATE_DB).migrate_schema()
-
-    asyncio.run(_bootstrap())
+    await ThesisSQLiteStore(DEFAULT_STATE_DB).migrate_schema()
     print(f'- Đảm bảo SQLite schema tại: {DEFAULT_STATE_DB}')
     report = build_runtime_report(
         profile_path=context.profile_path,
@@ -997,7 +1064,7 @@ def command_scorecard(context: ShellContext) -> int:
     return 0
 
 
-def command_watchdog(context: ShellContext) -> int:
+async def command_watchdog(context: ShellContext) -> int:
     from cfte.cli.reliability import load_json_artifact
     from cfte.storage.sqlite_writer import ThesisSQLiteStore
     
@@ -1005,41 +1072,39 @@ def command_watchdog(context: ShellContext) -> int:
     store = ThesisSQLiteStore(DEFAULT_STATE_DB)
     runtime_path = _profile_path(context.profile, "review", "live_runtime_path", DEFAULT_LIVE_RUNTIME_REPORT)
     
-    async def _show():
-        runtime_payload = load_json_artifact(runtime_path)
-        if runtime_payload:
-            print("📡 Runtime live gần nhất:")
-            for line in _render_live_runtime_status_lines(runtime_payload):
-                print(line)
-            print()
-        else:
-            print(f"⚠️ Chưa có runtime artifact tại {runtime_path}.")
-            print()
+    runtime_payload = load_json_artifact(runtime_path)
+    if runtime_payload:
+        print("📡 Runtime live gần nhất:")
+        for line in _render_live_runtime_status_lines(runtime_payload):
+            print(line)
+        print()
+    else:
+        print(f"⚠️ Chưa có runtime artifact tại {runtime_path}.")
+        print()
 
-        recent = await store.get_recent_thesis(limit=1)
-        if not recent:
-            print("⚠️ Chưa có luận điểm nào được ghi nhận.")
-            return
+    recent = await store.get_recent_thesis(limit=1)
+    if not recent:
+        print("⚠️ Chưa có luận điểm nào được ghi nhận.")
+        return 0
 
-        last_t = recent[0]
-        opened_dt = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(last_t["opened_ts"] / 1000))
-        print(f"✅ Luận điểm gần nhất: [{last_t['thesis_id'][:8]}] {last_t['instrument_key']}")
-        print(f" - Thời gian: {opened_dt}")
-        print(f" - Trạng thái: {last_t['stage']}")
-        
-        # Check if DB is actively updated
-        now = int(time.time() * 1000)
-        ms_diff = now - last_t["opened_ts"]
-        if ms_diff > 3600000: # 1h
-            print("⚠️ Cảnh báo: Đã hơn 1h chưa có luận điểm mới. Hãy kiểm tra kết nối loop.")
-        else:
-            print("👍 Hệ thống có vẻ đang hoạt động bình thường.")
+    last_t = recent[0]
+    opened_dt = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(last_t["opened_ts"] / 1000))
+    print(f"✅ Luận điểm gần nhất: [{last_t['thesis_id'][:8]}] {last_t['instrument_key']}")
+    print(f" - Thời gian: {opened_dt}")
+    print(f" - Trạng thái: {last_t['stage']}")
+    
+    # Check if DB is actively updated
+    now = int(time.time() * 1000)
+    ms_diff = now - last_t["opened_ts"]
+    if ms_diff > 3600000: # 1h
+        print("⚠️ Cảnh báo: Đã hơn 1h chưa có luận điểm mới. Hãy kiểm tra kết nối loop.")
+    else:
+        print("👍 Hệ thống có vẻ đang hoạt động bình thường.")
 
-    asyncio.run(_show())
     return 0
 
 
-def command_health(context: ShellContext) -> int:
+async def command_health(context: ShellContext) -> int:
     import shutil
     from cfte.cli.reliability import build_runtime_report, load_json_artifact, persist_runtime_report, render_runtime_report_vi
     from cfte.storage.sqlite_writer import ThesisSQLiteStore
@@ -1063,14 +1128,12 @@ def command_health(context: ShellContext) -> int:
     print("\n[Cơ sở dữ liệu SQLite]")
     if DEFAULT_STATE_DB.exists():
         store = ThesisSQLiteStore(DEFAULT_STATE_DB)
-        async def _db_stats():
-            diag = await store.get_db_diagnostics()
-            print(f" - Đường dẫn: {diag['file_path']}")
-            print(f" - Kích thước: {diag['file_size_kb']:.2f} KB")
-            print(f" - Số luận điểm: {diag['thesis_count']}")
-            print(f" - Số kết quả (outcome): {diag['outcome_count']}")
-            print(f" - Số sự kiện (event): {diag['event_count']}")
-        asyncio.run(_db_stats())
+        diag = await store.get_db_diagnostics()
+        print(f" - Đường dẫn: {diag['file_path']}")
+        print(f" - Kích thước: {diag['file_size_kb']:.2f} KB")
+        print(f" - Số luận điểm: {diag['thesis_count']}")
+        print(f" - Số kết quả (outcome): {diag['outcome_count']}")
+        print(f" - Số sự kiện (event): {diag['event_count']}")
     else:
         print(f" - [WARN] Không tìm thấy database tại {DEFAULT_STATE_DB}")
 
@@ -1267,18 +1330,18 @@ def main() -> int:
     context = build_context(args.profile)
 
     if args.cmd == 'bootstrap':
-        return command_bootstrap(context)
+        return asyncio.run(command_bootstrap(context))
     if args.cmd == "doctor":
-        return doctor(context)
+        return asyncio.run(doctor(context))
     if args.cmd == "health":
-        return command_health(context)
+        return asyncio.run(command_health(context))
     if args.cmd == "replay":
         replay_events = _resolve_path(args.events, _profile_path(context.profile, "defaults", "replay_events", DEFAULT_REPLAY_EVENTS))
         replay_summary = _resolve_path(args.summary_out, _profile_path(context.profile, "defaults", "summary_out", DEFAULT_REPLAY_SUMMARY))
-        return command_replay(context, events_path=replay_events, summary_out=replay_summary)
+        return asyncio.run(command_replay(context, events_path=replay_events, summary_out=replay_summary))
     if args.cmd == "run-scan":
         replay_events = _resolve_path(args.events, _profile_path(context.profile, "defaults", "replay_events", DEFAULT_REPLAY_EVENTS))
-        return command_run_scan(context, events_path=replay_events, limit=args.limit)
+        return asyncio.run(command_run_scan(context, events_path=replay_events, limit=args.limit))
     if args.cmd == "run-live":
         return command_run_live(
             context,
@@ -1305,7 +1368,7 @@ def main() -> int:
     if args.cmd == "tune-profile":
         return command_tune_profile(context)
     if args.cmd == "watchdog":
-        return command_watchdog(context)
+        return asyncio.run(command_watchdog(context))
 
     parser.print_help()
     return 0

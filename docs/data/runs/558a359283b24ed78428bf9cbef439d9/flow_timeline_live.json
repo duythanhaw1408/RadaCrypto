@@ -1,0 +1,46 @@
+{
+  "artifact_contract": {
+    "schema_version": "v1",
+    "mode": "live",
+    "run_id": "558a359283b24ed78428bf9cbef439d9",
+    "symbol": "BTCUSDT",
+    "generated_at_ts": 1774497936940,
+    "artifact_name": "flow_timeline",
+    "count": 1
+  },
+  "items": [
+    {
+      "run_id": "558a359283b24ed78428bf9cbef439d9",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "event_id": "fde7b394-4b61-4011-8d3a-54643e235629:state",
+      "market_ts": 1774497579489,
+      "frame": "M5",
+      "window": {
+        "start_ts": 1774497278144,
+        "end_ts": 1774497579489
+      },
+      "event_type": "STATE",
+      "signal_kind": "PATTERN",
+      "priority": 50,
+      "context": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "pattern_code": "TRAP_LONG",
+        "pattern_phase": "FORMING",
+        "decision_posture": "WAIT",
+        "tradability_grade": "C"
+      },
+      "message": {
+        "action_label_vi": "Chỉ theo dõi, chờ thêm xác nhận từ futures hoặc đa sàn trước khi hành động.",
+        "why_now_vi": "Delta spot +55.99K | Nhịp 4.22/s | Inventory L1 -2%",
+        "invalid_if_vi": "Inventory tiếp tục âm hoặc giá không giữ được trên microprice.",
+        "summary_vi": "Chỉ theo dõi, chờ thêm xác nhận từ futures hoặc đa sàn trước khi hành động."
+      },
+      "refs": {
+        "snapshot_id": "fde7b394-4b61-4011-8d3a-54643e235629",
+        "thesis_id": ""
+      }
+    }
+  ]
+}

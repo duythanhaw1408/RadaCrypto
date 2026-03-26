@@ -1,0 +1,49 @@
+{
+  "artifact_contract": {
+    "schema_version": "v1",
+    "mode": "live",
+    "run_id": "ddc211624bf6474c907bcde362e0f624",
+    "symbol": "BTCUSDT",
+    "generated_at_ts": 1774500047403,
+    "artifact_name": "flow_stack",
+    "count": 1
+  },
+  "items": [
+    {
+      "run_id": "ddc211624bf6474c907bcde362e0f624",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "stack_id": "34ae369a-ac66-40fe-bf51-38ab0eb6b039:stack",
+      "market_ts": 1774499831698,
+      "anchor": {
+        "frame": "M5",
+        "window_end_ts": 1774499831698
+      },
+      "stack_signature": "M5:NEG_INIT__POS_INV",
+      "stack_alignment": "MICRO_LEAD",
+      "stack_conflict": "UNKNOWN",
+      "micro_vs_macro": "UNKNOWN",
+      "stack_pressure": 0.0,
+      "stack_quality": 1.0,
+      "macro_bias": "NEUTRAL",
+      "trigger_bias": "NEUTRAL",
+      "frames": {
+        "M5": {
+          "state_id": "34ae369a-ac66-40fe-bf51-38ab0eb6b039",
+          "window_end_ts": 1774499831698,
+          "matrix_cell": "NEG_INIT__POS_INV",
+          "alias_vi": "Bán gặp hấp thụ mua",
+          "pattern_code": "TRAP_SHORT",
+          "pattern_phase": "FORMING",
+          "tradability_grade": "C",
+          "flow_bias": "NEUTRAL"
+        },
+        "M30": {},
+        "H1": {},
+        "H4": {},
+        "H12": {},
+        "D1": {}
+      }
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "schema_version": "v1",
+  "mode": "scan",
+  "run_id": "84b6b52e2d3c4fd6a9ee35107f041e5b",
+  "published_at": "2026-03-26T04:14:22.548755Z",
+  "paths": {
+    "status": "runs/84b6b52e2d3c4fd6a9ee35107f041e5b/actions_status.json",
+    "summary": "runs/84b6b52e2d3c4fd6a9ee35107f041e5b/summary_btcusdt_scan.json",
+    "frames": "runs/84b6b52e2d3c4fd6a9ee35107f041e5b/flow_frames_scan.json",
+    "timeline": "runs/84b6b52e2d3c4fd6a9ee35107f041e5b/flow_timeline_scan.json",
+    "stack": "runs/84b6b52e2d3c4fd6a9ee35107f041e5b/flow_stack_scan.json",
+    "logs": "runs/84b6b52e2d3c4fd6a9ee35107f041e5b/thesis_log_scan.json",
+    "realtime": "runs/84b6b52e2d3c4fd6a9ee35107f041e5b/realtime_events_scan.json",
+    "m5": "runs/84b6b52e2d3c4fd6a9ee35107f041e5b/tpfm_m5_scan.json",
+    "m30": "runs/84b6b52e2d3c4fd6a9ee35107f041e5b/tpfm_m30_scan.json",
+    "h4": "runs/84b6b52e2d3c4fd6a9ee35107f041e5b/tpfm_4h_scan.json"
+  }
+}

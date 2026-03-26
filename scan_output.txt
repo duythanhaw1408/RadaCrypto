@@ -1,0 +1,217 @@
+=== run-scan | hồ sơ: personal-binance | người dùng: Trader Binance ===
+📊 [INIT] Loaded 19 snapshots from history.
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__NEUTRAL_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__NEUTRAL_INV -> NEG_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__NEUTRAL_INV -> POS_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__NEUTRAL_INV -> POS_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__NEUTRAL_INV -> POS_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__NEUTRAL_INV -> NEG_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__NEUTRAL_INV -> POS_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__NEUTRAL_INV -> POS_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__NEUTRAL_INV -> POS_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__NEUTRAL_INV -> POS_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__NEUTRAL_INV -> POS_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__NEUTRAL_INV -> POS_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__NEUTRAL_INV -> POS_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__NEUTRAL_INV -> NEG_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__NEUTRAL_INV -> POS_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__NEUTRAL_INV -> NEG_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__NEUTRAL_INV -> POS_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__NEUTRAL_INV -> POS_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__NEUTRAL_INV -> POS_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__NEUTRAL_INV -> POS_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__NEUTRAL_INV -> POS_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__NEUTRAL_INV -> POS_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__NEUTRAL_INV -> NEG_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Tái định giá theo hướng bán: NEG_INIT__NEUTRAL_INV -> NEG_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__NEUTRAL_INV -> POS_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__NEUTRAL_INV -> NEG_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__NEUTRAL_INV -> POS_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__NEUTRAL_INV -> NEG_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__NEUTRAL_INV -> POS_INIT__NEUTRAL_INV
+🔄 [TRANSITION] Inventory xác nhận phe mua: POS_INIT__NEUTRAL_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng bán: NEG_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng bán: NEG_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEUTRAL_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEUTRAL_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng bán: NEG_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng bán: NEG_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEUTRAL_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng bán: NEUTRAL_INIT__POS_INV -> NEUTRAL_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEUTRAL_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng bán: NEG_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng bán: NEG_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Tiếp diễn bán: NEG_INIT__POS_INV -> NEUTRAL_INIT__POS_INV
+🔄 [TRANSITION] Tiếp diễn bán: NEUTRAL_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng bán: NEG_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng bán: NEG_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng bán: NEG_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng bán: NEG_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng bán: NEG_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng bán: NEG_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng bán: NEG_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng bán: NEG_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng bán: NEG_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Tiếp diễn bán: NEG_INIT__POS_INV -> NEUTRAL_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEUTRAL_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng bán: NEG_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng bán: NEG_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang bán: POS_INIT__POS_INV -> NEG_INIT__POS_INV
+🔄 [TRANSITION] Đảo chiều sang mua: NEG_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__POS_INV -> POS_INIT__POS_INV
+DEBUG EXPORT: run_id=3f69434d2c7b41fa8229729c7a2c8ea9, mode=scan, symbol=BTCUSDT, dest_dir=docs/data
+✅ Dashboard artifacts exported for run 3f69434d2c7b41fa8229729c7a2c8ea9
+Đã lưu summary scan tại: data/replay/summary_btcusdt.json
+DEBUG SYNC: /Users/nguyenduythanh/Downloads/crypto-flow-thesis-engine-starter/crypto-flow-thesis-engine-starter/data/review/tpfm_m5_scan.json (2958831) -> /Users/nguyenduythanh/Downloads/crypto-flow-thesis-engine-starter/crypto-flow-thesis-engine-starter/docs/data/tpfm_m5_scan.json (before=2958831, after=2958831)
+DEBUG SYNC: Skip missing /Users/nguyenduythanh/Downloads/crypto-flow-thesis-engine-starter/crypto-flow-thesis-engine-starter/data/review/tpfm_m30.json
+DEBUG SYNC: Skip missing /Users/nguyenduythanh/Downloads/crypto-flow-thesis-engine-starter/crypto-flow-thesis-engine-starter/data/review/tpfm_4h.json
+DEBUG SYNC: Skip missing /Users/nguyenduythanh/Downloads/crypto-flow-thesis-engine-starter/crypto-flow-thesis-engine-starter/data/review/daily_summary.json
+DEBUG SYNC: /Users/nguyenduythanh/Downloads/crypto-flow-thesis-engine-starter/crypto-flow-thesis-engine-starter/data/review/health_status.json (4213) -> /Users/nguyenduythanh/Downloads/crypto-flow-thesis-engine-starter/crypto-flow-thesis-engine-starter/docs/data/health_status.json (before=4213, after=4213)
+DEBUG SYNC: Skip missing /Users/nguyenduythanh/Downloads/crypto-flow-thesis-engine-starter/crypto-flow-thesis-engine-starter/data/review/weekly_review.json
+DEBUG SYNC: Skip missing /Users/nguyenduythanh/Downloads/crypto-flow-thesis-engine-starter/crypto-flow-thesis-engine-starter/data/review/cycle_status.json
+Đã đồng bộ artifact scan lên Dashboard.
+Đã ghi log thesis scan tại: data/thesis/thesis_log.jsonl
+Lịch sử sự kiện scan chi tiết tại: data/thesis/scan_thesis_events.jsonl
+Đã quét replay cho BINANCE:BTCUSDT:SPOT với 200 cửa sổ đặc trưng.
+Ngưỡng ưu tiên từ hồ sơ cá nhân: 70.00 điểm.
+Cửa sổ dòng tiền áp dụng: 60s / 400 trades.
+Chưa có thiết lập nào vượt ngưỡng ưu tiên. Hãy tiếp tục theo dõi watchlist.

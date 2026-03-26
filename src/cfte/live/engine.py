@@ -11,6 +11,10 @@ from pathlib import Path
 from uuid import uuid4
 import shutil
 import json
+from dotenv import load_dotenv
+
+# Load environment variables from .env if present
+load_dotenv()
 
 from cfte.books.binance_depth import BinanceDepthReconciler
 from cfte.collectors.binance_public import BinancePublicCollector, build_public_streams, try_fetch_depth_snapshot
@@ -46,6 +50,7 @@ from cfte.thesis.state import ThesisLifecycleRecord, apply_signal_update
 from cfte.tpfm.engine import TPFMStateEngine
 from cfte.tpfm.cards import render_tpfm_m5_card
 from cfte.tpfm.ai_explainer import TPFMAIExplainer
+from cfte.tpfm.models import TPFMSnapshot
 from cfte.models.events import NormalizedTrade, TapeSnapshot
 
 # Phase 4 Imports
@@ -81,8 +86,10 @@ class LiveThesisLoop:
         max_window_trades: int = DEFAULT_MAX_WINDOW_TRADES,
         min_runtime: int = 0,
         run_until_first_m5: bool = False,
+        mode: str = "live",
     ) -> None:
         self.symbol = symbol.upper()
+        self.venue = "binance"  # Default venue for live loop
         self.instrument_key = f"BINANCE:{self.symbol}:SPOT"
         self.db_path = db_path
         self.use_agg_trade = use_agg_trade
@@ -94,6 +101,7 @@ class LiveThesisLoop:
         self.heartbeat_interval = max(1, heartbeat_interval)
         self.runtime_report_path = runtime_report_path
         self._runtime_run_id = uuid4().hex
+        self.mode = mode
         self._runtime_lease: LiveRuntimeLease | None = None
         self.max_retries = max(1, max_retries)
         self.trade_window_seconds = max(1.0, float(trade_window_seconds))
@@ -112,12 +120,70 @@ class LiveThesisLoop:
         self._context_health: dict[str, str | float | bool | int | list[str] | None] = {}
         self._latest_tpfm_summary: dict[str, str | float | bool | int | list[str] | None] = {}
         self._dashboard_m5_history = deque(maxlen=100)
+        self._last_ai_brief_ts: float = 0 # Track last Gemini call time
+        self._prev_m5_winning_signal: dict = {}  # Previous M5 winning signal for delta comparison
+        self._m5_signal_history: list[dict] = []  # Consolidated M5 signal history (1 per window)
+        
+        # HTF State Caches (Patch 1: Parent tracking for Flow Stack)
+        self._latest_m30_id = ""
+        self._latest_h1_id = ""
+        self._latest_h4_id = ""
+        self._latest_h12_id = ""
+        self._latest_d1_id = ""
+        self._latest_m30_end_ts = 0
+        self._latest_h1_end_ts = 0
+        self._latest_h4_end_ts = 0
+        self._latest_h12_end_ts = 0
+        self._latest_d1_end_ts = 0
+        self._latest_frame_meta = {} # Cache for rich frame metadata (alias, bias, grade)
+        
+        # Load existing history if available
+        try:
+            m5_path = Path("data/review/tpfm_m5.json")
+            if m5_path.exists():
+                old_snapshots = json.loads(m5_path.read_text(encoding="utf-8"))
+                if isinstance(old_snapshots, list):
+                    # Fill the deque with loaded snapshots (as dicts or objects depending on use)
+                    # Line 908 indicates it expects objects to call asdict() on them.
+                    # So we should reconstruct TPFMSnapshot objects.
+                    for s_dict in old_snapshots[-100:]:
+                        try:
+                            # Reconstruct object, but note TPFMSnapshot has many fields.
+                            # We can just use the dict if we adjust the save logic, 
+                            # but line 908: [asdict(s) for s in self._dashboard_m5_history]
+                            # requires 's' to be a dataclass.
+                            # Let's use a simpler approach: load them as TPFMSnapshot objects.
+                            # Since TPFMSnapshot is a large dataclass, we can use 
+                            # TPFMSnapshot(**s_dict) if the keys match exactly.
+                            # However, some fields like transition_event might be nested. 
+                            # For dashboard chart, the basic fields are mostly enough.
+                            
+                            # Pre-filter s_dict to only include fields TPFMSnapshot expects
+                            from dataclasses import fields
+                            valid_fields = {f.name for f in fields(TPFMSnapshot)}
+                            filtered_s = {k: v for k, v in s_dict.items() if k in valid_fields}
+                            self._dashboard_m5_history.append(TPFMSnapshot(**filtered_s))
+                        except Exception:
+                            continue
+                print(f"📊 [INIT] Loaded {len(self._dashboard_m5_history)} snapshots from history.")
+        except Exception as e:
+            print(f"⚠️ [INIT] Failed to load M5 history: {e}")
         
         # TPFM State
         self.tpfm = TPFMStateEngine(symbol=self.symbol)
         self._tpfm_window_start_ts: int | None = None
         self._tpfm_trades: list[NormalizedTrade] = []
         self._tpfm_snapshots: list[TapeSnapshot] = []
+        
+        # Phase 20-E: MTF Roll Buffers
+        self._tpfm_m5_roll_buffer: deque[TPFMSnapshot] = deque(maxlen=288) # 24h
+        self._tpfm_h1_roll_buffer: deque[dict] = deque(maxlen=24)
+        self._tpfm_h4_roll_buffer: deque[dict] = deque(maxlen=6)
+        self._tpfm_h12_roll_buffer: deque[dict] = deque(maxlen=2)
+        
+        # Phase 20-H: Latest Frame State Trackers
+        self._latest_frame_ids: dict[str, str] = {} # frame -> state_id
+        self._last_exported_flow_run_id: str | None = None
         self._tpfm_m5_buffer: list[TPFMSnapshot] = []
         self._tpfm_m30_buffer: list[TPFM30mRegime] = []
         self._latest_tpfm_snapshot: TPFMSnapshot | None = None
@@ -136,6 +202,129 @@ class LiveThesisLoop:
         self.futures_collector = BinanceFuturesCollector(symbol=self.symbol)
         self.veto_engine = VetoEngine()
         self.outcome_realism = OutcomeRealismEngine(self.store)
+
+    @staticmethod
+    def _write_json_atomic(path: Path, payload: dict | list) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp_path = path.with_suffix(path.suffix + ".tmp")
+        tmp_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        tmp_path.replace(path)
+
+    @staticmethod
+    def _read_json_file(path: Path) -> dict | list | None:
+        try:
+            if not path.exists():
+                return None
+            return json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return None
+
+    def _filter_records_for_run(self, records: list[dict], run_id: str) -> list[dict]:
+        if not records:
+            return []
+        has_run_key = any(isinstance(item, dict) and "run_id" in item for item in records)
+        if not has_run_key:
+            return records
+        return [item for item in records if isinstance(item, dict) and item.get("run_id") == run_id]
+
+    def _run_bundle_dir(self, dashboard_data_dir: Path, run_id: str) -> Path:
+        return (dashboard_data_dir / "runs" / run_id).absolute()
+
+    def _build_dashboard_manifest(self, run_id: str) -> dict:
+        mode = self.mode
+        return {
+            "schema_version": "v1",
+            "mode": mode,
+            "run_id": run_id,
+            "published_at": datetime.now(tz=timezone.utc).isoformat(),
+            "paths": {
+                "status": f"runs/{run_id}/actions_status.json",
+                "summary": f"runs/{run_id}/summary_btcusdt_{mode}.json",
+                "frames": f"runs/{run_id}/flow_frames_{mode}.json",
+                "timeline": f"runs/{run_id}/flow_timeline_{mode}.json",
+                "stack": f"runs/{run_id}/flow_stack_{mode}.json",
+                "logs": f"runs/{run_id}/thesis_log_{mode}.json",
+                "realtime": f"runs/{run_id}/realtime_events_{mode}.json",
+                "m5": f"runs/{run_id}/tpfm_m5_{mode}.json",
+                "m30": f"runs/{run_id}/tpfm_m30_{mode}.json",
+                "h4": f"runs/{run_id}/tpfm_4h_{mode}.json",
+            },
+        }
+
+    def _publish_run_bundle(self, dashboard_data_dir: Path, published_run_id: str) -> None:
+        run_dir = self._run_bundle_dir(dashboard_data_dir, published_run_id)
+        run_dir.mkdir(parents=True, exist_ok=True)
+        mode = self.mode
+        bundle_ready = True
+
+        status_payload = self._read_json_file((dashboard_data_dir / "actions_status.json").absolute())
+        if isinstance(status_payload, dict):
+            status_copy = dict(status_payload)
+            status_copy["artifact_run_id"] = published_run_id
+            self._write_json_atomic((run_dir / "actions_status.json").absolute(), status_copy)
+
+        summary_path = (dashboard_data_dir / f"summary_btcusdt_{mode}.json").absolute()
+        summary_payload = self._read_json_file(summary_path)
+        if (
+            isinstance(summary_payload, dict)
+            and summary_payload.get("artifact_contract", {}).get("run_id") == published_run_id
+        ):
+            self._write_json_atomic((run_dir / f"summary_btcusdt_{mode}.json").absolute(), summary_payload)
+        else:
+            bundle_ready = False
+
+        for artifact_name in (
+            f"flow_frames_{mode}.json",
+            f"flow_timeline_{mode}.json",
+            f"flow_stack_{mode}.json",
+        ):
+            artifact_path = (dashboard_data_dir / artifact_name).absolute()
+            artifact_payload = self._read_json_file(artifact_path)
+            if (
+                isinstance(artifact_payload, dict)
+                and artifact_payload.get("artifact_contract", {}).get("run_id") == published_run_id
+            ):
+                self._write_json_atomic((run_dir / artifact_name).absolute(), artifact_payload)
+            else:
+                bundle_ready = False
+
+        thesis_log_path = (dashboard_data_dir / f"thesis_log_{mode}.json").absolute()
+        thesis_log_payload = self._read_json_file(thesis_log_path)
+        if isinstance(thesis_log_payload, list):
+            self._write_json_atomic(
+                (run_dir / f"thesis_log_{mode}.json").absolute(),
+                self._filter_records_for_run(thesis_log_payload, published_run_id),
+            )
+        else:
+            self._write_json_atomic((run_dir / f"thesis_log_{mode}.json").absolute(), [])
+
+        realtime_path = (dashboard_data_dir / f"realtime_events_{mode}.json").absolute()
+        realtime_payload = self._read_json_file(realtime_path)
+        if isinstance(realtime_payload, list):
+            self._write_json_atomic(
+                (run_dir / f"realtime_events_{mode}.json").absolute(),
+                self._filter_records_for_run(realtime_payload, published_run_id),
+            )
+        else:
+            self._write_json_atomic((run_dir / f"realtime_events_{mode}.json").absolute(), [])
+
+        for telemetry_name in (f"tpfm_m5_{mode}.json", f"tpfm_m30_{mode}.json", f"tpfm_4h_{mode}.json"):
+            telemetry_path = (dashboard_data_dir / telemetry_name).absolute()
+            telemetry_payload = self._read_json_file(telemetry_path)
+            if isinstance(telemetry_payload, list):
+                self._write_json_atomic(
+                    (run_dir / telemetry_name).absolute(),
+                    self._filter_records_for_run(telemetry_payload, published_run_id),
+                )
+            else:
+                self._write_json_atomic((run_dir / telemetry_name).absolute(), [])
+
+        if not bundle_ready:
+            print(f"ℹ️ [Phase24] Skip current_{mode}.json update until bundle is complete for run {published_run_id}")
+            return
+
+        manifest = self._build_dashboard_manifest(published_run_id)
+        self._write_json_atomic((dashboard_data_dir / f"current_{mode}.json").absolute(), manifest)
 
     def _should_alert_signal(
         self,
@@ -265,6 +454,7 @@ class LiveThesisLoop:
             "blind_spot_flags": list(tpfm_snap.blind_spot_flags),
             "risk_flags": list(tpfm_snap.risk_flags[:4]),
             "action_plan_vi": str(tpfm_snap.action_plan_vi),
+            "flow_decision_brief": str(tpfm_snap.flow_decision_brief),
         }
 
     def _runtime_degraded_flags(self) -> list[str]:
@@ -314,94 +504,663 @@ class LiveThesisLoop:
         Uses absolute paths to avoid working directory ambiguity.
         """
         try:
+            # Ensure DB schema is ready
+            await self.store.migrate_schema()
+            
             # Dashboard target directory
             dashboard_data_dir = Path("docs/data").absolute()
             if not dashboard_data_dir.exists():
                 dashboard_data_dir.mkdir(parents=True, exist_ok=True)
 
             # 1. Sync Thesis Log (.jsonl to .json array)
-            src_log = Path("data/thesis/thesis_log.jsonl").absolute()
-            if src_log.exists():
-                try:
-                    with src_log.open("r", encoding="utf-8") as f:
-                        records = [json.loads(line) for line in f if line.strip()]
-                    # Only sync last 100 for performance
-                    target_log = dashboard_data_dir / "thesis_log_live.json"
-                    with target_log.open("w", encoding="utf-8") as f:
-                        json.dump(records[-100:], f, ensure_ascii=False)
-                except Exception:
-                    pass
+            def _safe_sync_log():
+                src_log = Path("data/thesis/thesis_log.jsonl").absolute()
+                if src_log.exists():
+                    try:
+                        with src_log.open("r", encoding="utf-8") as f:
+                            records = [json.loads(line) for line in f if line.strip()]
+                        # Only sync last 100 for performance
+                        target_log = dashboard_data_dir / f"thesis_log_{self.mode}.json"
+                        with target_log.open("w", encoding="utf-8") as f:
+                            json.dump(records[-100:], f, ensure_ascii=False)
+                    except Exception as e:
+                        print(f"⚠️ [Phase20B] Sync Thesis Log failed: {e}")
 
-            # 2. Sync TPFM M5
-            m5_src = Path("data/review/tpfm_m5.json").absolute()
-            if m5_src.exists():
-                shutil.copy2(m5_src, dashboard_data_dir / "tpfm_m5_live.json")
+            _safe_sync_log()
 
+            # 2. Phase 20-B: Export market-timeline-anchored flow artifacts FIRST
+            # This returns the count of frames exported
+            frames_count = 0
+            try:
+                frames_count = self._export_flow_artifacts(dashboard_data_dir)
+            except Exception as e:
+                print(f"⚠️ [Phase20B] Sync flow artifacts failed: {e}")
+
+            has_current_run_flow = (
+                frames_count > 0 and self._last_exported_flow_run_id == self._runtime_run_id
+            )
+
+            # 3. Generate and Sync TRUE Live Summary
+            # We only sync summary if we have some data to show
+            try:
+                await self._sync_live_summary(dashboard_data_dir, has_data=has_current_run_flow)
+            except Exception as e:
+                print(f"⚠️ [Phase20B] Sync live summary failed: {e}")
+
+            # 4. Sync Telemetry Files
+            mode_suffix = f"_{self.mode}"
             telemetry_map = {
+                f"data/review/tpfm_m5.json": f"tpfm_m5{mode_suffix}.json",
                 "data/review/daily_summary.json": "daily_summary.json",
                 "data/review/health_status.json": "health_status.json",
-                "data/review/tpfm_m30.json": "tpfm_m30.json",
-                "data/review/tpfm_4h.json": "tpfm_4h.json",
+                f"data/review/tpfm_m30.json": f"tpfm_m30{mode_suffix}.json",
+                f"data/review/tpfm_4h.json": f"tpfm_4h{mode_suffix}.json",
             }
 
             for src_rel, target_name in telemetry_map.items():
-                src_p = Path(src_rel).absolute()
-                if src_p.exists():
-                    shutil.copy2(src_p, dashboard_data_dir / target_name)
-            
-            # 3. Generate and Sync TRUE Live Summary
-            await self._sync_live_summary(dashboard_data_dir)
-            
-            # 4. Update actions_status.json to point to Live mode using actual session ID
-            await self._sync_actions_status(dashboard_data_dir)
-                
-        except Exception:
-            # Silent failure for sync, don't break the engine
-            pass
+                try:
+                    src_p = Path(src_rel).absolute()
+                    if src_p.exists():
+                        shutil.copy2(src_p, dashboard_data_dir / target_name)
+                except Exception as e:
+                    print(f"⚠️ [Phase20B] Sync {target_name} failed: {e}")
 
-    async def _sync_live_summary(self, dashboard_data_dir: Path):
-        """Generates a synthetic summary matching the Replay Summary schema using Live data."""
+            # 5. Export realtime thesis events
+            try:
+                await self._sync_realtime_events(dashboard_data_dir)
+            except Exception as e:
+                print(f"⚠️ [Phase20B] Sync realtime events failed: {e}")
+
+            # 6. Update actions_status.json LAST with a publication gate
+            # ONLY update artifact_run_id if we have at least one frame
+            try:
+                await self._sync_actions_status(dashboard_data_dir, has_data=has_current_run_flow)
+            except Exception as e:
+                print(f"⚠️ [Phase20B] Sync actions status failed: {e}")
+
+            # 7. Publish an atomic per-run bundle + manifest for dashboard reads
+            try:
+                status_payload = self._read_json_file((dashboard_data_dir / "actions_status.json").absolute())
+                published_run_id = (
+                    status_payload.get("artifact_run_id")
+                    if isinstance(status_payload, dict)
+                    else self._runtime_run_id
+                )
+                if published_run_id:
+                    self._publish_run_bundle(dashboard_data_dir, published_run_id)
+            except Exception as e:
+                print(f"⚠️ [Phase20B] Publish current manifest failed: {e}")
+                
+        except Exception as global_e:
+            print(f"❌ [Phase20B] Critical failure in _sync_to_dashboard: {global_e}")
+
+    def _select_m5_winning_signal(self) -> dict:
+        """Select the single best signal from current thesis state for M5 consolidated view."""
+        active_list = list(self.thesis_state.values())
+        if not active_list:
+            return {}
+        # Pick the signal with highest (flow_alignment_score, score) — same sorting as evaluate_setups
+        best_record = max(
+            active_list,
+            key=lambda x: (getattr(x.signal, 'flow_alignment_score', 0), x.signal.score, x.signal.confidence),
+        )
+        winner = asdict(best_record.signal)
+        winner["created_at"] = winner.get("created_at") or datetime.now(tz=timezone.utc).isoformat()
+        return winner
+
+    def _build_m5_consolidated_entry(self, winner: dict) -> dict:
+        """Build a consolidated M5 entry with delta comparison to previous M5."""
+        prev = self._prev_m5_winning_signal
+        delta_score = round(winner.get("score", 0) - prev.get("score", 0), 1) if prev else 0
+        prev_grade = prev.get("tradability_grade", "") if prev else ""
+        curr_grade = winner.get("tradability_grade", "D")
+        prev_setup = prev.get("setup", "") if prev else ""
+        curr_setup = winner.get("setup", "")
+        
+        entry = {
+            **winner,
+            "delta_score": delta_score,
+            "prev_grade": prev_grade,
+            "grade_changed": prev_grade != curr_grade if prev else False,
+            "setup_changed": prev_setup != curr_setup if prev else False,
+            "prev_setup": prev_setup,
+            "window_ts": int(datetime.now().timestamp() * 1000),
+        }
+        return entry
+
+    async def _sync_live_summary(self, dashboard_data_dir: Path, has_data: bool = True):
+        """Generates a synthetic summary with consolidated M5 signals (1 winner per window)."""
         try:
             generated_at = datetime.now(tz=timezone.utc).isoformat()
+            target_path = (dashboard_data_dir / f"summary_btcusdt_{self.mode}.json").absolute()
+
+            if not has_data and target_path.exists():
+                return
             
-            # Extract top signals from active state
-            active_list = list(self.thesis_state.values())
-            # Sort by score desc, limited to 5
-            top_records = sorted(active_list, key=lambda x: x.signal.score, reverse=True)[:5]
-            top_signals = [asdict(r.signal) for r in top_records]
+            # Select the single winning signal for this M5 window
+            winner = self._select_m5_winning_signal()
+            
+            # Build consolidated entry with delta
+            if winner:
+                consolidated = self._build_m5_consolidated_entry(winner)
+            else:
+                consolidated = {}
             
             latest_tpfm = asdict(self._latest_tpfm_snapshot) if self._latest_tpfm_snapshot else {}
             
+            # Patch 3 CONTENT GATE: Don't export summary if it's purely empty/initializing
+            if not latest_tpfm and not consolidated and not self._m5_signal_history:
+                return
+
             summary = {
                 "instrument_key": self.instrument_key,
                 "artifact_contract": {
-                    "mode": "live",
+                    "schema_version": "v2",
+                    "mode": self.mode,
                     "run_id": self._runtime_run_id,
                     "generated_at": generated_at,
                     "window_end_ts": int(datetime.now().timestamp() * 1000),
                     "source": "live_engine"
                 },
                 "latest_tpfm": latest_tpfm,
-                "top_signals": top_signals
+                "top_signals": [consolidated] if consolidated else [],
+                "m5_signal_history": self._m5_signal_history[-20:],  # Last 20 M5 consolidated entries
             }
             
-            target_path = (dashboard_data_dir / "summary_btcusdt_live.json").absolute()
             with target_path.open("w", encoding="utf-8") as f:
                 json.dump(summary, f, ensure_ascii=False, indent=2)
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"⚠️ [Phase20B] Sync live summary failed: {e}")
 
-    async def _sync_actions_status(self, dashboard_data_dir: Path):
-        """Updates actions_status.json to reflect the current Live session using internal state."""
+    async def _sync_realtime_events(self, dashboard_data_dir: Path):
+        """Phase 20-F: Export filtered high-fidelity realtime events for the Decision Cockpit."""
         try:
+            src_log = Path("data/thesis/thesis_log.jsonl").absolute()
+            if not src_log.exists():
+                return
+            
+            filtered_records = []
+            with src_log.open("r", encoding="utf-8") as f:
+                for line in f:
+                    if not line.strip():
+                        continue
+                    try:
+                        rec = json.loads(line)
+                        event_type = rec.get("event_type", rec.get("type", ""))
+                        
+                        # Phase 20-F Quality Filter
+                        should_keep = False
+                        
+                        # 1. Thesis state transitions are always kept
+                        # Mapping stage_transition (new contract) to priority checks
+                        if event_type == "stage_transition":
+                            to_stage = rec.get("to_stage", "")
+                            if to_stage in ("CONFIRMED", "ACTIONABLE", "INVALIDATED", "RESOLVED"):
+                                should_keep = True
+                        elif event_type in ("EVENT_THESIS_CONFIRMED", "EVENT_THESIS_ACTIONABLE", "EVENT_THESIS_INVALIDATED", "EVENT_THESIS_RESOLVED"):
+                            should_keep = True
+                        
+                        # 2. Large liquidations or high intensity events
+                        elif event_type == "EVENT_LIQUIDATION_LARGE" or rec.get("liquidation_quote", 0) > 20000:
+                            should_keep = True
+                        
+                        # 3. High-quality TPFM transitions
+                        elif event_type == "EVENT_TPFM_TRANSITION" or event_type == "tpfm_transition":
+                            quality = rec.get("transition_quality", rec.get("quality", 0.0))
+                            speed = rec.get("transition_speed", rec.get("speed", 0.0))
+                            if quality >= 0.60 or speed >= 0.65:
+                                should_keep = True
+                        
+                        # 4. Critical alerts or escalations
+                        elif rec.get("severity") == "CRITICAL" or rec.get("should_escalate") is True:
+                            should_keep = True
+                            
+                        if should_keep:
+                            filtered_records.append(rec)
+                    except (json.JSONDecodeError, TypeError):
+                        continue
+            
+            # Sort by timestamp (asc) and take last 50
+            filtered_records.sort(key=lambda x: x.get("timestamp", 0))
+            
+            target = (dashboard_data_dir / f"realtime_events_{self.mode}.json").absolute()
+            with target.open("w", encoding="utf-8") as f:
+                json.dump(filtered_records[-50:], f, ensure_ascii=False)
+        except Exception as e:
+            # Silent failure for sync, don't break the engine
+            print(f"⚠️ [Phase20B] Sync realtime events failed: {e}")
+
+    def _emit_m5_timeline_records(self, snap: "TPFMSnapshot") -> None:
+        """Phase 20-B: Emit market-timeline-anchored records for this M5 window."""
+        try:
+            import time as _time
+            now_ms = int(_time.time() * 1000)
+            run_id = self._runtime_run_id
+            mode = self.mode
+            symbol = snap.symbol
+            venue = snap.venue
+            market_ts = snap.window_end_ts
+            stack = snap.stack_state
+
+            # Parent Fallbacks (Patch 1: Use cached HTF data if parent_context is missing)
+            m30_id = snap.parent_context.get("m30_state_id") if snap.parent_context else self._latest_m30_id
+            h1_id = snap.parent_context.get("h1_state_id") if snap.parent_context else self._latest_h1_id
+            h4_id = snap.parent_context.get("h4_state_id") if snap.parent_context else self._latest_h4_id
+            h12_id = snap.parent_context.get("h12_state_id") if snap.parent_context else self._latest_h12_id
+            d1_id = snap.parent_context.get("d1_state_id") if snap.parent_context else self._latest_d1_id
+
+            m30_ts = snap.parent_context.get("m30_end_ts") if snap.parent_context else self._latest_m30_end_ts
+            h1_ts = snap.parent_context.get("h1_end_ts") if snap.parent_context else self._latest_h1_end_ts
+            h4_ts = snap.parent_context.get("h4_end_ts") if snap.parent_context else self._latest_h4_end_ts
+            h12_ts = snap.parent_context.get("h12_end_ts") if snap.parent_context else self._latest_h12_end_ts
+            d1_ts = snap.parent_context.get("d1_end_ts") if snap.parent_context else self._latest_d1_end_ts
+
+            # 1. flow_frame_history (M5 state row)
+            flow_bias = snap.continuation_bias if snap.continuation_bias in ("LONG", "SHORT") else "NEUTRAL"
+            frame_row = {
+                "frame_state_id": snap.snapshot_id,
+                "run_id": run_id,
+                "mode": mode,
+                "symbol": symbol,
+                "venue": venue,
+                "frame": "M5",
+                "market_ts": market_ts,
+                "window_start_ts": snap.window_start_ts,
+                "window_end_ts": snap.window_end_ts,
+                "emitted_at_ts": now_ms,
+                "ingested_at_ts": now_ms,
+                "record_seq": 0,
+                "is_final": 1,
+                "source_kind": "tpfm_m5_snapshot",
+                "source_ref_id": snap.snapshot_id,
+                "snapshot_id": snap.snapshot_id,
+                "pattern_id": snap.metadata.get("pattern_id", "") if snap.metadata else "",
+                "stack_id": stack.stack_id if stack else f"{snap.snapshot_id}:stack",
+                "open_px": snap.open_px,
+                "high_px": snap.high_px,
+                "low_px": snap.low_px,
+                "close_px": snap.close_px,
+                "volume_quote": snap.volume_quote,
+                "matrix_cell": snap.matrix_cell,
+                "matrix_alias_vi": snap.matrix_alias_vi,
+                "flow_state_code": snap.flow_state_code,
+                "pattern_code": snap.pattern_code,
+                "pattern_phase": snap.pattern_phase,
+                "sequence_id": snap.sequence_id,
+                "sequence_signature": snap.sequence_signature,
+                "sequence_length": snap.sequence_length,
+                "flow_bias": flow_bias,
+                "tempo_state": snap.tempo_state,
+                "persistence_state": snap.persistence_state,
+                "decision_posture": snap.decision_posture,
+                "tradability_grade": snap.tradability_grade,
+                "agreement_score": snap.agreement_score,
+                "tradability_score": snap.tradability_score,
+                "context_quality_score": snap.context_quality_score,
+                "market_quality_score": snap.market_quality_score,
+                "stack_signature": stack.stack_signature if stack else "",
+                "stack_alignment": stack.stack_alignment if stack else "UNKNOWN",
+                "stack_quality": stack.stack_quality if stack else 0.0,
+                "parent_m30_end_ts": m30_ts,
+                "parent_h1_end_ts": h1_ts,
+                "parent_h4_end_ts": h4_ts,
+                "parent_h12_end_ts": h12_ts,
+                "parent_d1_end_ts": d1_ts,
+                "health_state": snap.health_state,
+                "metadata_json": json.dumps(snap.metadata if snap.metadata else {}, ensure_ascii=False),
+            }
+            self.store.save_flow_frame_state(frame_row)
+
+            # 2. flow_timeline_event (STATE event)
+            state_event_id = f"{snap.snapshot_id}:state"
+            observed = snap.observed_facts[:3] if snap.observed_facts else []
+            event_row = {
+                "event_id": state_event_id,
+                "run_id": run_id,
+                "mode": mode,
+                "symbol": symbol,
+                "venue": venue,
+                "frame": "M5",
+                "market_ts": market_ts,
+                "window_start_ts": snap.window_start_ts,
+                "window_end_ts": snap.window_end_ts,
+                "anchor_frame": "M5",
+                "anchor_window_start_ts": snap.window_start_ts,
+                "anchor_window_end_ts": snap.window_end_ts,
+                "emitted_at_ts": now_ms,
+                "ingested_at_ts": now_ms,
+                "record_seq": 10,
+                "is_final": 1,
+                "event_type": "STATE",
+                "signal_kind": "PATTERN",
+                "severity": "INFO",
+                "priority": 50,
+                "snapshot_id": snap.snapshot_id,
+                "transition_id": snap.transition_event.transition_id if snap.transition_event else "",
+                "pattern_id": snap.metadata.get("pattern_id", "") if snap.metadata else "",
+                "stack_id": stack.stack_id if stack else f"{snap.snapshot_id}:stack",
+                "thesis_id": "",
+                "matrix_cell": snap.matrix_cell,
+                "matrix_alias_vi": snap.matrix_alias_vi,
+                "flow_state_code": snap.flow_state_code,
+                "pattern_code": snap.pattern_code,
+                "pattern_phase": snap.pattern_phase,
+                "sequence_signature": snap.sequence_signature,
+                "decision_posture": snap.decision_posture,
+                "tradability_grade": snap.tradability_grade,
+                "action_label_vi": snap.action_plan_vi,
+                "why_now_vi": " | ".join(observed),
+                "invalid_if_vi": snap.invalid_if,
+                "summary_vi": snap.decision_summary_vi,
+                "parent_m30_end_ts": m30_ts,
+                "parent_h1_end_ts": h1_ts,
+                "parent_h4_end_ts": h4_ts,
+                "parent_h12_end_ts": h12_ts,
+                "parent_d1_end_ts": d1_ts,
+                "metadata_json": "{}",
+            }
+            self.store.save_flow_timeline_event(event_row)
+
+            # 3. flow_stack_history
+            stack_id = stack.stack_id if stack else f"{snap.snapshot_id}:stack"
+            
+            # Phase 24: Construct comprehensive frames metadata for MTF strip
+            # Try to build rich metadata for parent frames from snap context or cached IDs
+            def _get_frame_meta(tf: str, state_id: str | None, end_ts: int | None) -> dict:
+                if not state_id:
+                    return {}
+
+                # Prefer enriched aggregate metadata from the latest timeframe cache.
+                cached = self._latest_frame_meta.get(tf, {})
+                fallback_alias = f"{tf} đang đồng bộ"
+                return {
+                    "state_id": state_id,
+                    "window_end_ts": end_ts or cached.get("window_end_ts"),
+                    "alias_vi": cached.get("matrix_alias_vi") or fallback_alias,
+                    "flow_bias": cached.get("flow_bias", "NEUTRAL"),
+                    "tradability_grade": cached.get("tradability_grade") or "--",
+                    "pattern_code": cached.get("pattern_code", ""),
+                    "pattern_phase": cached.get("pattern_phase", ""),
+                }
+
+            stack_row = {
+                "stack_id": stack_id,
+                "run_id": run_id,
+                "mode": mode,
+                "symbol": symbol,
+                "venue": venue,
+                "market_ts": market_ts,
+                "anchor_frame": "M5",
+                "anchor_window_start_ts": snap.window_start_ts,
+                "anchor_window_end_ts": snap.window_end_ts,
+                "emitted_at_ts": now_ms,
+                "ingested_at_ts": now_ms,
+                "record_seq": 0,
+                "is_final": 1,
+                "m5_state_id": snap.snapshot_id,
+                "m30_state_id": m30_id,
+                "h1_state_id": h1_id,
+                "h4_state_id": h4_id,
+                "h12_state_id": h12_id,
+                "d1_state_id": d1_id,
+                "m5_end_ts": snap.window_end_ts,
+                "m30_end_ts": m30_ts,
+                "h1_end_ts": h1_ts,
+                "h4_end_ts": h4_ts,
+                "h12_end_ts": h12_ts,
+                "d1_end_ts": d1_ts,
+                "stack_signature": stack.stack_signature if stack else f"M5:{snap.matrix_cell}",
+                "stack_alignment": stack.stack_alignment if stack else "MICRO_LEAD",
+                "stack_conflict": stack.stack_conflict if stack else "UNKNOWN",
+                "micro_vs_macro": stack.micro_vs_macro if stack else "UNKNOWN",
+                "stack_pressure": stack.stack_pressure if stack else 0.0,
+                "stack_quality": stack.stack_quality if stack else 1.0,
+                "macro_bias": self._latest_frame_ids.get("MACRO_BIAS", "NEUTRAL"),
+                "trigger_bias": flow_bias,
+                "metadata_json": json.dumps({
+                    "frames": {
+                        "M5": {
+                            "state_id": snap.snapshot_id,
+                            "window_end_ts": snap.window_end_ts,
+                            "matrix_cell": snap.matrix_cell,
+                            "alias_vi": snap.matrix_alias_vi,
+                            "pattern_code": snap.pattern_code,
+                            "pattern_phase": snap.pattern_phase,
+                            "tradability_grade": snap.tradability_grade,
+                            "flow_bias": flow_bias,
+                        },
+                        "M30": _get_frame_meta("M30", m30_id, m30_ts),
+                        "H1": _get_frame_meta("H1", h1_id, h1_ts),
+                        "H4": _get_frame_meta("H4", h4_id, h4_ts),
+                        "H12": _get_frame_meta("H12", h12_id, h12_ts),
+                        "D1": _get_frame_meta("D1", d1_id, d1_ts),
+                    }
+                }, ensure_ascii=False),
+            }
+            self.store.save_flow_stack_history(stack_row)
+
+        except Exception as e:
+            # Patch 1: Show errors clearly in dev
+            print(f"⚠️ [Phase20B] Emit timeline records failed: {e}")
+            import traceback
+            traceback.print_exc()
+
+    def _export_flow_artifacts(self, dashboard_data_dir: Path) -> int:
+        """Phase 20-B: Export flow history (Frames, Timeline, Stack) into tiered artifacts."""
+        try:
+            run_id = self._runtime_run_id
+            mode = self.mode
+            symbol = self.symbol
+            
+            now_ms = int(__import__("time").time() * 1000)
+
+            def build_frame_item(r: dict) -> dict:
+                return {
+                    "run_id": export_run_id,
+                    "mode": self.mode,
+                    "symbol": self.symbol,
+                    "frame_state_id": r.get("frame_state_id"),
+                    "frame": r.get("frame", "M5"),
+                    "market_ts": r.get("market_ts"),
+                    "window": {"start_ts": r.get("window_start_ts"), "end_ts": r.get("window_end_ts")},
+                    "source": {"kind": r.get("source_kind"), "ref_id": r.get("source_ref_id")},
+                    "prices": {"open": r.get("open_px"), "high": r.get("high_px"), "low": r.get("low_px"), "close": r.get("close_px")},
+                    "volume_quote": r.get("volume_quote"),
+                    "flow": {
+                        "matrix_cell": r.get("matrix_cell"), "matrix_alias_vi": r.get("matrix_alias_vi"),
+                        "flow_state_code": r.get("flow_state_code"), "pattern_code": r.get("pattern_code"),
+                        "pattern_phase": r.get("pattern_phase"), "flow_bias": r.get("flow_bias"),
+                        "sequence_signature": r.get("sequence_signature"), "sequence_length": r.get("sequence_length"),
+                        "tempo_state": r.get("tempo_state"), "persistence_state": r.get("persistence_state"),
+                    },
+                    "decision": {
+                        "posture": r.get("decision_posture"), "tradability_grade": r.get("tradability_grade"),
+                        "stack_alignment": r.get("stack_alignment"), "stack_quality": r.get("stack_quality"),
+                        "action_label_vi": r.get("action_label_vi", ""),
+                        "invalid_if_vi": r.get("invalid_if_vi", ""),
+                    },
+                    "parents": {
+                        "m30_end_ts": r.get("parent_m30_end_ts"),
+                        "h1_end_ts": r.get("parent_h1_end_ts"),
+                        "h4_end_ts": r.get("parent_h4_end_ts"),
+                    },
+                    "health_state": r.get("health_state"),
+                }
+
+            def build_timeline_item(r: dict) -> dict:
+                return {
+                    "run_id": export_run_id,
+                    "mode": self.mode,
+                    "symbol": self.symbol,
+                    "event_id": r.get("event_id"),
+                    "market_ts": r.get("market_ts"),
+                    "frame": r.get("frame"),
+                    "window": {"start_ts": r.get("window_start_ts"), "end_ts": r.get("window_end_ts")},
+                    "event_type": r.get("event_type"),
+                    "signal_kind": r.get("signal_kind"),
+                    "priority": r.get("priority"),
+                    "context": {
+                        "matrix_cell": r.get("matrix_cell"), "matrix_alias_vi": r.get("matrix_alias_vi"),
+                        "pattern_code": r.get("pattern_code"), "pattern_phase": r.get("pattern_phase"),
+                        "decision_posture": r.get("decision_posture"), "tradability_grade": r.get("tradability_grade"),
+                    },
+                    "message": {
+                        "action_label_vi": r.get("action_label_vi", ""),
+                        "why_now_vi": r.get("why_now_vi", ""),
+                        "invalid_if_vi": r.get("invalid_if_vi", ""),
+                        "summary_vi": r.get("summary_vi", ""),
+                    },
+                    "refs": {"snapshot_id": r.get("snapshot_id"), "thesis_id": r.get("thesis_id")},
+                }
+
+            def build_stack_item(r: dict) -> dict:
+                import json as _json
+                frames = {}
+                try:
+                    meta = _json.loads(r.get("metadata_json") or "{}")
+                    frames = meta.get("frames", {})
+                except Exception:
+                    pass
+                return {
+                    "run_id": export_run_id,
+                    "mode": self.mode,
+                    "symbol": self.symbol,
+                    "stack_id": r.get("stack_id"),
+                    "market_ts": r.get("market_ts"),
+                    "anchor": {"frame": r.get("anchor_frame"), "window_end_ts": r.get("anchor_window_end_ts")},
+                    "stack_signature": r.get("stack_signature"),
+                    "stack_alignment": r.get("stack_alignment"),
+                    "stack_conflict": r.get("stack_conflict"),
+                    "micro_vs_macro": r.get("micro_vs_macro"),
+                    "stack_pressure": r.get("stack_pressure"),
+                    "stack_quality": r.get("stack_quality"),
+                    "macro_bias": r.get("macro_bias"),
+                    "trigger_bias": r.get("trigger_bias"),
+                    "frames": frames,
+                }
+
+            def _load_rows(target_run_id: str) -> tuple[list[dict], list[dict], list[dict]]:
+                return (
+                    self.store.load_flow_frames(target_run_id, self.mode, self.symbol, 100),
+                    self.store.load_flow_timeline(target_run_id, self.mode, self.symbol, 50),
+                    self.store.load_flow_stack(target_run_id, self.mode, self.symbol, 20),
+                )
+
+            # Load from store and export using engine's current mode
+            export_run_id = run_id
+            frame_rows, timeline_rows, stack_rows = _load_rows(export_run_id)
+
+            if self.mode == "live" and not frame_rows:
+                status_path = (dashboard_data_dir / "actions_status.json").absolute()
+                summary_path = (dashboard_data_dir / f"summary_btcusdt_{self.mode}.json").absolute()
+                candidate_run_ids: list[str] = []
+                try:
+                    if status_path.exists():
+                        candidate_run_ids.append(
+                            json.loads(status_path.read_text(encoding="utf-8")).get("artifact_run_id", "")
+                        )
+                except Exception:
+                    pass
+                try:
+                    if summary_path.exists():
+                        candidate_run_ids.append(
+                            json.loads(summary_path.read_text(encoding="utf-8")).get("artifact_contract", {}).get("run_id", "")
+                        )
+                except Exception:
+                    pass
+                for fallback_run_id in candidate_run_ids:
+                    if not fallback_run_id or fallback_run_id == run_id:
+                        continue
+                    fb_frames, fb_timeline, fb_stack = _load_rows(fallback_run_id)
+                    if fb_frames:
+                        export_run_id = fallback_run_id
+                        frame_rows, timeline_rows, stack_rows = fb_frames, fb_timeline, fb_stack
+                        print(f"ℹ️ [Phase20B] Backfill live flow artifacts from published run {fallback_run_id}")
+                        break
+
+            has_artifact_rows = bool(frame_rows or timeline_rows or stack_rows)
+            self._last_exported_flow_run_id = export_run_id if has_artifact_rows else None
+            frames_path = (dashboard_data_dir / f"flow_frames_{self.mode}.json").absolute()
+            timeline_path = (dashboard_data_dir / f"flow_timeline_{self.mode}.json").absolute()
+            stack_path = (dashboard_data_dir / f"flow_stack_{self.mode}.json").absolute()
+
+            # Keep the last coherent live bundle visible until the new run has data.
+            if (
+                self.mode == "live"
+                and not has_artifact_rows
+                and frames_path.exists()
+                and timeline_path.exists()
+                and stack_path.exists()
+            ):
+                print("ℹ️ [Phase20B] Preserve previous live flow artifacts until new run has data")
+                return 0
+
+            artifact_contract = {
+                "schema_version": "v1", "mode": self.mode,
+                "run_id": export_run_id, "symbol": self.symbol,
+                "generated_at_ts": now_ms,
+            }
+
+            frames_path.write_text(json.dumps({
+                "artifact_contract": {**artifact_contract, "artifact_name": "flow_frames", "count": len(frame_rows)},
+                "items": [build_frame_item(r) for r in frame_rows],
+            }, ensure_ascii=False), encoding="utf-8")
+
+            timeline_path.write_text(json.dumps({
+                "artifact_contract": {**artifact_contract, "artifact_name": "flow_timeline", "count": len(timeline_rows)},
+                "items": [build_timeline_item(r) for r in timeline_rows],
+            }, ensure_ascii=False), encoding="utf-8")
+
+            stack_path.write_text(json.dumps({
+                "artifact_contract": {**artifact_contract, "artifact_name": "flow_stack", "count": len(stack_rows)},
+                "items": [build_stack_item(r) for r in stack_rows],
+            }, ensure_ascii=False), encoding="utf-8")
+
+            return len(frame_rows)
+        except Exception as e:
+            print(f"❌ [Phase20B] Export flow artifacts failed: {e}")
+            import traceback
+            traceback.print_exc()
+            return 0
+
+    async def _sync_actions_status(self, dashboard_data_dir: Path, has_data: bool = True):
+        """Update actions_status.json to reflect current engine state and mode."""
+        try:
+            now_ms = int(time.time() * 1000)
             generated_at = datetime.now(tz=timezone.utc).isoformat()
             
-            # Extract basic telemetry from state
-            active_list = list(self.thesis_state.values())
-            top_signal = {}
-            if active_list:
-                top_record = max(active_list, key=lambda x: x.signal.score)
-                top_signal = asdict(top_record.signal)
+            # Publication Gate: Only update run_id if we have data or if it's already set to current
+            target_status = (dashboard_data_dir / "actions_status.json").absolute()
+            current_run_id = self._runtime_run_id
+            
+            if not has_data and target_status.exists():
+                try:
+                    with target_status.open("r", encoding="utf-8") as f:
+                        old_status = json.load(f)
+                        # Carry over old run_id if we aren't ready to publish new one yet
+                        old_run_id = old_status.get("artifact_run_id", "")
+                        if old_run_id and old_run_id != current_run_id:
+                            old_frames = self.store.load_flow_frames(old_run_id, self.mode, self.symbol, 1)
+                            if old_frames:
+                                current_run_id = old_run_id
+                            else:
+                                summary_path = (dashboard_data_dir / f"summary_btcusdt_{self.mode}.json").absolute()
+                                if summary_path.exists():
+                                    summary_run_id = json.loads(summary_path.read_text(encoding="utf-8")).get("artifact_contract", {}).get("run_id", "")
+                                    if summary_run_id:
+                                        summary_frames = self.store.load_flow_frames(summary_run_id, self.mode, self.symbol, 1)
+                                        if summary_frames:
+                                            current_run_id = summary_run_id
+                except Exception:
+                    pass
+
+            # Get top signal from existing state
+            active_signals = [r.signal for r in self.thesis_state.values() if r.signal.stage in ["CONFIRMED", "ACTIONABLE"]]
+            top_record_signal = None
+            if active_signals:
+                top_record_signal = sorted(active_signals, key=lambda s: (s.score, s.confidence), reverse=True)[0]
+            
+            top_signal = asdict(top_record_signal) if top_record_signal else {}
             
             latest_tpfm = asdict(self._latest_tpfm_snapshot) if self._latest_tpfm_snapshot else {}
             
@@ -411,19 +1170,142 @@ class LiveThesisLoop:
                 "data_mode": "live",
                 "live_enabled": True,
                 "is_replay": False,
-                "artifact_run_id": self._runtime_run_id,
-                "artifact_window_end_ts": int(datetime.now().timestamp() * 1000),
+                "artifact_run_id": current_run_id,
+                "artifact_window_end_ts": now_ms,
                 "artifact_generated_at": generated_at,
                 "latest_flow_grade": latest_tpfm.get("tradability_grade") or "D",
                 "latest_transition": {},
                 "top_signal": top_signal,
             }
             
-            target_status = (dashboard_data_dir / "actions_status.json").absolute()
             with target_status.open("w", encoding="utf-8") as f:
                 json.dump(status_payload, f, ensure_ascii=False, indent=2)
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"⚠️ [Phase20B] Sync actions status failed: {e}")
+
+    def _map_sum_to_db_row(self, summary: dict, frame_state_id: str | None = None) -> dict:
+        """Helper to map calculate_higher_frame_summary result to flow_frame_history row format."""
+        from uuid import uuid4
+        now_ms = int(__import__("time").time() * 1000)
+        
+        # Phase 20-H Enforcement: Capture meaningful bias for MTF stack
+        flow_bias = summary.get("flow_bias", "NEUTRAL")
+        if not flow_bias or flow_bias == "NEUTRAL":
+            # Heuristic: use dominant_cell for bias if flow_bias is missing
+            cell = summary.get("dominant_cell", "")
+            if "SHORT" in cell: flow_bias = "SHORT"
+            elif "LONG" in cell: flow_bias = "LONG"
+        
+        return {
+            "frame_state_id": frame_state_id or f"sum:{summary['frame']}:{summary['window_end_ts']}:{uuid4().hex[:8]}",
+            "run_id": self._runtime_run_id,
+            "mode": "live",
+            "symbol": summary["symbol"],
+            "venue": self.venue,
+            "frame": summary["frame"],
+            "market_ts": summary["market_ts"],
+            "window_start_ts": summary["window_start_ts"],
+            "window_end_ts": summary["window_end_ts"],
+            "emitted_at_ts": now_ms,
+            "ingested_at_ts": now_ms,
+            "record_seq": 0,
+            "is_final": 1,
+            "source_kind": "aggregator",
+            "source_ref_id": f"m5_count:{summary.get('m5_count', 0)}",
+            "open_px": summary["open_px"],
+            "high_px": summary["high_px"],
+            "low_px": summary["low_px"],
+            "close_px": summary["close_px"],
+            "volume_quote": summary["volume_quote"],
+            "matrix_cell": summary["dominant_cell"],
+            "matrix_alias_vi": summary["matrix_alias_vi"],
+            "flow_state_code": f"{flow_bias}_REGIME", 
+            "pattern_code": f"PERIODIC_{summary['frame']}",
+            "pattern_phase": "CONSOLIDATED",
+            "flow_bias": flow_bias,
+            "decision_posture": "WAIT" if summary.get("agreement_score", 0) < 0.6 else "WATCH",
+            "tradability_grade": summary["tradability_grade"],
+            "agreement_score": summary["agreement_score"],
+            "tradability_score": summary["tradability_score"],
+            "market_quality_score": summary["market_quality_score"],
+            "stack_quality": summary.get("persistence_score", 0.0),
+            "metadata_json": json.dumps({
+                "persistence": summary.get("persistence_score"),
+                "m5_count": summary.get("m5_count")
+            }, ensure_ascii=False),
+        }
+
+    def _check_higher_timeframe_aggregation(self, tpfm_snap: TPFMSnapshot) -> None:
+        """Phase 20-E: Aggregates M5 snapshots into M30, H1, H4, H12, D1 and saves to SQLite."""
+        try:
+            self._tpfm_m5_roll_buffer.append(tpfm_snap)
+            ts = tpfm_snap.window_end_ts
+            m5_list = list(self._tpfm_m5_roll_buffer)
+            
+            # M30 Aggregation: Every 30m or 6 M5
+            if ts % 1800000 < 300000:
+                if len(m5_list) >= 6:
+                    m30_sum = self.tpfm.calculate_m30_summary(m5_list[-6:])
+                    row = self._map_sum_to_db_row(m30_sum)
+                    self.store.save_flow_frame_state(row)
+                    self._latest_frame_ids["M30"] = row["frame_state_id"]
+                    self._latest_m30_id = row["frame_state_id"]
+                    self._latest_m30_end_ts = m30_sum["window_end_ts"]
+                    self._latest_frame_meta["M30"] = row
+                    print(f"🪜 [MTF] Aggregated M30: {m30_sum['dominant_cell']} | Bias: {m30_sum['flow_bias']}")
+
+            # H1 Aggregation: Every hour boundary or 12 M5
+            if ts % 3600000 < 300000:
+                if len(m5_list) >= 12:
+                    h1_sum = self.tpfm.calculate_h1_summary(m5_list[-12:])
+                    row = self._map_sum_to_db_row(h1_sum)
+                    self.store.save_flow_frame_state(row)
+                    self._latest_frame_ids["H1"] = row["frame_state_id"]
+                    self._latest_m30_id = row["frame_state_id"] # Fallback if M30 not found
+                    self._latest_h1_id = row["frame_state_id"]
+                    self._latest_h1_end_ts = h1_sum["window_end_ts"]
+                    self._latest_frame_ids["MACRO_BIAS"] = h1_sum["flow_bias"] # H1 defines macro bias for stack
+                    self._latest_frame_meta["H1"] = row
+                    print(f"🪜 [MTF] Aggregated H1: {h1_sum['dominant_cell']} | Bias: {h1_sum['flow_bias']}")
+
+            # H4 Aggregation
+            if ts % 14400000 < 300000: 
+                if len(m5_list) >= 48:
+                    h4_sum = self.tpfm.calculate_h4_summary(m5_list[-48:])
+                    row = self._map_sum_to_db_row(h4_sum)
+                    self.store.save_flow_frame_state(row)
+                    self._latest_frame_ids["H4"] = row["frame_state_id"]
+                    self._latest_h4_id = row["frame_state_id"]
+                    self._latest_h4_end_ts = h4_sum["window_end_ts"]
+                    self._latest_frame_meta["H4"] = row
+                    print(f"🪜 [MTF] Aggregated H4: {h4_sum['dominant_cell']} | Bias: {h4_sum['flow_bias']}")
+
+            # H12 Aggregation
+            if ts % 43200000 < 300000:
+                if len(m5_list) >= 144:
+                    h12_sum = self.tpfm.calculate_h12_summary(m5_list[-144:])
+                    row = self._map_sum_to_db_row(h12_sum)
+                    self.store.save_flow_frame_state(row)
+                    self._latest_frame_ids["H12"] = row["frame_state_id"]
+                    self._latest_h12_id = row["frame_state_id"]
+                    self._latest_h12_end_ts = h12_sum["window_end_ts"]
+                    self._latest_frame_meta["H12"] = row
+                    print(f"🪜 [MTF] Aggregated H12: {h12_sum['dominant_cell']} | Bias: {h12_sum['flow_bias']}")
+
+            # D1 Aggregation
+            if ts % 86400000 < 300000:
+                if len(m5_list) >= 288:
+                    d1_sum = self.tpfm.calculate_d1_summary(m5_list[-288:])
+                    row = self._map_sum_to_db_row(d1_sum)
+                    self.store.save_flow_frame_state(row)
+                    self._latest_frame_ids["D1"] = row["frame_state_id"]
+                    self._latest_d1_id = row["frame_state_id"]
+                    self._latest_d1_end_ts = d1_sum["window_end_ts"]
+                    self._latest_frame_meta["D1"] = row
+                    print(f"🪜 [MTF] Aggregated D1: {d1_sum['dominant_cell']} | Bias: {d1_sum['flow_bias']}")
+
+        except Exception as e:
+            print(f"⚠️ [Phase20E] Higher frame aggregation failed: {e}")
 
     async def _init_book(self) -> bool:
         snapshot, error = try_fetch_depth_snapshot(symbol=self.symbol)
@@ -526,6 +1408,10 @@ class LiveThesisLoop:
     ):
         started_at = datetime.now(tz=timezone.utc).isoformat()
         print(f"Khởi chạy loop cho {self.symbol}...")
+        
+        # Bootstrap DB schema
+        await self.store.migrate_schema()
+        
         session_started_monotonic = time.monotonic()
         if self.runtime_report_path is not None and self._runtime_lease is None:
             self._runtime_lease = acquire_live_runtime_lease(
@@ -887,7 +1773,7 @@ class LiveThesisLoop:
             tpfm_snap.setup_score_map = setup_score_map
             tpfm_snap.dominant_setups = [setup for setup, _ in sorted(setup_score_map.items(), key=lambda item: item[1], reverse=True)[:3]]
             
-            # Persist
+            # persistence
             await self.store.save_tpfm_snapshot(tpfm_snap)
             
             # Phase 14: Final E2E Pattern Persistence
@@ -898,17 +1784,26 @@ class LiveThesisLoop:
             pattern_outcomes = tpfm_snap.metadata.get("pattern_outcomes", [])
             for outcome in pattern_outcomes:
                 await self.store.save_pattern_outcome(outcome)
+
+            # Optimized AI Insights for M5 (Gemini)
+            now_ts = time.time()
+            time_since_ai = now_ts - self._last_ai_brief_ts
+            is_anomaly = tpfm_snap.should_escalate or tpfm_snap.tradability_grade in ["A", "S"]
             
-            # Dashboard History & Export
-            self._dashboard_m5_history.append(tpfm_snap)
-            try:
-                m5_path = Path("data/review/tpfm_m5.json")
-                m5_path.parent.mkdir(parents=True, exist_ok=True)
-                # Convert deque to list of dicts for JSON
-                snapshots_json = [asdict(s) for s in self._dashboard_m5_history]
-                m5_path.write_text(json.dumps(snapshots_json, ensure_ascii=False, indent=2), encoding="utf-8")
-            except Exception as e:
-                print(f"⚠️ [DASHBOARD] Lỗi xuất M5 JSON: {e}")
+            # Logic: Call AI every 1 hour OR if anomaly detected
+            should_call_ai = (time_since_ai > 3600) or is_anomaly
+            
+            if self.ai_explainer and self.ai_explainer.api_key and should_call_ai:
+                reason = "Chu kỳ 1h" if not is_anomaly else "🔥 Đột biến dòng tiền"
+                print(f"🤖 [AI] Đang lấy nhận định ({reason}) cho {self.symbol}...")
+                brief = self.ai_explainer.explain_m5_brief(tpfm_snap)
+                tpfm_snap.flow_decision_brief = brief
+                self._last_ai_brief_ts = now_ts
+                print(f"💡 [AI BRIEF] {brief}")
+            else:
+                # Carry over previous reasoning to avoid empty box
+                prev_brief = self._latest_tpfm_snapshot.flow_decision_brief if self._latest_tpfm_snapshot else ""
+                tpfm_snap.flow_decision_brief = prev_brief or "☕ Đang theo dõi thị trường (Chờ chu kỳ nhận định tiếp theo)..."
 
             self._update_latest_tpfm_summary(tpfm_snap)
             self._latest_tpfm_snapshot = tpfm_snap
@@ -922,12 +1817,86 @@ class LiveThesisLoop:
             if tpfm_snap.should_escalate:
                 print(f"⚠️ [ESCALATION] {', '.join(tpfm_snap.escalation_reason)}")
 
+            # Dashboard History & Export (Finalized with AI Brief)
+            self._dashboard_m5_history.append(tpfm_snap)
+            
+            # Phase 19: Capture winning signal for this M5 window
+            winner = self._select_m5_winning_signal()
+            if winner:
+                consolidated = self._build_m5_consolidated_entry(winner)
+                self._m5_signal_history.append(consolidated)
+                # Keep only last 50
+                if len(self._m5_signal_history) > 50:
+                    self._m5_signal_history = self._m5_signal_history[-50:]
+                # Update prev for next window's delta
+                self._prev_m5_winning_signal = winner
+            
+            # Phase 20-B: Emit market-timeline-anchored records to SQLite
+            self._emit_m5_timeline_records(tpfm_snap)
+            
+            # Phase 20-E: Aggregation for higher frames
+            self._check_higher_timeframe_aggregation(tpfm_snap)
+            
+            try:
+                sfx = "_live" if self.mode == "live" else "_scan"
+                m5_path = Path(f"data/review/tpfm_m5{sfx}.json")
+                m5_path.parent.mkdir(parents=True, exist_ok=True)
+                snapshots_json = [asdict(s) for s in self._dashboard_m5_history]
+                m5_path.write_text(json.dumps(snapshots_json, ensure_ascii=False, indent=2), encoding="utf-8")
+                # Also sync to docs/data immediately
+                shutil.copy2(m5_path, Path(f"docs/data/tpfm_m5{sfx}.json").absolute())
+            except Exception as e:
+                print(f"⚠️ [DASHBOARD] Lỗi xuất M5 JSON: {e}")
+
             # PHASE 3: 30m Regime Synthesis
             self._tpfm_m5_buffer.append(tpfm_snap)
             if len(self._tpfm_m5_buffer) >= 6:
                 print(f"🌀 [TPFM] Đang tổng hợp REGIME 30m cho {self.symbol}...")
                 regime = self.tpfm.calculate_30m_regime(self._tpfm_m5_buffer)
                 await self.store.save_tpfm_m30_regime(regime)
+                
+                # Phase 20-H Track M30 ID
+                # regime row in flow_frame_history? No, it's a separate table for now.
+                # But we should probably also save it to flow_frame_history for the MTF ladder.
+                m30_id = f"frame:M30:{tpfm_snap.window_end_ts}"
+                row = {
+                    "frame_state_id": m30_id,
+                    "run_id": self._runtime_run_id,
+                    "mode": "live",
+                    "symbol": self.symbol,
+                    "venue": self.venue,
+                    "frame": "M30",
+                    "market_ts": tpfm_snap.window_end_ts,
+                    "window_start_ts": self._tpfm_m5_buffer[0].window_start_ts,
+                    "window_end_ts": tpfm_snap.window_end_ts,
+                    "emitted_at_ts": int(datetime.now().timestamp() * 1000),
+                    "ingested_at_ts": int(datetime.now().timestamp() * 1000),
+                    "record_seq": 0,
+                    "is_final": 1,
+                    "source_kind": "regime_aggregator",
+                    "source_ref_id": regime.regime_id,
+                    "open_px": self._tpfm_m5_buffer[0].open_px,
+                    "high_px": max(s.high_px for s in self._tpfm_m5_buffer),
+                    "low_px": min(s.low_px for s in self._tpfm_m5_buffer),
+                    "close_px": tpfm_snap.close_px,
+                    "volume_quote": sum(s.volume_quote for s in self._tpfm_m5_buffer),
+                    "matrix_cell": regime.dominant_cell,
+                    "matrix_alias_vi": regime.dominant_regime,
+                    "flow_state_code": regime.dominant_regime,
+                    "pattern_code": "REGIME_30M",
+                    "pattern_phase": "CONSOLIDATED",
+                    "flow_bias": "LONG" if "ACCUMULATION" in regime.dominant_regime or "BUY" in regime.dominant_regime else ("SHORT" if "DISTRIBUTION" in regime.dominant_regime or "SELL" in regime.dominant_regime else "NEUTRAL"),
+                    "decision_posture": regime.macro_posture,
+                    "tradability_grade": "A" if regime.regime_persistence_score > 0.6 else "B",
+                    "agreement_score": regime.agreement_score,
+                    "tradability_score": regime.tradability_score,
+                    "market_quality_score": regime.regime_persistence_score,
+                    "stack_quality": regime.actionability_density,
+                    "metadata_json": json.dumps({"persistence": regime.regime_persistence_score}, ensure_ascii=False),
+                }
+                self.store.save_flow_frame_state(row)
+                self._latest_frame_ids["M30"] = m30_id
+                self._latest_frame_meta["M30"] = row
                 
                 # Output Summary
                 print(f"📝 [REGIME] {regime.dominant_regime} | Persistence: {regime.regime_persistence_score:.2f}")
@@ -944,7 +1913,9 @@ class LiveThesisLoop:
                     structural_report.ai_analysis_vi = analysis
                     
                     await self.store.save_tpfm_4h_report(structural_report)
-                    
+                    # Note: Structural report is H4, and we should track its ID too
+                    # But calculate_h4_summary (periodic) also runs. We prioritize periodic for timeline.
+
                     print(f"🤖 [AI ANALYSIS]\n{analysis}")
                     
                     self._tpfm_m30_buffer = []

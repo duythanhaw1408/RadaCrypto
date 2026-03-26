@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, replace
 
+from datetime import datetime, timezone
 from cfte.models.events import Stage, ThesisSignal
 from cfte.thesis.lifecycle import ACTIVE_STAGES, reduce_thesis_stage, stage_label_vi, summarize_lifecycle_transition
 
@@ -83,11 +84,17 @@ def apply_signal_update(
     event_ts: int,
 ) -> tuple[ThesisLifecycleRecord, list[ThesisEventRecord]]:
     if state is None:
+        # Initialize timestamps
+        iso_now = datetime.fromtimestamp(event_ts / 1000, tz=timezone.utc).isoformat()
+        signal.created_at = iso_now
+        signal.updated_at = iso_now
         next_state = ThesisLifecycleRecord(signal=signal, opened_ts=event_ts, updated_ts=event_ts)
         return next_state, [_build_open_event(signal=signal, event_ts=event_ts)]
 
     current_stage = state.signal.stage
     desired_stage = signal.stage
+    signal.created_at = state.signal.created_at
+    signal.updated_at = datetime.fromtimestamp(event_ts / 1000, tz=timezone.utc).isoformat()
     next_state = ThesisLifecycleRecord(
         signal=_transition_signal(signal=signal, next_stage=current_stage),
         opened_ts=state.opened_ts,

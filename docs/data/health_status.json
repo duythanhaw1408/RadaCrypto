@@ -1,6 +1,6 @@
 {
-  "overall_status": "healthy",
-  "generated_at": "2026-03-23T09:31:34.308193+00:00",
+  "overall_status": "degraded",
+  "generated_at": "2026-03-26T04:14:22.215653+00:00",
   "checks": [
     {
       "key": "python_version",
@@ -49,21 +49,21 @@
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact replay_summary sẵn sàng",
-      "detail": "2026-03-23T06:39:39.883724+00:00"
+      "detail": "2026-03-26T04:11:37.560397+00:00"
     },
     {
       "key": "daily_summary",
       "level": "warning",
-      "status": "ok",
-      "summary_vi": "Artifact daily_summary sẵn sàng",
-      "detail": "2026-03-23T01:42:28.871515+00:00"
+      "status": "warn",
+      "summary_vi": "Artifact daily_summary chưa được tạo",
+      "detail": "data/review/daily_summary.json"
     },
     {
       "key": "weekly_summary",
       "level": "warning",
-      "status": "ok",
-      "summary_vi": "Artifact weekly_summary sẵn sàng",
-      "detail": "2026-03-20T07:14:09.880987+00:00"
+      "status": "warn",
+      "summary_vi": "Artifact weekly_summary chưa được tạo",
+      "detail": "data/review/weekly_review.json"
     },
     {
       "key": "review_journal",
@@ -75,30 +75,30 @@
     {
       "key": "tuning_report",
       "level": "warning",
-      "status": "ok",
-      "summary_vi": "Artifact tuning_report sẵn sàng",
-      "detail": "2026-03-23T07:05:40.980361+00:00"
+      "status": "warn",
+      "summary_vi": "Artifact tuning_report chưa được tạo",
+      "detail": "data/review/tuning_report.json"
     },
     {
       "key": "health_report",
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact health_report sẵn sàng",
-      "detail": "2026-03-23T06:09:41.146274+00:00"
+      "detail": "2026-03-26T04:11:37.210236+00:00"
     },
     {
       "key": "live_runtime",
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact live_runtime sẵn sàng",
-      "detail": "2026-03-23T09:31:30.142421+00:00"
+      "detail": "2026-03-26T04:14:04.427851+00:00"
     },
     {
       "key": "live_runtime_owner",
       "level": "warning",
       "status": "ok",
       "summary_vi": "Artifact live_runtime có owner rõ ràng",
-      "detail": "run_id=12527d928d264cad8a2f35a61afc2c7b | pid=21030 | host=nguyens-MacBook-Air.local"
+      "detail": "run_id=50c5ff67754c499f9dd4e93048b048ba | pid=53878 | host=nguyens-Air.lan"
     },
     {
       "key": "live_runtime_status",
@@ -108,24 +108,31 @@
       "detail": null
     },
     {
+      "key": "live_runtime_degraded_flags",
+      "level": "warning",
+      "status": "warn",
+      "summary_vi": "Phiên live gần nhất có dấu hiệu suy giảm feed/context",
+      "detail": "tpfm_snapshot_degraded"
+    },
+    {
       "key": "live_runtime_first_m5",
       "level": "warning",
       "status": "ok",
       "summary_vi": "Phiên live gần nhất đã sinh M5 đầu tiên",
-      "detail": "2026-03-23T09:08:21.426083+00:00"
+      "detail": "2026-03-26T04:05:50.117205+00:00"
     },
     {
       "key": "live_runtime_latest_matrix",
       "level": "warning",
       "status": "ok",
-      "summary_vi": "Matrix gần nhất: Bán chủ động chưa có đè",
-      "detail": "grade=C"
+      "summary_vi": "Matrix gần nhất: Thuận pha bán",
+      "detail": "grade=B | blind_spots=FLOW_FRESHNESS_LOW"
     },
     {
       "key": "live_runtime_last_transition",
       "level": "warning",
       "status": "ok",
-      "summary_vi": "Chuyển pha gần nhất: Lật sang bán nhưng mang tính bẫy",
+      "summary_vi": "Chuyển pha gần nhất: Pha bán có dấu hiệu bẫy",
       "detail": null
     }
   ],

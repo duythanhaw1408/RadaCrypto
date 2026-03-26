@@ -1,0 +1,13 @@
+{
+  "last_run": "2026-03-26T04:05:37.010933+00:00",
+  "last_scan_time": "2026-03-26T04:05:37.010933+00:00",
+  "data_mode": "live",
+  "live_enabled": true,
+  "is_replay": false,
+  "artifact_run_id": "558a359283b24ed78428bf9cbef439d9",
+  "artifact_window_end_ts": 1774497937010,
+  "artifact_generated_at": "2026-03-26T04:05:37.010933+00:00",
+  "latest_flow_grade": "D",
+  "latest_transition": {},
+  "top_signal": {}
+}

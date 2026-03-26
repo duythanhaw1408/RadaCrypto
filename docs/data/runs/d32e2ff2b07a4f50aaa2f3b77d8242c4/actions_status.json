@@ -1,0 +1,67 @@
+{
+  "last_run": "2026-03-26T02:39:00.468167Z",
+  "last_scan_time": "2026-03-26T02:39:00.468167Z",
+  "data_mode": "scan",
+  "live_enabled": false,
+  "is_replay": true,
+  "artifact_run_id": "d32e2ff2b07a4f50aaa2f3b77d8242c4",
+  "artifact_window_end_ts": 1700000005000,
+  "artifact_generated_at": "2026-03-26T02:39:00.468167Z",
+  "latest_flow_grade": "D",
+  "latest_transition": {},
+  "top_signal": {
+    "thesis_id": "7ae8b3d148a48c72",
+    "instrument_key": "BINANCE:BTCUSDT:SPOT",
+    "setup": "stealth_accumulation",
+    "direction": "LONG_BIAS",
+    "stage": "WATCHLIST",
+    "score": 83.0,
+    "confidence": 0.9,
+    "coverage": 1.0,
+    "why_now": [
+      "Delta mua dương: 18000.17",
+      "Bid L1 áp đảo: 0.67",
+      "Nhịp trade tăng: 2.00/s",
+      "Spread còn mỏng: 0.17 bps",
+      "Hấp thụ chủ động cao: 1080019.20",
+      "Đồng thuận TPFM theo đúng chiều dòng tiền chính",
+      "Setup adapter chính theo flow: Tích lũy âm thầm",
+      "Matrix TPFM: Mua chủ động chưa có đỡ",
+      "Decision TPFM: Đứng ngoài. Matrix chưa đủ sạch để hành động."
+    ],
+    "conflicts": [
+      "Giá khớp trượt dưới microprice",
+      "TPFM đang ở posture WAIT, chưa nên để setup dẫn quyết định.",
+      "Chất lượng thị trường (Grade D) không đủ để trade setup này."
+    ],
+    "invalidation": "Dòng tiền mua nguội đi hoặc thất bại giữ breakout.",
+    "entry_style": "Inventory shift sang POS_INV",
+    "targets": [
+      "TP1: 1 ATR giả lập",
+      "TP2: 2 ATR giả lập"
+    ],
+    "timeframe": "1h",
+    "regime_bucket": "NEUTRAL",
+    "flow_state": "BUY_PRESSURE_BUILDUP",
+    "matrix_cell": "POS_INIT__NEUTRAL_INV",
+    "matrix_alias_vi": "Mua chủ động chưa có đỡ",
+    "tradability_grade": "D",
+    "decision_posture": "WAIT",
+    "decision_summary_vi": "Đứng ngoài. Matrix chưa đủ sạch để hành động.",
+    "flow_alignment_score": 0.8,
+    "ai_brief_vi": "",
+    "edge_score": 0.0,
+    "edge_confidence": "LOW",
+    "pattern_code": "BREAKOUT_FORMING_LONG",
+    "pattern_phase": "FORMING",
+    "sequence_signature": "POS_NEUTRALx1|STABLE|NONE|MIXED",
+    "created_at": "2023-11-14T22:13:21+00:00",
+    "updated_at": "2023-11-14T22:13:22+00:00",
+    "metadata": {
+      "matrix_cell_at_entry": "POS_INIT__NEUTRAL_INV",
+      "flow_state_at_entry": "BUY_PRESSURE_BUILDUP",
+      "flow_grade_at_entry": "D",
+      "transition_code_at_entry": "UNKNOWN"
+    }
+  }
+}

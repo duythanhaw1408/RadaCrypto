@@ -7,7 +7,8 @@ from cfte.cli.main import build_context, build_parser, command_run_scan, doctor,
 def test_doctor_accepts_personal_profile_and_required_paths_exist(capsys):
     context = build_context("configs/profiles/personal.default.yaml")
 
-    exit_code = doctor(context)
+    import asyncio
+    exit_code = asyncio.run(doctor(context))
     captured = capsys.readouterr()
 
     assert exit_code in {0, 1}
@@ -42,7 +43,9 @@ def test_main_dispatches_run_live_runtime_controls(monkeypatch):
 
     monkeypatch.setattr("cfte.cli.main.build_context", lambda profile: "context")
 
-    def _fake_command_run_live(context, symbol, max_events, use_trade, min_runtime_seconds, run_until_first_m5):
+    def _fake_command_run_live(
+        context, symbol, max_events, use_trade, min_runtime_seconds, run_until_first_m5, force_clean=False
+    ):
         captured.update(
             {
                 "context": context,
@@ -51,6 +54,7 @@ def test_main_dispatches_run_live_runtime_controls(monkeypatch):
                 "use_trade": use_trade,
                 "min_runtime_seconds": min_runtime_seconds,
                 "run_until_first_m5": run_until_first_m5,
+                "force_clean": force_clean,
             }
         )
         return 0
@@ -84,13 +88,15 @@ def test_main_dispatches_run_live_runtime_controls(monkeypatch):
         "use_trade": False,
         "min_runtime_seconds": 330.0,
         "run_until_first_m5": True,
+        "force_clean": False,
     }
 
 
 def test_run_scan_outputs_vietnamese_summary(capsys):
     context = build_context(Path("configs/profiles/personal.default.yaml"))
 
-    exit_code = command_run_scan(context, events_path=Path("fixtures/replay/btcusdt_normalized.jsonl"), limit=1)
+    import asyncio
+    exit_code = asyncio.run(command_run_scan(context, events_path=Path("fixtures/replay/btcusdt_normalized.jsonl"), limit=1))
     captured = capsys.readouterr()
 
     assert exit_code == 0
@@ -121,7 +127,8 @@ def test_bootstrap_creates_state_db_and_health_report(tmp_path, capsys):
     )
     context = build_context(profile_path)
 
-    exit_code = command_bootstrap(context)
+    import asyncio
+    exit_code = asyncio.run(command_bootstrap(context))
     captured = capsys.readouterr()
 
     assert exit_code in {0, 1}
@@ -152,7 +159,8 @@ def test_health_reports_bad_config_for_missing_profile_replay(tmp_path, capsys):
     )
     context = build_context(profile_path)
 
-    exit_code = command_health(context)
+    import asyncio
+    exit_code = asyncio.run(command_health(context))
     captured = capsys.readouterr()
 
     assert exit_code in {0, 1}

@@ -17,10 +17,11 @@ class LiveEvaluation:
 
 
 class LiveThesisLoop:
-    def __init__(self, instrument_key: str, trade_window_size: int = 20) -> None:
-        self.instrument_key = instrument_key
+    def __init__(self, symbol: str, trade_window_size: int = 20) -> None:
+        self.symbol = symbol.upper()
+        self.instrument_key = f"BINANCE:{self.symbol}:SPOT"
         self.trade_window_size = trade_window_size
-        self.order_book = LocalBook(instrument_key)
+        self.order_book = LocalBook(self.instrument_key)
         self.previous_book_snapshot: LocalBook | None = None
         self.trades: list[NormalizedTrade] = []
         self.previous_cvd = 0.0

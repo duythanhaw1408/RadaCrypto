@@ -1,0 +1,1474 @@
+=== run-live | hồ sơ: personal-binance | người dùng: Trader Binance ===
+Bắt đầu bộ máy live thesis cho BTCUSDT...
+- Cơ sở dữ liệu trạng thái: data/state/state.db
+- Giới hạn sự kiện: 1000
+- Thesis log live: data/thesis/thesis_log.jsonl
+- Cửa sổ dòng tiền: 60s / 400 trades
+- Runtime artifact: data/review/live_runtime.json
+📊 [INIT] Loaded 50 snapshots from history.
+Khởi chạy loop cho BTCUSDT...
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+📝 [EVENT] 7ae8b3d1 -> DETECTED: Khởi tạo luận điểm ở trạng thái 'Mới phát hiện'.
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+📝 [EVENT] fe14cc55 -> DETECTED: Khởi tạo luận điểm ở trạng thái 'Mới phát hiện'.
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+📝 [EVENT] e44fe9d0 -> DETECTED: Khởi tạo luận điểm ở trạng thái 'Mới phát hiện'.
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+📝 [EVENT] bc009df5 -> DETECTED: Khởi tạo luận điểm ở trạng thái 'Mới phát hiện'.
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+
+--- THÔNG BÁO TÍN HIỆU [e44fe9d0] ---
+[e44fe9d0] BINANCE:BTCUSDT:SPOT | Đang khởi tạo M5 | Grade D
+Flow: INITIALIZING | Posture WAIT
+Decision: Đang chờ nhịp Flow đầu tiên...
+Setup tương thích: Phân phối | SHORT 🔽
+Trạng thái: 🔥 Có thể hành động | ƯU TIÊN CAO
+Hành động: Có thể hành động nếu giữ đúng điều kiện vào lệnh: Canh failed reclaim và lower-high
+Chỉ số: Score 80.0 | Conf 0.90 | Cov 1.00
+📊 Lợi thế Thống kê: ⬜ Edge Score N/A (Cần thêm sample) | Tin cậy: LOW
+💡 AI Decision Brief: Đang chờ snapshot M5 đầu diện để AI Briefing...
+Cơ sở: Delta bán âm mạnh: -682.20 | Nhịp thoát hàng tăng: 2.00/s | Spread đủ thanh khoản: <0.01 bps | +2 yếu tố nữa
+Rủi ro: Bid L1 chưa suy yếu
+Vô hiệu: Giá reclaim lên trên ask 70,914.64 | Vào: Canh failed reclaim và lower-high
+Mục tiêu: TP1: 1 ATR giả lập | TP2: 2 ATR giả lập
+🚀 [REALISM] Virtual Entry: e44fe9d0 at 70,903.99 (Slippage: 1.5bps)
+📝 [EVENT] e44fe9d0 -> ACTIONABLE: Chuyển nhanh qua các mốc WATCHLIST -> CONFIRMED -> ACTIONABLE.
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+
+--- THÔNG BÁO TÍN HIỆU [bc009df5] ---
+[bc009df5] BINANCE:BTCUSDT:SPOT | Đang khởi tạo M5 | Grade D
+Flow: INITIALIZING | Posture WAIT
+Decision: Đang chờ nhịp Flow đầu tiên...
+Setup tương thích: Bứt phá thất bại | SHORT 🔽
+Trạng thái: 👀 Đưa vào danh sách theo dõi | THEO DÕI
+Hành động: Chưa vào vội, tiếp tục quan sát để chờ xác nhận tiếp theo.
+Chỉ số: Score 66.0 | Conf 0.83 | Cov 0.99
+📊 Lợi thế Thống kê: ⬜ Edge Score N/A (Cần thêm sample) | Tin cậy: LOW
+💡 AI Decision Brief: Đang chờ snapshot M5 đầu diện để AI Briefing...
+Cơ sở: Lực bán phản công sau breakout: -682.20 | Giá khớp quay xuống dưới microprice | Spread còn giao dịch được: <0.01 bps | +1 yếu tố nữa
+Rủi ro: N/A
+Vô hiệu: Giá quay lại trên ask 70,914.64 và giữ được | Vào: Ưu tiên vào khi retest thất bại vùng breakout cũ
+Mục tiêu: TP1: Quay về mid | TP2: Quét thanh khoản đáy gần nhất
+📝 [EVENT] bc009df5 -> WATCHLIST: Luận điểm chuyển trạng thái từ 'Mới phát hiện' sang 'Đưa vào danh sách theo dõi'.
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+
+--- THÔNG BÁO TÍN HIỆU [bc009df5] ---
+[bc009df5] BINANCE:BTCUSDT:SPOT | Đang khởi tạo M5 | Grade D
+Flow: INITIALIZING | Posture WAIT
+Decision: Đang chờ nhịp Flow đầu tiên...
+Setup tương thích: Bứt phá thất bại | SHORT 🔽
+Trạng thái: 🔥 Có thể hành động | ƯU TIÊN CAO
+Hành động: Có thể hành động nếu giữ đúng điều kiện vào lệnh: Ưu tiên vào khi retest thất bại vùng breakout cũ
+Chỉ số: Score 82.0 | Conf 0.90 | Cov 1.00
+📊 Lợi thế Thống kê: ⬜ Edge Score N/A (Cần thêm sample) | Tin cậy: LOW
+💡 AI Decision Brief: Đang chờ snapshot M5 đầu diện để AI Briefing...
+Cơ sở: Có nỗ lực breakout trước đó: 3.00/s | Lực bán phản công sau breakout: -752.40 | Giá khớp quay xuống dưới microprice | +2 yếu tố nữa
+Rủi ro: N/A
+Vô hiệu: Giá quay lại trên ask 70,914.64 và giữ được | Vào: Ưu tiên vào khi retest thất bại vùng breakout cũ
+Mục tiêu: TP1: Quay về mid | TP2: Quét thanh khoản đáy gần nhất
+🚀 [REALISM] Virtual Entry: bc009df5 at 70,903.99 (Slippage: 1.5bps)
+📝 [EVENT] bc009df5 -> ACTIONABLE: Chuyển nhanh qua các mốc CONFIRMED -> ACTIONABLE.
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+
+--- THÔNG BÁO TÍN HIỆU [fe14cc55] ---
+[fe14cc55] BINANCE:BTCUSDT:SPOT | Đang khởi tạo M5 | Grade D
+Flow: INITIALIZING | Posture WAIT
+Decision: Đang chờ nhịp Flow đầu tiên...
+Setup tương thích: Kích hoạt bứt phá | LONG 🔼
+Trạng thái: 👀 Đưa vào danh sách theo dõi | THEO DÕI
+Hành động: Chưa vào vội, tiếp tục quan sát để chờ xác nhận tiếp theo.
+Chỉ số: Score 64.0 | Conf 0.83 | Cov 1.00
+📊 Lợi thế Thống kê: ⬜ Edge Score N/A (Cần thêm sample) | Tin cậy: LOW
+💡 AI Decision Brief: Đang chờ snapshot M5 đầu diện để AI Briefing...
+Cơ sở: Xung lực giao dịch tăng vọt: 3.00/s | Spread nén thuận lợi cho bứt phá: <0.01 bps | Lực đỡ bid rõ ràng: 86% | +1 yếu tố nữa
+Rủi ro: Dòng tiền mua chưa xác nhận | Giá khớp chưa tạo trạng thái bứt phá
+Vô hiệu: Thất bại giữ trên microprice 70,914.64 | Vào: Theo breakout có xác nhận volume và giữ cấu trúc bid
+Mục tiêu: TP1: Mở rộng 1R | TP2: Mở rộng 2R
+📝 [EVENT] fe14cc55 -> WATCHLIST: Luận điểm chuyển trạng thái từ 'Mới phát hiện' sang 'Đưa vào danh sách theo dõi'.
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+
+--- THÔNG BÁO TÍN HIỆU [fe14cc55] ---
+[fe14cc55] BINANCE:BTCUSDT:SPOT | Đang khởi tạo M5 | Grade D
+Flow: INITIALIZING | Posture WAIT
+Decision: Đang chờ nhịp Flow đầu tiên...
+Setup tương thích: Kích hoạt bứt phá | LONG 🔼
+Trạng thái: ✅ Đã xác nhận | ĐÁNG CHÚ Ý
+Hành động: Đã có xác nhận, ưu tiên chờ điểm vào sạch theo plan: Theo breakout có xác nhận volume và giữ cấu trúc bid
+Chỉ số: Score 72.0 | Conf 0.90 | Cov 1.00
+📊 Lợi thế Thống kê: ⬜ Edge Score N/A (Cần thêm sample) | Tin cậy: LOW
+💡 AI Decision Brief: Đang chờ snapshot M5 đầu diện để AI Briefing...
+Cơ sở: Xung lực giao dịch tăng vọt: 5.02/s | Giá khớp nằm trên microprice | Spread nén thuận lợi cho bứt phá: <0.01 bps | +2 yếu tố nữa
+Rủi ro: Dòng tiền mua chưa xác nhận
+Vô hiệu: Thất bại giữ trên microprice 70,905.90 | Vào: Theo breakout có xác nhận volume và giữ cấu trúc bid
+Mục tiêu: TP1: Mở rộng 1R | TP2: Mở rộng 2R
+📝 [EVENT] fe14cc55 -> CONFIRMED: Luận điểm chuyển trạng thái từ 'Đưa vào danh sách theo dõi' sang 'Đã xác nhận'.
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+
+--- THÔNG BÁO TÍN HIỆU [7ae8b3d1] ---
+[7ae8b3d1] BINANCE:BTCUSDT:SPOT | Đang khởi tạo M5 | Grade D
+Flow: INITIALIZING | Posture WAIT
+Decision: Đang chờ nhịp Flow đầu tiên...
+Setup tương thích: Tích lũy âm thầm | LONG 🔼
+Trạng thái: 👀 Đưa vào danh sách theo dõi | THEO DÕI
+Hành động: Chưa vào vội, tiếp tục quan sát để chờ xác nhận tiếp theo.
+Chỉ số: Score 70.0 | Conf 0.90 | Cov 1.00
+📊 Lợi thế Thống kê: ⬜ Edge Score N/A (Cần thêm sample) | Tin cậy: LOW
+💡 AI Decision Brief: Đang chờ snapshot M5 đầu diện để AI Briefing...
+Cơ sở: Bid L1 áp đảo: 63% | Nhịp trade tăng: 5.02/s | Spread còn mỏng: <0.01 bps | +2 yếu tố nữa
+Rủi ro: Delta bán đang lấn át
+Vô hiệu: Mất bid hỗ trợ dưới 70,905.89 | Vào: Canh hồi về bid và giữ microprice
+Mục tiêu: TP1: 1 ATR giả lập | TP2: 2 ATR giả lập
+📝 [EVENT] 7ae8b3d1 -> WATCHLIST: Luận điểm chuyển trạng thái từ 'Mới phát hiện' sang 'Đưa vào danh sách theo dõi'.
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+
+--- THÔNG BÁO TÍN HIỆU [e44fe9d0] ---
+[e44fe9d0] BINANCE:BTCUSDT:SPOT | Đang khởi tạo M5 | Grade D
+Flow: INITIALIZING | Posture WAIT
+Decision: Đang chờ nhịp Flow đầu tiên...
+Setup tương thích: Phân phối | SHORT 🔽
+Trạng thái: ❌ Đã bị vô hiệu | LOẠI BỎ
+Hành động: Kịch bản đã hỏng. Không tiếp tục theo tín hiệu này cho tới khi có thesis mới.
+Chỉ số: Score 68.0 | Conf 0.83 | Cov 1.00
+📊 Lợi thế Thống kê: ⬜ Edge Score N/A (Cần thêm sample) | Tin cậy: LOW
+💡 AI Decision Brief: Đang chờ snapshot M5 đầu diện để AI Briefing...
+Cơ sở: Delta bán âm mạnh: -18.80K | Nhịp thoát hàng tăng: 5.02/s | Spread đủ thanh khoản: <0.01 bps | +1 yếu tố nữa
+Rủi ro: Bid L1 chưa suy yếu | Giá khớp chưa thủng microprice
+Vô hiệu: Giá reclaim lên trên ask 70,905.90 | Vào: Canh failed reclaim và lower-high
+Mục tiêu: TP1: 1 ATR giả lập | TP2: 2 ATR giả lập
+📝 [EVENT] e44fe9d0 -> INVALIDATED: Luận điểm chuyển trạng thái từ 'Có thể hành động' sang 'Đã bị vô hiệu'.
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+
+--- THÔNG BÁO TÍN HIỆU [bc009df5] ---
+[bc009df5] BINANCE:BTCUSDT:SPOT | Đang khởi tạo M5 | Grade D
+Flow: INITIALIZING | Posture WAIT
+Decision: Đang chờ nhịp Flow đầu tiên...
+Setup tương thích: Bứt phá thất bại | SHORT 🔽
+Trạng thái: ❌ Đã bị vô hiệu | LOẠI BỎ
+Hành động: Kịch bản đã hỏng. Không tiếp tục theo tín hiệu này cho tới khi có thesis mới.
+Chỉ số: Score 62.0 | Conf 0.83 | Cov 1.00
+📊 Lợi thế Thống kê: ⬜ Edge Score N/A (Cần thêm sample) | Tin cậy: LOW
+💡 AI Decision Brief: Đang chờ snapshot M5 đầu diện để AI Briefing...
+Cơ sở: Có nỗ lực breakout trước đó: 5.02/s | Lực bán phản công sau breakout: -18.80K | Spread còn giao dịch được: <0.01 bps | +1 yếu tố nữa
+Rủi ro: Giá chưa thất bại rõ khỏi vùng breakout
+Vô hiệu: Giá quay lại trên ask 70,905.90 và giữ được | Vào: Ưu tiên vào khi retest thất bại vùng breakout cũ
+Mục tiêu: TP1: Quay về mid | TP2: Quét thanh khoản đáy gần nhất
+📝 [EVENT] bc009df5 -> INVALIDATED: Luận điểm chuyển trạng thái từ 'Có thể hành động' sang 'Đã bị vô hiệu'.
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+
+--- THÔNG BÁO TÍN HIỆU [fe14cc55] ---
+[fe14cc55] BINANCE:BTCUSDT:SPOT | Đang khởi tạo M5 | Grade D
+Flow: INITIALIZING | Posture WAIT
+Decision: Đang chờ nhịp Flow đầu tiên...
+Setup tương thích: Kích hoạt bứt phá | LONG 🔼
+Trạng thái: 🔥 Có thể hành động | ƯU TIÊN CAO
+Hành động: Có thể hành động nếu giữ đúng điều kiện vào lệnh: Theo breakout có xác nhận volume và giữ cấu trúc bid
+Chỉ số: Score 80.0 | Conf 0.90 | Cov 1.00
+📊 Lợi thế Thống kê: ⬜ Edge Score N/A (Cần thêm sample) | Tin cậy: LOW
+💡 AI Decision Brief: Đang chờ snapshot M5 đầu diện để AI Briefing...
+Cơ sở: Xung lực giao dịch tăng vọt: 5.12/s | Giá khớp vượt ask hiện tại | Spread nén thuận lợi cho bứt phá: <0.01 bps | +2 yếu tố nữa
+Rủi ro: Dòng tiền mua chưa xác nhận
+Vô hiệu: Thất bại giữ trên microprice 70,905.90 | Vào: Theo breakout có xác nhận volume và giữ cấu trúc bid
+Mục tiêu: TP1: Mở rộng 1R | TP2: Mở rộng 2R
+🚀 [REALISM] Virtual Entry: fe14cc55 at 70,916.54 (Slippage: 1.5bps)
+📝 [EVENT] fe14cc55 -> ACTIONABLE: Luận điểm chuyển trạng thái từ 'Đã xác nhận' sang 'Có thể hành động'.
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+ℹ️ [Phase24] Skip current_live.json update until bundle is complete for run 558a359283b24ed78428bf9cbef439d9
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+
+--- THÔNG BÁO TÍN HIỆU [fe14cc55] ---
+[fe14cc55] BINANCE:BTCUSDT:SPOT | Đang khởi tạo M5 | Grade D
+Flow: INITIALIZING | Posture WAIT
+Decision: Đang chờ nhịp Flow đầu tiên...
+Setup tương thích: Kích hoạt bứt phá | LONG 🔼
+Trạng thái: ❌ Đã bị vô hiệu | LOẠI BỎ
+Hành động: Kịch bản đã hỏng. Không tiếp tục theo tín hiệu này cho tới khi có thesis mới.
+Chỉ số: Score 64.0 | Conf 0.83 | Cov 1.00
+📊 Lợi thế Thống kê: ⬜ Edge Score N/A (Cần thêm sample) | Tin cậy: LOW
+💡 AI Decision Brief: Đang chờ snapshot M5 đầu diện để AI Briefing...
+Cơ sở: Xung lực giao dịch tăng vọt: 6.86/s | Spread nén thuận lợi cho bứt phá: <0.01 bps | Lực đỡ bid rõ ràng: 63% | +1 yếu tố nữa
+Rủi ro: Dòng tiền mua chưa xác nhận | Giá khớp chưa tạo trạng thái bứt phá | Cảnh báo: Sàn khác (okx) đang dẫn nhịp trước Binance.
+Vô hiệu: Thất bại giữ trên microprice 70,905.90 | Vào: Theo breakout có xác nhận volume và giữ cấu trúc bid
+Mục tiêu: TP1: Mở rộng 1R | TP2: Mở rộng 2R
+📝 [EVENT] fe14cc55 -> INVALIDATED: Luận điểm chuyển trạng thái từ 'Có thể hành động' sang 'Đã bị vô hiệu'.
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+
+--- THÔNG BÁO TÍN HIỆU [7ae8b3d1] ---
+[7ae8b3d1] BINANCE:BTCUSDT:SPOT | Đang khởi tạo M5 | Grade D
+Flow: INITIALIZING | Posture WAIT
+Decision: Đang chờ nhịp Flow đầu tiên...
+Setup tương thích: Tích lũy âm thầm | LONG 🔼
+Trạng thái: ❌ Đã bị vô hiệu | LOẠI BỎ
+Hành động: Kịch bản đã hỏng. Không tiếp tục theo tín hiệu này cho tới khi có thesis mới.
+Chỉ số: Score 58.0 | Conf 0.83 | Cov 1.00
+📊 Lợi thế Thống kê: ⬜ Edge Score N/A (Cần thêm sample) | Tin cậy: LOW
+💡 AI Decision Brief: Đang chờ snapshot M5 đầu diện để AI Briefing...
+Cơ sở: Bid L1 áp đảo: 63% | Nhịp trade tăng: 6.86/s | Spread còn mỏng: <0.01 bps | +1 yếu tố nữa
+Rủi ro: Delta bán đang lấn át | Giá khớp trượt dưới microprice | Cảnh báo: Sàn khác (okx) đang dẫn nhịp trước Binance.
+Vô hiệu: Mất bid hỗ trợ dưới 70,905.89 | Vào: Canh hồi về bid và giữ microprice
+Mục tiêu: TP1: 1 ATR giả lập | TP2: 2 ATR giả lập
+📝 [EVENT] 7ae8b3d1 -> INVALIDATED: Luận điểm chuyển trạng thái từ 'Đưa vào danh sách theo dõi' sang 'Đã bị vô hiệu'.
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+ℹ️ [Phase24] Skip current_live.json update until bundle is complete for run 558a359283b24ed78428bf9cbef439d9
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+ℹ️ [Phase24] Skip current_live.json update until bundle is complete for run 558a359283b24ed78428bf9cbef439d9
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+ℹ️ [Phase20B] Backfill live flow artifacts from published run 558a359283b24ed78428bf9cbef439d9
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+📊 [TPFM] Đang tổng hợp snapshot M5 cho BTCUSDT...
+━━━ BTCUSDT | Bán chủ động chưa có đè | Grade C ━━━
+Pattern : Đang nén phá đáy Bán | Phase: FORMING
+Sequence: NEG_NEUTRALx1|STABLE|NONE|ABSORBED_OR_TRAP | L: 1
+Edge    : Score 0.45 (LOW) | WR 50% | RR 1.5
+Tempo   : STABLE | Persistence: EARLY | Exh: 0.20
+Deltas  : Init -0.45 (➡️) | Inv 0.01 (➡️)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Observed: Delta spot -749.46K | Nhịp 5.20/s | Inventory L1 -20% | Hấp thụ ký hiệu -1.00 | Sweep bán +147.10M | giữ lực 0.78 | Bid refill +101.67M | Delta futures +15.92K | aggr 0.51
+Inferred: Bán chủ động chưa có đè | Flow state: SELL_PRESSURE_BUILDUP__TRAP | INITIATIVE_DRIVEN | Quan hệ spot/futures: SPOT_LED | Dòng perp đang do okx dẫn nhịp
+Decision: Chỉ theo dõi, chờ thêm xác nhận từ futures hoặc đa sàn trước khi hành động.
+Entry   : Inventory shift sang NEG_INV
+Invalid : Dòng tiền bán nguội đi hoặc giá reclaim lại microprice.
+💡 Brief : ☕ Đang theo dõi thị trường (Chờ chu kỳ nhận định tiếp theo)...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+ℹ️ [Phase24] Skip current_live.json update until bundle is complete for run 50c5ff67754c499f9dd4e93048b048ba
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+📊 [TPFM] Đang tổng hợp snapshot M5 cho BTCUSDT...
+🔄 [TRANSITION] Pha bán có dấu hiệu bẫy: NEG_INIT__NEUTRAL_INV -> NEG_INIT__NEG_INV (TRAP_TO_SHORT)
+━━━ BTCUSDT | Thuận pha bán | Grade B ━━━
+Pattern : Chưa phân loại pattern | Phase: FORMING
+Sequence: NEG_NEGx1|STABLE|NONE|ABSORBED_OR_TRAP | L: 1
+Edge    : Score 0.76 (LOW) | WR 65% | RR 1.4
+Tempo   : STABLE | Persistence: EARLY | Exh: 0.20
+Deltas  : Init -0.50 (📉) | Inv -0.35 (📉)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Observed: Delta spot -623.77K | Nhịp 3.52/s | Inventory L1 -29% | Hấp thụ ký hiệu -1.00 | Sweep bán +197.82M | giữ lực 0.77 | Ask đang hấp thụ và ghìm giá | Ask refill +74.32M
+Inferred: Thuận pha bán | Flow state: SHORT_CONTINUATION__TRAP | Transition: Pha bán có dấu hiệu bẫy (TRAP_TO_SHORT) | BEARISH_CONFLUENCE | Inventory defense: ASK_DEFENSE
+Decision: AGGRESSIVE: Ưu tiên continuation short khi hồi yếu và ask vẫn ép xuống.
+Entry   : Microprice resistance + Ask pressure
+Invalid : Initiative mất âm hoặc inventory không còn đè.
+💡 Brief : ☕ Đang theo dõi thị trường (Chờ chu kỳ nhận định tiếp theo)...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ [ESCALATION] Shift: NEG_INIT__NEUTRAL_INV -> NEG_INIT__NEG_INV, Inventory Flip: NEG_INV, Futures Xác Nhận (Confluence)
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+ℹ️ [Phase24] Skip current_live.json update until bundle is complete for run 50c5ff67754c499f9dd4e93048b048ba
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+📊 [TPFM] Đang tổng hợp snapshot M5 cho BTCUSDT...
+🔄 [TRANSITION] Lật sang mua nhưng mang tính bẫy: NEG_INIT__NEG_INV -> POS_INIT__NEG_INV (TRAP_FLIP_TO_LONG)
+━━━ BTCUSDT | Mua gặp hấp thụ bán | Grade B ━━━
+Pattern : Bẫy Mua (Hấp thụ Bán) | Phase: FORMING
+Sequence: POS_NEGx1|DECELERATING|NONE|ABSORBED_OR_TRAP | L: 1
+Edge    : Score 0.59 (LOW) | WR 45% | RR 2.1
+Tempo   : DECELERATING | Persistence: EARLY | Exh: 0.50
+Deltas  : Init 0.89 (📈) | Inv -0.50 (📉)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Observed: Delta spot +4.98M | Nhịp 6.56/s | Inventory L1 -34% | Hấp thụ ký hiệu -1.00 | Sweep mua +2117.29M | giữ lực 0.69 | Ask đang hấp thụ và ghìm giá | Ask refill +252.66M
+Inferred: Mua gặp hấp thụ bán | Flow state: LONG_TRAP_RISK__TRAP | Transition: Lật sang mua nhưng mang tính bẫy (TRAP_FLIP_TO_LONG) | ABSORPTION_IN_PROGRESS | Inventory defense: ASK_DEFENSE
+Decision: CONSERVATIVE: Chỉ theo long khi vượt hấp thụ và có xác nhận thêm từ futures/venue lead.
+Entry   : Breakout vùng hấp thụ + Venue confirmation
+Invalid : Inventory tiếp tục âm hoặc giá không giữ được trên microprice.
+💡 Brief : ☕ Đang theo dõi thị trường (Chờ chu kỳ nhận định tiếp theo)...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ [ESCALATION] Shift: NEG_INIT__NEG_INV -> POS_INIT__NEG_INV, Futures Xác Nhận (Confluence)
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+ℹ️ [Phase24] Skip current_live.json update until bundle is complete for run 50c5ff67754c499f9dd4e93048b048ba
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+📊 [TPFM] Đang tổng hợp snapshot M5 cho BTCUSDT...
+🔄 [TRANSITION] Inventory xác nhận phe mua: POS_INIT__NEG_INV -> POS_INIT__POS_INV (INVENTORY_CONFIRM_TO_LONG)
+━━━ BTCUSDT | Thuận pha mua | Grade B ━━━
+Pattern : Chưa phân loại pattern | Phase: FORMING
+Sequence: POS_POSx1|ACCELERATING|NONE|MIXED | L: 1
+Edge    : Score 0.75 (LOW) | WR 62% | RR 1.5
+Tempo   : ACCELERATING | Persistence: EARLY | Exh: 0.00
+Deltas  : Init 0.77 (📉) | Inv 0.62 (📈)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Observed: Delta spot +204.68K | Nhịp 3.54/s | Inventory L1 +13% | Hấp thụ ký hiệu +1.00 | Sweep mua +114.33M | giữ lực 0.79 | Bid đang hấp thụ và đỡ giá | Bid refill +76.48M
+Inferred: Thuận pha mua | Flow state: LONG_CONTINUATION | Transition: Inventory xác nhận phe mua (INVENTORY_CONFIRM_TO_LONG) | BULLISH_CONFLUENCE | Inventory defense: BID_DEFENSE
+Decision: AGGRESSIVE: Ưu tiên continuation long khi microprice giữ vững và bid tiếp tục dâng cao.
+Entry   : Microprice retest + Bid replenishment
+Invalid : Initiative mất dương hoặc inventory không còn đỡ.
+💡 Brief : ☕ Đang theo dõi thị trường (Chờ chu kỳ nhận định tiếp theo)...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ [ESCALATION] Shift: POS_INIT__NEG_INV -> POS_INIT__POS_INV, Inventory Flip: POS_INV, Futures Xác Nhận (Confluence)
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+📊 [TPFM] Đang tổng hợp snapshot M5 cho BTCUSDT...
+🔄 [TRANSITION] Inventory xác nhận phe mua: POS_INIT__POS_INV -> POS_INIT__NEUTRAL_INV (INVENTORY_CONFIRM_TO_LONG)
+━━━ BTCUSDT | Mua chủ động chưa có đỡ | Grade B ━━━
+Pattern : Đang nén bứt phá Mua | Phase: FORMING
+Sequence: POS_NEUTRALx1|DECELERATING|NONE|FOLLOW_THROUGH | L: 1
+Edge    : Score 0.45 (LOW) | WR 50% | RR 1.5
+Tempo   : DECELERATING | Persistence: EARLY | Exh: 0.30
+Deltas  : Init 0.79 (📈) | Inv 0.16 (📉)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Observed: Delta spot +483.82K | Nhịp 3.38/s | Inventory L1 +14% | Hấp thụ ký hiệu +1.00 | Sweep mua +103.80M | giữ lực 0.80 | Ask refill +75.67M | Delta futures +435.83K | aggr 0.77
+Inferred: Mua chủ động chưa có đỡ | Flow state: BUY_PRESSURE_BUILDUP__FOLLOW_THROUGH | Transition: Inventory xác nhận phe mua (INVENTORY_CONFIRM_TO_LONG) | INITIATIVE_DRIVEN | Quan hệ spot/futures: CONFLUENT
+Decision: Theo dõi breakout nhưng chưa đuổi, cần inventory xác nhận.
+Entry   : Inventory shift sang POS_INV
+Invalid : Dòng tiền mua nguội đi hoặc thất bại giữ breakout.
+💡 Brief : ☕ Đang theo dõi thị trường (Chờ chu kỳ nhận định tiếp theo)...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ [ESCALATION] Shift: POS_INIT__POS_INV -> POS_INIT__NEUTRAL_INV, Inventory Flip: NEUTRAL_INV, Futures Xác Nhận (Confluence)
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+⚠️ Error fetching Binance Futures Premium Index on https://fapi.binance.com: HTTPSConnectionPool(host='fapi.binance.com', port=443): Read timed out. (read timeout=5)
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+ℹ️ [Phase24] Skip current_live.json update until bundle is complete for run 50c5ff67754c499f9dd4e93048b048ba
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 1000 sự kiện | message=1000 | gap=0.0s
+✅ TPFM Probability Engine synced with 1 cells and 56 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+💓 Hệ thống đang chạy... Đã xử lý 250 sự kiện | message=250 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 500 sự kiện | message=500 | gap=0.0s
+💓 Hệ thống đang chạy... Đã xử lý 750 sự kiện | message=750 | gap=0.0s
+📊 [TPFM] Đang tổng hợp snapshot M5 cho BTCUSDT...
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__NEUTRAL_INV -> POS_INIT__NEUTRAL_INV (REPRICE_TO_LONG)
+━━━ BTCUSDT | Mua chủ động chưa có đỡ | Grade C ━━━
+Pattern : Đang nén bứt phá Mua | Phase: CONFIRMED
+Sequence: POS_NEUTRALx2|STABLE|NONE|FOLLOW_THROUGH | L: 2
+Edge    : Score 0.50 (LOW) | WR 52% | RR 1.5
+Tempo   : STABLE | Persistence: BUILDING | Exh: 0.00
+Deltas  : Init 0.75 (📉) | Inv 0.06 (📉)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Observed: Delta spot +227.58K | Nhịp 3.06/s | Inventory L1 +9% | Hấp thụ ký hiệu +1.00 | Sweep mua +87.88M | giữ lực 0.79 | Ask refill +64.23M | Delta futures +168.99K | aggr 0.62
+Inferred: Mua chủ động chưa có đỡ | Flow state: BUY_PRESSURE_BUILDUP__FOLLOW_THROUGH | Transition: Tái định giá theo hướng mua (REPRICE_TO_LONG) | INITIATIVE_DRIVEN | Quan hệ spot/futures: CONFLUENT
+Decision: Chỉ theo dõi, chờ thêm xác nhận từ futures hoặc đa sàn trước khi hành động.
+Entry   : Inventory shift sang POS_INV
+Invalid : Dòng tiền mua nguội đi hoặc thất bại giữ breakout.
+💡 Brief : ☕ Đang theo dõi thị trường (Chờ chu kỳ nhận định tiếp theo)...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ [Phase20E] Higher frame aggregation failed: 'TPFMStateEngine' object has no attribute 'calculate_m30_summary'
+🌀 [TPFM] Đang tổng hợp REGIME 30m cho BTCUSDT...
+Bắt lỗi trong loop: You did not supply a value for binding parameter :snapshot_id.
+Mất kết nối. Đang thử kết nối lại sau 10 giây...
+✅ TPFM Probability Engine synced with 1 cells and 57 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+📊 [TPFM] Đang tổng hợp snapshot M5 cho BTCUSDT...
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__NEUTRAL_INV -> POS_INIT__NEUTRAL_INV (REPRICE_TO_LONG)
+━━━ BTCUSDT | Mua chủ động chưa có đỡ | Grade C ━━━
+Pattern : Đang nén bứt phá Mua | Phase: CONFIRMED
+Sequence: POS_NEUTRALx3|STABLE|NONE|FOLLOW_THROUGH | L: 3
+Edge    : Score 0.58 (LOW) | WR 55% | RR 1.5
+Tempo   : STABLE | Persistence: BUILDING | Exh: 0.00
+Deltas  : Init 0.75 (📉) | Inv 0.03 (📉)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Observed: Delta spot +227.01K | Nhịp 2.93/s | Inventory L1 +9% | Hấp thụ ký hiệu +1.00 | Sweep mua +87.95M | giữ lực 0.79 | Ask refill +64.23M | Delta futures +28.97K | aggr 0.52
+Inferred: Mua chủ động chưa có đỡ | Flow state: BUY_PRESSURE_BUILDUP__FOLLOW_THROUGH | Transition: Tái định giá theo hướng mua (REPRICE_TO_LONG) | INITIATIVE_DRIVEN | Quan hệ spot/futures: SPOT_LED
+Decision: Chỉ theo dõi, chờ thêm xác nhận từ futures hoặc đa sàn trước khi hành động.
+Entry   : Inventory shift sang POS_INV
+Invalid : Dòng tiền mua nguội đi hoặc thất bại giữ breakout.
+💡 Brief : ☕ Đang theo dõi thị trường (Chờ chu kỳ nhận định tiếp theo)...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ [Phase20E] Higher frame aggregation failed: 'TPFMStateEngine' object has no attribute 'calculate_m30_summary'
+🌀 [TPFM] Đang tổng hợp REGIME 30m cho BTCUSDT...
+Bắt lỗi trong loop: You did not supply a value for binding parameter :snapshot_id.
+Mất kết nối. Đang thử kết nối lại sau 10 giây...
+✅ TPFM Probability Engine synced with 1 cells and 57 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📊 [TPFM] Đang tổng hợp snapshot M5 cho BTCUSDT...
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__NEUTRAL_INV -> POS_INIT__NEUTRAL_INV (REPRICE_TO_LONG)
+━━━ BTCUSDT | Mua chủ động chưa có đỡ | Grade C ━━━
+Pattern : Đang nén bứt phá Mua | Phase: MATURE
+Sequence: POS_NEUTRALx4|STABLE|NONE|FOLLOW_THROUGH | L: 4
+Edge    : Score 0.58 (LOW) | WR 55% | RR 1.5
+Tempo   : STABLE | Persistence: PERSISTENT | Exh: 0.20
+Deltas  : Init 0.75 (📉) | Inv -0.14 (📉)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Observed: Delta spot +226.91K | Nhịp 2.78/s | Inventory L1 +9% | Hấp thụ ký hiệu +1.00 | Sweep mua +87.97M | giữ lực 0.79 | Ask refill +64.50M | Delta futures +813.31K | aggr 0.77
+Inferred: Mua chủ động chưa có đỡ | Flow state: BUY_PRESSURE_BUILDUP__FOLLOW_THROUGH | Transition: Tái định giá theo hướng mua (REPRICE_TO_LONG) | OI_DRIVEN_MOVE | Quan hệ spot/futures: FUTURES_LED
+Decision: Chỉ theo dõi, chờ thêm xác nhận từ futures hoặc đa sàn trước khi hành động.
+Entry   : Inventory shift sang POS_INV
+Invalid : Dòng tiền mua nguội đi hoặc thất bại giữ breakout.
+💡 Brief : ☕ Đang theo dõi thị trường (Chờ chu kỳ nhận định tiếp theo)...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ [Phase20E] Higher frame aggregation failed: 'TPFMStateEngine' object has no attribute 'calculate_m30_summary'
+🌀 [TPFM] Đang tổng hợp REGIME 30m cho BTCUSDT...
+Bắt lỗi trong loop: You did not supply a value for binding parameter :snapshot_id.
+Mất kết nối. Đang thử kết nối lại sau 10 giây...
+✅ TPFM Probability Engine synced with 1 cells and 58 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+📊 [TPFM] Đang tổng hợp snapshot M5 cho BTCUSDT...
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__NEUTRAL_INV -> POS_INIT__NEUTRAL_INV (REPRICE_TO_LONG)
+━━━ BTCUSDT | Mua chủ động chưa có đỡ | Grade C ━━━
+Pattern : Đang nén bứt phá Mua | Phase: MATURE
+Sequence: POS_NEUTRALx5|STABLE|NONE|FOLLOW_THROUGH | L: 5
+Edge    : Score 0.33 (LOW) | WR 45% | RR 1.5
+Tempo   : STABLE | Persistence: PERSISTENT | Exh: 0.20
+Deltas  : Init 0.74 (📉) | Inv 0.03 (📈)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Observed: Delta spot +226.67K | Nhịp 2.68/s | Inventory L1 +9% | Hấp thụ ký hiệu +1.00 | Sweep mua +87.97M | giữ lực 0.79 | Ask refill +64.50M | Delta futures +735.23K | aggr 0.67
+Inferred: Mua chủ động chưa có đỡ | Flow state: BUY_PRESSURE_BUILDUP__FOLLOW_THROUGH | Transition: Tái định giá theo hướng mua (REPRICE_TO_LONG) | INITIATIVE_DRIVEN | Quan hệ spot/futures: FUTURES_LED
+Decision: Chỉ theo dõi, chờ thêm xác nhận từ futures hoặc đa sàn trước khi hành động.
+Entry   : Inventory shift sang POS_INV
+Invalid : Dòng tiền mua nguội đi hoặc thất bại giữ breakout.
+💡 Brief : ☕ Đang theo dõi thị trường (Chờ chu kỳ nhận định tiếp theo)...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ [Phase20E] Higher frame aggregation failed: 'TPFMStateEngine' object has no attribute 'calculate_m30_summary'
+🌀 [TPFM] Đang tổng hợp REGIME 30m cho BTCUSDT...
+Bắt lỗi trong loop: You did not supply a value for binding parameter :snapshot_id.
+Mất kết nối. Đang thử kết nối lại sau 10 giây...
+✅ TPFM Probability Engine synced with 1 cells and 58 patterns.
+Đã kết nối Binance Stream: ['btcusdt@aggTrade', 'btcusdt@bookTicker', 'btcusdt@depth@100ms', 'btcusdt@kline_1m', 'btcusdt@kline_15m', 'btcusdt@kline_1h', 'btcusdt@kline_4h']
+Bắt đầu trình theo dõi kết quả luận điểm (Outcome Monitor)...
+📡 Bybit Stream Connected: wss://stream.bybit.com/v5/public/linear
+📡 Futures Stream Connected: wss://fstream.binance.com/stream?streams=btcusdt@aggTrade/btcusdt@forceOrder
+WS Connected to wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@bookTicker/btcusdt@depth@100ms/btcusdt@kline_1m/btcusdt@kline_15m/btcusdt@kline_1h/btcusdt@kline_4h
+📊 [TPFM] Đang tổng hợp snapshot M5 cho BTCUSDT...
+🔄 [TRANSITION] Tái định giá theo hướng mua: POS_INIT__NEUTRAL_INV -> POS_INIT__NEUTRAL_INV (REPRICE_TO_LONG)
+━━━ BTCUSDT | Mua chủ động chưa có đỡ | Grade C ━━━
+Pattern : Đang nén bứt phá Mua | Phase: MATURE
+Sequence: POS_NEUTRALx6|STABLE|NONE|FOLLOW_THROUGH | L: 6
+Edge    : Score 0.33 (LOW) | WR 45% | RR 1.5
+Tempo   : STABLE | Persistence: PERSISTENT | Exh: 0.20
+Deltas  : Init 0.74 (📉) | Inv 0.03 (📈)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Observed: Delta spot +226.69K | Nhịp 2.59/s | Inventory L1 +9% | Hấp thụ ký hiệu +1.00 | Sweep mua +87.97M | giữ lực 0.79 | Ask refill +64.50M | Delta futures +382.56K | aggr 0.65
+Inferred: Mua chủ động chưa có đỡ | Flow state: BUY_PRESSURE_BUILDUP__FOLLOW_THROUGH | Transition: Tái định giá theo hướng mua (REPRICE_TO_LONG) | OI_DRIVEN_MOVE | Quan hệ spot/futures: FUTURES_LED
+Decision: Chỉ theo dõi, chờ thêm xác nhận từ futures hoặc đa sàn trước khi hành động.
+Entry   : Inventory shift sang POS_INV
+Invalid : Dòng tiền mua nguội đi hoặc thất bại giữ breakout.
+💡 Brief : ☕ Đang theo dõi thị trường (Chờ chu kỳ nhận định tiếp theo)...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ [Phase20E] Higher frame aggregation failed: 'TPFMStateEngine' object has no attribute 'calculate_m30_summary'
+🌀 [TPFM] Đang tổng hợp REGIME 30m cho BTCUSDT...
+Bắt lỗi trong loop: You did not supply a value for binding parameter :snapshot_id.
+Mất kết nối. Đang thử kết nối lại sau 10 giây...
+Đã đạt giới hạn số lần thử lại. Dừng hệ thống.
+Hoàn tất phiên live cho BTCUSDT.

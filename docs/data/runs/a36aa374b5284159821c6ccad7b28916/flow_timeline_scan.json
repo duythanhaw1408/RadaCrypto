@@ -1,0 +1,46 @@
+{
+  "artifact_contract": {
+    "schema_version": "v1",
+    "mode": "scan",
+    "run_id": "a36aa374b5284159821c6ccad7b28916",
+    "symbol": "BTCUSDT",
+    "generated_at_ts": 1774497971043,
+    "artifact_name": "flow_timeline",
+    "count": 1
+  },
+  "items": [
+    {
+      "run_id": "a36aa374b5284159821c6ccad7b28916",
+      "mode": "scan",
+      "symbol": "BTCUSDT",
+      "event_id": "9228c96e-9df9-4492-99d8-23ef1537bbc7:state",
+      "market_ts": 1700000005000,
+      "frame": "M5",
+      "window": {
+        "start_ts": 1700000001000,
+        "end_ts": 1700000005000
+      },
+      "event_type": "STATE",
+      "signal_kind": "PATTERN",
+      "priority": 50,
+      "context": {
+        "matrix_cell": "POS_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Mua chủ động chưa có đỡ",
+        "pattern_code": "BREAKOUT_FORMING_LONG",
+        "pattern_phase": "FORMING",
+        "decision_posture": "WAIT",
+        "tradability_grade": "D"
+      },
+      "message": {
+        "action_label_vi": "Đứng ngoài. Matrix chưa đủ sạch để hành động.",
+        "why_now_vi": "Delta spot +228.00K | Nhịp 1.25/s | Inventory L1 +33%",
+        "invalid_if_vi": "Dòng tiền mua nguội đi hoặc thất bại giữ breakout.",
+        "summary_vi": "Đứng ngoài. Matrix chưa đủ sạch để hành động."
+      },
+      "refs": {
+        "snapshot_id": "9228c96e-9df9-4492-99d8-23ef1537bbc7",
+        "thesis_id": ""
+      }
+    }
+  ]
+}

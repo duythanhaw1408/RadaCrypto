@@ -1,0 +1,49 @@
+{
+  "artifact_contract": {
+    "schema_version": "v1",
+    "mode": "scan",
+    "run_id": "2cb235fc7ed14beda8454ddf75b0ff00",
+    "symbol": "BTCUSDT",
+    "generated_at_ts": 1774497967432,
+    "artifact_name": "flow_stack",
+    "count": 1
+  },
+  "items": [
+    {
+      "run_id": "2cb235fc7ed14beda8454ddf75b0ff00",
+      "mode": "scan",
+      "symbol": "BTCUSDT",
+      "stack_id": "7cd91244-2246-4918-b36b-3e4ab515d682:stack",
+      "market_ts": 1700000005000,
+      "anchor": {
+        "frame": "M5",
+        "window_end_ts": 1700000005000
+      },
+      "stack_signature": "M5:POS_INIT__NEUTRAL_INV",
+      "stack_alignment": "MICRO_LEAD",
+      "stack_conflict": "UNKNOWN",
+      "micro_vs_macro": "UNKNOWN",
+      "stack_pressure": 0.0,
+      "stack_quality": 1.0,
+      "macro_bias": "NEUTRAL",
+      "trigger_bias": "NEUTRAL",
+      "frames": {
+        "M5": {
+          "state_id": "7cd91244-2246-4918-b36b-3e4ab515d682",
+          "window_end_ts": 1700000005000,
+          "matrix_cell": "POS_INIT__NEUTRAL_INV",
+          "alias_vi": "Mua chủ động chưa có đỡ",
+          "pattern_code": "BREAKOUT_FORMING_LONG",
+          "pattern_phase": "FORMING",
+          "tradability_grade": "D",
+          "flow_bias": "NEUTRAL"
+        },
+        "M30": {},
+        "H1": {},
+        "H4": {},
+        "H12": {},
+        "D1": {}
+      }
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "artifact_contract": {
+    "schema_version": "v1",
+    "mode": "live",
+    "run_id": "558a359283b24ed78428bf9cbef439d9",
+    "symbol": "BTCUSDT",
+    "generated_at_ts": 1774497936940,
+    "artifact_name": "flow_stack",
+    "count": 1
+  },
+  "items": [
+    {
+      "run_id": "558a359283b24ed78428bf9cbef439d9",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "stack_id": "fde7b394-4b61-4011-8d3a-54643e235629:stack",
+      "market_ts": 1774497579489,
+      "anchor": {
+        "frame": "M5",
+        "window_end_ts": 1774497579489
+      },
+      "stack_signature": "M5:POS_INIT__NEG_INV",
+      "stack_alignment": "MICRO_LEAD",
+      "stack_conflict": "UNKNOWN",
+      "micro_vs_macro": "UNKNOWN",
+      "stack_pressure": 0.0,
+      "stack_quality": 1.0,
+      "macro_bias": "NEUTRAL",
+      "trigger_bias": "NEUTRAL",
+      "frames": {
+        "M5": {
+          "state_id": "fde7b394-4b61-4011-8d3a-54643e235629",
+          "window_end_ts": 1774497579489,
+          "matrix_cell": "POS_INIT__NEG_INV",
+          "alias_vi": "Mua gặp hấp thụ bán",
+          "pattern_code": "TRAP_LONG",
+          "pattern_phase": "FORMING",
+          "tradability_grade": "C",
+          "flow_bias": "NEUTRAL"
+        },
+        "M30": {},
+        "H1": {},
+        "H4": {},
+        "H12": {},
+        "D1": {}
+      }
+    }
+  ]
+}

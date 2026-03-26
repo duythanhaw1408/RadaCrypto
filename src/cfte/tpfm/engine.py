@@ -413,7 +413,7 @@ class TPFMStateEngine:
         snapshot.pattern_failure_risk = self._estimate_pattern_failure_risk(snapshot)
         
         pattern_event = self._build_flow_pattern_event(snapshot)
-        snapshot.metadata["pattern_event"] = pattern_event
+        snapshot.metadata["pattern_event"] = asdict(pattern_event)
         
         self._detect_transitions(snapshot)
         self._finalize_output_contract(snapshot)
@@ -422,16 +422,17 @@ class TPFMStateEngine:
         
         # If we need to return the sequence, we either return it as a third element or attach it to metadata
         if closed_sequence:
-            snapshot.metadata["closed_sequence"] = closed_sequence
+            snapshot.metadata["closed_sequence"] = asdict(closed_sequence)
 
         # Phase 14: Pattern Outcome Tracking
         snapshot.metadata["pattern_outcomes"] = self._update_pattern_outcomes(snapshot, trades)
 
         # Phase D: Probability / Expectancy Engine (Finding 3 Uplift)
+        pattern_event_dict = snapshot.metadata.get("pattern_event")
         snapshot.edge_profile = self._probability_engine.evaluate_edge(
             matrix_cell=snapshot.matrix_cell,
             sequence_length=snapshot.sequence_length,
-            pattern_code=snapshot.metadata.get("pattern_event").pattern_code if snapshot.metadata.get("pattern_event") else None,
+            pattern_code=pattern_event_dict.get("pattern_code") if pattern_event_dict else None,
             sequence_signature=snapshot.sequence_signature
         )
 
@@ -1310,6 +1311,78 @@ class TPFMStateEngine:
             )
         )
 
+    def calculate_higher_frame_summary(self, frame: str, snapshots: List[TPFMSnapshot]) -> Dict[str, Any]:
+        """Phase 20-E: Generic aggregator for higher timeframes (H1, H4, H12, D1)."""
+        if not snapshots:
+            return {}
+        
+        count = len(snapshots)
+        cells = [s.matrix_cell for s in snapshots]
+        counter = Counter(cells)
+        dominant_cell = counter.most_common(1)[0][0]
+        persistence = counter[dominant_cell] / count
+        
+        # Aggregate scores
+        avg_agreement = sum(s.agreement_score for s in snapshots) / count
+        avg_tradability = sum(s.tradability_score for s in snapshots) / count
+        avg_quality = sum(s.market_quality_score for s in snapshots) / count
+        
+        # Prices
+        open_px = snapshots[0].open_px
+        close_px = snapshots[-1].close_px
+        high_px = max(s.high_px for s in snapshots)
+        low_px = min(s.low_px for s in snapshots)
+        volume_quote = sum(s.volume_quote for s in snapshots)
+        
+        # Bias derived from initiative
+        avg_init = sum(s.initiative_score for s in snapshots) / count
+        flow_bias = "NEUTRAL"
+        if avg_init >= 0.15: flow_bias = "LONG"
+        elif avg_init <= -0.15: flow_bias = "SHORT"
+        
+        # Tradability Grade (simplified for higher frames)
+        if avg_tradability >= 0.70: grade = "A"
+        elif avg_tradability >= 0.55: grade = "B"
+        elif avg_tradability >= 0.35: grade = "C"
+        else: grade = "D"
+
+        m_contract = self._matrix_contract(dominant_cell)
+        
+        return {
+            "frame": frame,
+            "symbol": self.symbol,
+            "window_start_ts": snapshots[0].window_start_ts,
+            "window_end_ts": snapshots[-1].window_end_ts,
+            "market_ts": snapshots[-1].window_end_ts,
+            "open_px": open_px,
+            "high_px": high_px,
+            "low_px": low_px,
+            "close_px": close_px,
+            "volume_quote": volume_quote,
+            "dominant_cell": dominant_cell,
+            "matrix_alias_vi": m_contract["alias"],
+            "flow_bias": flow_bias,
+            "tradability_grade": grade,
+            "agreement_score": round(avg_agreement, 3),
+            "tradability_score": round(avg_tradability, 3),
+            "market_quality_score": round(avg_quality, 3),
+            "persistence_score": round(persistence, 3),
+            "m5_count": count,
+        }
+
+    def calculate_h1_summary(self, snapshots: List[TPFMSnapshot]) -> Dict[str, Any]:
+        return self.calculate_higher_frame_summary("H1", snapshots)
+
+    def calculate_h4_summary(self, snapshots: List[TPFMSnapshot]) -> Dict[str, Any]:
+        return self.calculate_higher_frame_summary("H4", snapshots)
+
+    def calculate_h12_summary(self, snapshots: List[TPFMSnapshot]) -> Dict[str, Any]:
+        return self.calculate_higher_frame_summary("H12", snapshots)
+
+    def calculate_d1_summary(self, snapshots: List[TPFMSnapshot]) -> Dict[str, Any]:
+        return self.calculate_higher_frame_summary("D1", snapshots)
+
+
     def _soft_clamp(self, x: float) -> float:
         return max(-1.0, min(1.0, x))
 
@@ -1750,7 +1823,7 @@ class TPFMStateEngine:
                 }
             })
                 
-        return outcomes_to_save
+        return [asdict(o) for o in outcomes_to_save]
 
     def flush_all_pending_outcomes(self, last_snapshot: TPFMSnapshot) -> List[Any]:
         """Force outcomes for all pending patterns using last known price."""

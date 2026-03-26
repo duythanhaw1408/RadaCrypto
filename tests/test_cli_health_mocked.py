@@ -18,7 +18,8 @@ def mock_context():
     )
     return ShellContext(profile_path=Path("configs/profiles/test.yaml"), profile=profile)
 
-def test_command_health_success(mock_context):
+@pytest.mark.asyncio
+async def test_command_health_success(mock_context):
     """Verify health command handles successful network audit."""
     with patch("requests.get") as mock_get:
         mock_response = MagicMock()
@@ -27,8 +28,15 @@ def test_command_health_success(mock_context):
         
         with patch("cfte.storage.sqlite_writer.ThesisSQLiteStore") as mock_store:
             # Mock async DB diagnostics
+            from unittest.mock import AsyncMock
             store_inst = mock_store.return_value
-            store_inst.get_db_diagnostics = MagicMock() # Will be called via asyncio.run
+            store_inst.get_db_diagnostics = AsyncMock(return_value={
+                "file_path": "test.db",
+                "file_size_kb": 10.0,
+                "thesis_count": 5,
+                "outcome_count": 2,
+                "event_count": 100
+            })
             
             with patch("cfte.cli.reliability.build_runtime_report") as mock_build_report:
                 report = MagicMock()
@@ -37,17 +45,12 @@ def test_command_health_success(mock_context):
                 
                 with patch("cfte.cli.reliability.persist_runtime_report"):
                     with patch("pathlib.Path.exists", return_value=True):
-                        # Mock asyncio.run to avoid unawaited coroutine warnings
-                        def mock_run(coro):
-                            coro.close()
-                            return None
-                            
-                        with patch("asyncio.run", side_effect=mock_run):
-                            code = command_health(mock_context)
-                            assert code == 0
-                            mock_get.assert_called_once()
+                        code = await command_health(mock_context)
+                        assert code == 0
+                        mock_get.assert_called_once()
 
-def test_command_health_network_error(mock_context):
+@pytest.mark.asyncio
+async def test_command_health_network_error(mock_context):
     """Verify health command handles network failure without crashing."""
     with patch("requests.get", side_effect=Exception("DNS Failure")):
         with patch("cfte.storage.sqlite_writer.ThesisSQLiteStore"):
@@ -58,16 +61,11 @@ def test_command_health_network_error(mock_context):
                 
                 with patch("cfte.cli.reliability.persist_runtime_report"):
                     with patch("pathlib.Path.exists", return_value=False):
-                        def mock_run(coro):
-                            coro.close()
-                            return None
-                        with patch("asyncio.run", side_effect=mock_run):
-                            code = command_health(mock_context)
-                            assert code == 0
-                            # This verifies that the build_error_surface logic 
-                            # we added to main.py doesn't crash the command.
+                        code = await command_health(mock_context)
+                        assert code == 0
 
-def test_command_health_bad_config(mock_context):
+@pytest.mark.asyncio
+async def test_command_health_bad_config(mock_context):
     """Verify health command returns 1 if report status is bad_config."""
     with patch("requests.get"):
         with patch("cfte.storage.sqlite_writer.ThesisSQLiteStore"):
@@ -78,9 +76,5 @@ def test_command_health_bad_config(mock_context):
                 
                 with patch("cfte.cli.reliability.persist_runtime_report"):
                     with patch("pathlib.Path.exists", return_value=False):
-                        def mock_run(coro):
-                            coro.close()
-                            return None
-                        with patch("asyncio.run", side_effect=mock_run):
-                            code = command_health(mock_context)
-                            assert code == 1
+                        code = await command_health(mock_context)
+                        assert code == 1

@@ -385,10 +385,23 @@ class ThesisSQLiteStore:
                     pattern_failure_risk REAL NOT NULL,
                     matrix_cell TEXT NOT NULL,
                     flow_state_code TEXT NOT NULL,
-                    metadata TEXT
+                    metadata_json TEXT
                 )
                 """
             )
+            # Migration: Ensure metadata_json exists (Patch 4)
+            pattern_cols = [c[1] for c in db.execute("PRAGMA table_info(flow_pattern_event)").fetchall()]
+            if "metadata_json" not in pattern_cols:
+                try:
+                    db.execute("ALTER TABLE flow_pattern_event ADD COLUMN metadata_json TEXT")
+                except Exception:
+                    # In case it existed as 'metadata'
+                    if "metadata" in pattern_cols:
+                        try:
+                            db.execute("ALTER TABLE flow_pattern_event RENAME COLUMN metadata TO metadata_json")
+                        except Exception:
+                            pass
+            
             try:
                 db.execute("CREATE INDEX IF NOT EXISTS idx_flow_pattern_symbol_ts ON flow_pattern_event (symbol, timestamp)")
                 db.execute("CREATE INDEX IF NOT EXISTS idx_flow_pattern_signature_ts ON flow_pattern_event (sequence_signature, timestamp)")
@@ -433,7 +446,341 @@ class ThesisSQLiteStore:
                 )
                 """
             )
+
+            # ═══ Phase 20-A: Market Timeline Architecture ═══
+            # Table 1: Normalized frame state (M5/M30/H1/H4/H12/D1)
+            db.execute("""
+                CREATE TABLE IF NOT EXISTS flow_frame_history (
+                    frame_state_id TEXT PRIMARY KEY,
+                    run_id TEXT NOT NULL,
+                    mode TEXT NOT NULL DEFAULT 'scan',
+                    symbol TEXT NOT NULL DEFAULT 'BTCUSDT',
+                    venue TEXT NOT NULL DEFAULT 'binance',
+                    frame TEXT NOT NULL DEFAULT 'M5',
+                    market_ts INTEGER NOT NULL DEFAULT 0,
+                    window_start_ts INTEGER NOT NULL DEFAULT 0,
+                    window_end_ts INTEGER NOT NULL DEFAULT 0,
+                    emitted_at_ts INTEGER NOT NULL DEFAULT 0,
+                    ingested_at_ts INTEGER NOT NULL DEFAULT 0,
+                    record_seq INTEGER NOT NULL DEFAULT 0,
+                    is_final INTEGER NOT NULL DEFAULT 1,
+                    source_kind TEXT NOT NULL DEFAULT 'tpfm',
+                    source_ref_id TEXT NOT NULL DEFAULT '',
+                    snapshot_id TEXT DEFAULT '',
+                    pattern_id TEXT DEFAULT '',
+                    stack_id TEXT DEFAULT '',
+                    open_px REAL DEFAULT 0.0,
+                    high_px REAL DEFAULT 0.0,
+                    low_px REAL DEFAULT 0.0,
+                    close_px REAL DEFAULT 0.0,
+                    volume_quote REAL DEFAULT 0.0,
+                    matrix_cell TEXT NOT NULL DEFAULT 'NEUTRAL_INIT__NEUTRAL_INV',
+                    matrix_alias_vi TEXT NOT NULL DEFAULT 'Trung tính',
+                    flow_state_code TEXT NOT NULL DEFAULT 'NEUTRAL',
+                    pattern_code TEXT NOT NULL DEFAULT 'UNCLASSIFIED',
+                    pattern_phase TEXT NOT NULL DEFAULT 'FORMING',
+                    sequence_id TEXT DEFAULT '',
+                    sequence_signature TEXT DEFAULT 'UNKNOWN',
+                    sequence_length INTEGER NOT NULL DEFAULT 0,
+                    flow_bias TEXT NOT NULL DEFAULT 'NEUTRAL',
+                    tempo_state TEXT NOT NULL DEFAULT 'UNKNOWN',
+                    persistence_state TEXT NOT NULL DEFAULT 'UNKNOWN',
+                    decision_posture TEXT NOT NULL DEFAULT 'WAIT',
+                    tradability_grade TEXT NOT NULL DEFAULT 'D',
+                    agreement_score REAL DEFAULT 0.0,
+                    tradability_score REAL DEFAULT 0.0,
+                    context_quality_score REAL DEFAULT 0.0,
+                    market_quality_score REAL DEFAULT 0.0,
+                    stack_signature TEXT DEFAULT '',
+                    stack_alignment TEXT DEFAULT 'UNKNOWN',
+                    stack_quality REAL DEFAULT 0.0,
+                    parent_m30_end_ts INTEGER,
+                    parent_h1_end_ts INTEGER,
+                    parent_h4_end_ts INTEGER,
+                    parent_h12_end_ts INTEGER,
+                    parent_d1_end_ts INTEGER,
+                    health_state TEXT NOT NULL DEFAULT 'HEALTHY',
+                    metadata_json TEXT NOT NULL DEFAULT '{}'
+                )
+            """)
+            try:
+                db.execute("CREATE INDEX IF NOT EXISTS idx_ffh_sym_frame_end ON flow_frame_history(symbol, frame, window_end_ts DESC)")
+                db.execute("CREATE INDEX IF NOT EXISTS idx_ffh_run_frame_end ON flow_frame_history(run_id, frame, window_end_ts DESC)")
+                db.execute("CREATE INDEX IF NOT EXISTS idx_ffh_market_ts ON flow_frame_history(market_ts DESC)")
+                db.execute("CREATE UNIQUE INDEX IF NOT EXISTS uq_ffh_run_frame_end_seq ON flow_frame_history(run_id, frame, window_end_ts, record_seq)")
+            except Exception:
+                pass
+
+            # Table 2: Unified timeline events (market_ts-sorted, UI-facing)
+            db.execute("""
+                CREATE TABLE IF NOT EXISTS flow_timeline_event (
+                    event_id TEXT PRIMARY KEY,
+                    run_id TEXT NOT NULL,
+                    mode TEXT NOT NULL DEFAULT 'scan',
+                    symbol TEXT NOT NULL DEFAULT 'BTCUSDT',
+                    venue TEXT NOT NULL DEFAULT 'binance',
+                    frame TEXT NOT NULL DEFAULT 'M5',
+                    market_ts INTEGER NOT NULL DEFAULT 0,
+                    window_start_ts INTEGER,
+                    window_end_ts INTEGER,
+                    anchor_frame TEXT NOT NULL DEFAULT 'M5',
+                    anchor_window_end_ts INTEGER,
+                    emitted_at_ts INTEGER NOT NULL DEFAULT 0,
+                    ingested_at_ts INTEGER NOT NULL DEFAULT 0,
+                    record_seq INTEGER NOT NULL DEFAULT 0,
+                    is_final INTEGER NOT NULL DEFAULT 1,
+                    event_type TEXT NOT NULL DEFAULT 'STATE',
+                    signal_kind TEXT NOT NULL DEFAULT 'PATTERN',
+                    severity TEXT NOT NULL DEFAULT 'INFO',
+                    priority INTEGER NOT NULL DEFAULT 0,
+                    snapshot_id TEXT DEFAULT '',
+                    transition_id TEXT DEFAULT '',
+                    pattern_id TEXT DEFAULT '',
+                    stack_id TEXT DEFAULT '',
+                    thesis_id TEXT DEFAULT '',
+                    matrix_cell TEXT DEFAULT '',
+                    matrix_alias_vi TEXT DEFAULT '',
+                    flow_state_code TEXT DEFAULT '',
+                    pattern_code TEXT DEFAULT '',
+                    pattern_phase TEXT DEFAULT '',
+                    sequence_signature TEXT DEFAULT '',
+                    decision_posture TEXT DEFAULT 'WAIT',
+                    tradability_grade TEXT DEFAULT 'D',
+                    action_label_vi TEXT DEFAULT '',
+                    why_now_vi TEXT DEFAULT '',
+                    invalid_if_vi TEXT DEFAULT '',
+                    summary_vi TEXT DEFAULT '',
+                    parent_m30_end_ts INTEGER,
+                    parent_h1_end_ts INTEGER,
+                    parent_h4_end_ts INTEGER,
+                    parent_h12_end_ts INTEGER,
+                    parent_d1_end_ts INTEGER,
+                    metadata_json TEXT NOT NULL DEFAULT '{}'
+                )
+            """)
+            try:
+                db.execute("CREATE INDEX IF NOT EXISTS idx_fte_run_market_seq ON flow_timeline_event(run_id, market_ts DESC, record_seq DESC)")
+                db.execute("CREATE INDEX IF NOT EXISTS idx_fte_sym_frame ON flow_timeline_event(symbol, frame, market_ts DESC)")
+                db.execute("CREATE INDEX IF NOT EXISTS idx_fte_thesis ON flow_timeline_event(thesis_id, market_ts DESC)")
+            except Exception:
+                pass
+
+            # Table 3: MTF stack snapshot per M5 window
+            db.execute("""
+                CREATE TABLE IF NOT EXISTS flow_stack_history (
+                    stack_id TEXT PRIMARY KEY,
+                    run_id TEXT NOT NULL,
+                    mode TEXT NOT NULL DEFAULT 'scan',
+                    symbol TEXT NOT NULL DEFAULT 'BTCUSDT',
+                    venue TEXT NOT NULL DEFAULT 'binance',
+                    market_ts INTEGER NOT NULL DEFAULT 0,
+                    anchor_frame TEXT NOT NULL DEFAULT 'M5',
+                    anchor_window_start_ts INTEGER NOT NULL DEFAULT 0,
+                    anchor_window_end_ts INTEGER NOT NULL DEFAULT 0,
+                    emitted_at_ts INTEGER NOT NULL DEFAULT 0,
+                    ingested_at_ts INTEGER NOT NULL DEFAULT 0,
+                    record_seq INTEGER NOT NULL DEFAULT 0,
+                    is_final INTEGER NOT NULL DEFAULT 1,
+                    m5_state_id TEXT,
+                    m30_state_id TEXT,
+                    h1_state_id TEXT,
+                    h4_state_id TEXT,
+                    h12_state_id TEXT,
+                    d1_state_id TEXT,
+                    m5_end_ts INTEGER,
+                    m30_end_ts INTEGER,
+                    h1_end_ts INTEGER,
+                    h4_end_ts INTEGER,
+                    h12_end_ts INTEGER,
+                    d1_end_ts INTEGER,
+                    stack_signature TEXT NOT NULL DEFAULT '',
+                    stack_alignment TEXT NOT NULL DEFAULT 'UNKNOWN',
+                    stack_conflict TEXT NOT NULL DEFAULT 'UNKNOWN',
+                    micro_vs_macro TEXT NOT NULL DEFAULT 'UNKNOWN',
+                    stack_pressure REAL NOT NULL DEFAULT 0.0,
+                    stack_quality REAL NOT NULL DEFAULT 0.0,
+                    macro_bias TEXT NOT NULL DEFAULT 'NEUTRAL',
+                    trigger_bias TEXT NOT NULL DEFAULT 'NEUTRAL',
+                    metadata_json TEXT NOT NULL DEFAULT '{}'
+                )
+            """)
+            try:
+                db.execute("CREATE INDEX IF NOT EXISTS idx_fsh_run_anchor ON flow_stack_history(run_id, anchor_window_end_ts DESC)")
+                db.execute("CREATE INDEX IF NOT EXISTS idx_fsh_symbol ON flow_stack_history(symbol, market_ts DESC)")
+                db.execute("CREATE UNIQUE INDEX IF NOT EXISTS uq_fsh_run_anchor_seq ON flow_stack_history(run_id, anchor_frame, anchor_window_end_ts, record_seq)")
+            except Exception:
+                pass
+
             db.commit()
+
+    # ─── Phase 20-A: Market Timeline Architecture ─────────────────────────────
+
+    def _now_ms(self) -> int:
+        return int(time.time() * 1000)
+
+    def save_flow_frame_state(self, row: dict) -> None:
+        """Save a normalized frame state record (M5/M30/H4 etc.) into flow_frame_history."""
+        now = self._now_ms()
+        row.setdefault("ingested_at_ts", now)
+        row.setdefault("emitted_at_ts", now)
+        row.setdefault("metadata_json", "{}")
+        with sqlite3.connect(self.db_path) as db:
+            db.execute(
+                """
+                INSERT OR REPLACE INTO flow_frame_history (
+                    frame_state_id, run_id, mode, symbol, venue, frame,
+                    market_ts, window_start_ts, window_end_ts, emitted_at_ts, ingested_at_ts,
+                    record_seq, is_final, source_kind, source_ref_id,
+                    snapshot_id, pattern_id, stack_id,
+                    open_px, high_px, low_px, close_px, volume_quote,
+                    matrix_cell, matrix_alias_vi, flow_state_code, pattern_code, pattern_phase,
+                    sequence_id, sequence_signature, sequence_length,
+                    flow_bias, tempo_state, persistence_state,
+                    decision_posture, tradability_grade,
+                    agreement_score, tradability_score, context_quality_score, market_quality_score,
+                    stack_signature, stack_alignment, stack_quality,
+                    parent_m30_end_ts, parent_h1_end_ts, parent_h4_end_ts, parent_h12_end_ts, parent_d1_end_ts,
+                    health_state, metadata_json
+                ) VALUES (
+                    :frame_state_id, :run_id, :mode, :symbol, :venue, :frame,
+                    :market_ts, :window_start_ts, :window_end_ts, :emitted_at_ts, :ingested_at_ts,
+                    :record_seq, :is_final, :source_kind, :source_ref_id,
+                    :snapshot_id, :pattern_id, :stack_id,
+                    :open_px, :high_px, :low_px, :close_px, :volume_quote,
+                    :matrix_cell, :matrix_alias_vi, :flow_state_code, :pattern_code, :pattern_phase,
+                    :sequence_id, :sequence_signature, :sequence_length,
+                    :flow_bias, :tempo_state, :persistence_state,
+                    :decision_posture, :tradability_grade,
+                    :agreement_score, :tradability_score, :context_quality_score, :market_quality_score,
+                    :stack_signature, :stack_alignment, :stack_quality,
+                    :parent_m30_end_ts, :parent_h1_end_ts, :parent_h4_end_ts, :parent_h12_end_ts, :parent_d1_end_ts,
+                    :health_state, :metadata_json
+                )
+                """,
+                row,
+            )
+            db.commit()
+
+    def save_flow_timeline_event(self, row: dict) -> None:
+        """Save a timeline event into flow_timeline_event (STATE, DECISION, THESIS etc.)."""
+        now = self._now_ms()
+        row.setdefault("ingested_at_ts", now)
+        row.setdefault("emitted_at_ts", now)
+        row.setdefault("metadata_json", "{}")
+        with sqlite3.connect(self.db_path) as db:
+            db.execute(
+                """
+                INSERT OR REPLACE INTO flow_timeline_event (
+                    event_id, run_id, mode, symbol, venue, frame,
+                    market_ts, window_start_ts, window_end_ts,
+                    anchor_frame, anchor_window_end_ts,
+                    emitted_at_ts, ingested_at_ts, record_seq, is_final,
+                    event_type, signal_kind, severity, priority,
+                    snapshot_id, transition_id, pattern_id, stack_id, thesis_id,
+                    matrix_cell, matrix_alias_vi, flow_state_code, pattern_code, pattern_phase,
+                    sequence_signature, decision_posture, tradability_grade,
+                    action_label_vi, why_now_vi, invalid_if_vi, summary_vi,
+                    parent_m30_end_ts, parent_h1_end_ts, parent_h4_end_ts, parent_h12_end_ts, parent_d1_end_ts,
+                    metadata_json
+                ) VALUES (
+                    :event_id, :run_id, :mode, :symbol, :venue, :frame,
+                    :market_ts, :window_start_ts, :window_end_ts,
+                    :anchor_frame, :anchor_window_end_ts,
+                    :emitted_at_ts, :ingested_at_ts, :record_seq, :is_final,
+                    :event_type, :signal_kind, :severity, :priority,
+                    :snapshot_id, :transition_id, :pattern_id, :stack_id, :thesis_id,
+                    :matrix_cell, :matrix_alias_vi, :flow_state_code, :pattern_code, :pattern_phase,
+                    :sequence_signature, :decision_posture, :tradability_grade,
+                    :action_label_vi, :why_now_vi, :invalid_if_vi, :summary_vi,
+                    :parent_m30_end_ts, :parent_h1_end_ts, :parent_h4_end_ts, :parent_h12_end_ts, :parent_d1_end_ts,
+                    :metadata_json
+                )
+                """,
+                row,
+            )
+            db.commit()
+
+    def save_flow_stack_history(self, row: dict) -> None:
+        """Save a MTF stack snapshot anchored at one M5 window."""
+        now = self._now_ms()
+        row.setdefault("ingested_at_ts", now)
+        row.setdefault("emitted_at_ts", now)
+        row.setdefault("metadata_json", "{}")
+        with sqlite3.connect(self.db_path) as db:
+            db.execute(
+                """
+                INSERT OR REPLACE INTO flow_stack_history (
+                    stack_id, run_id, mode, symbol, venue,
+                    market_ts, anchor_frame, anchor_window_start_ts, anchor_window_end_ts,
+                    emitted_at_ts, ingested_at_ts, record_seq, is_final,
+                    m5_state_id, m30_state_id, h1_state_id, h4_state_id, h12_state_id, d1_state_id,
+                    m5_end_ts, m30_end_ts, h1_end_ts, h4_end_ts, h12_end_ts, d1_end_ts,
+                    stack_signature, stack_alignment, stack_conflict, micro_vs_macro,
+                    stack_pressure, stack_quality, macro_bias, trigger_bias,
+                    metadata_json
+                ) VALUES (
+                    :stack_id, :run_id, :mode, :symbol, :venue,
+                    :market_ts, :anchor_frame, :anchor_window_start_ts, :anchor_window_end_ts,
+                    :emitted_at_ts, :ingested_at_ts, :record_seq, :is_final,
+                    :m5_state_id, :m30_state_id, :h1_state_id, :h4_state_id, :h12_state_id, :d1_state_id,
+                    :m5_end_ts, :m30_end_ts, :h1_end_ts, :h4_end_ts, :h12_end_ts, :d1_end_ts,
+                    :stack_signature, :stack_alignment, :stack_conflict, :micro_vs_macro,
+                    :stack_pressure, :stack_quality, :macro_bias, :trigger_bias,
+                    :metadata_json
+                )
+                """,
+                row,
+            )
+            db.commit()
+
+    def load_flow_frames(
+        self, run_id: str, mode: str, symbol: str, limit: int = 100, frame: str | None = None
+    ) -> list[dict]:
+        """Load flow_frame_history rows sorted by market_ts DESC."""
+        with sqlite3.connect(self.db_path) as db:
+            db.row_factory = sqlite3.Row
+            if frame:
+                rows = db.execute(
+                    "SELECT * FROM flow_frame_history WHERE run_id=? AND mode=? AND symbol=? AND frame=? AND is_final=1 ORDER BY market_ts DESC LIMIT ?",
+                    (run_id, mode, symbol, frame, limit),
+                ).fetchall()
+            else:
+                rows = db.execute(
+                    "SELECT * FROM flow_frame_history WHERE run_id=? AND mode=? AND symbol=? AND is_final=1 ORDER BY market_ts DESC LIMIT ?",
+                    (run_id, mode, symbol, limit),
+                ).fetchall()
+            return [dict(r) for r in rows]
+
+    def load_flow_timeline(
+        self, run_id: str, mode: str, symbol: str, limit: int = 50, min_priority: int = 0
+    ) -> list[dict]:
+        """Load flow_timeline_event rows sorted by market_ts ASC, record_seq ASC."""
+        with sqlite3.connect(self.db_path) as db:
+            db.row_factory = sqlite3.Row
+            rows = db.execute(
+                """
+                SELECT * FROM flow_timeline_event
+                WHERE run_id=? AND mode=? AND symbol=? AND priority>=?
+                ORDER BY market_ts ASC, record_seq ASC
+                LIMIT ?
+                """,
+                (run_id, mode, symbol, min_priority, limit),
+            ).fetchall()
+            return [dict(r) for r in rows]
+
+    def load_flow_stack(
+        self, run_id: str, mode: str, symbol: str, limit: int = 20
+    ) -> list[dict]:
+        """Load flow_stack_history rows sorted by anchor_window_end_ts DESC."""
+        with sqlite3.connect(self.db_path) as db:
+            db.row_factory = sqlite3.Row
+            rows = db.execute(
+                "SELECT * FROM flow_stack_history WHERE run_id=? AND mode=? AND symbol=? AND is_final=1 ORDER BY anchor_window_end_ts DESC LIMIT ?",
+                (run_id, mode, symbol, limit),
+            ).fetchall()
+            return [dict(r) for r in rows]
+
+    # ──────────────────────────────────────────────────────────────────────────
 
     async def save_thesis(
         self,
@@ -1545,6 +1892,14 @@ class ThesisSQLiteStore:
             db.commit()
 
     async def save_flow_pattern_event(self, event: Any) -> None:
+        if not event:
+            return
+        # Handle both dict (from JSON-serializable metadata) and object
+        def _get(attr):
+            if isinstance(event, dict):
+                return event.get(attr)
+            return getattr(event, attr, None)
+
         with sqlite3.connect(self.db_path) as db:
             db.execute(
                 """
@@ -1554,62 +1909,70 @@ class ThesisSQLiteStore:
                     pattern_phase, sequence_id, sequence_signature, 
                     sequence_length, tempo_state, persistence_state, 
                     pattern_strength, pattern_quality, pattern_failure_risk, 
-                    matrix_cell, flow_state_code, metadata
+                    matrix_cell, flow_state_code, metadata_json
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
-                    event.pattern_id,
-                    event.snapshot_id,
-                    event.symbol,
-                    event.venue,
-                    event.timestamp,
-                    event.pattern_code,
-                    event.pattern_alias_vi,
-                    event.pattern_family,
-                    event.pattern_phase,
-                    event.sequence_id,
-                    event.sequence_signature,
-                    event.sequence_length,
-                    event.tempo_state,
-                    event.persistence_state,
-                    event.pattern_strength,
-                    event.pattern_quality,
-                    event.pattern_failure_risk,
-                    event.matrix_cell,
-                    event.flow_state_code,
-                    json.dumps(event.metadata, ensure_ascii=False) if event.metadata else "{}"
+                    _get("pattern_id"),
+                    _get("snapshot_id"),
+                    _get("symbol"),
+                    _get("venue"),
+                    _get("timestamp"),
+                    _get("pattern_code"),
+                    _get("pattern_alias_vi"),
+                    _get("pattern_family"),
+                    _get("pattern_phase"),
+                    _get("sequence_id"),
+                    _get("sequence_signature"),
+                    _get("sequence_length"),
+                    _get("tempo_state"),
+                    _get("persistence_state"),
+                    _get("pattern_strength"),
+                    _get("pattern_quality"),
+                    _get("pattern_failure_risk"),
+                    _get("matrix_cell"),
+                    _get("flow_state_code"),
+                    json.dumps(_get("metadata"), ensure_ascii=False) if _get("metadata") else "{}"
                 ),
             )
             db.commit()
 
     async def save_pattern_outcome(self, outcome: Any) -> None:
+        if not outcome:
+            return
+        # Handle both dict and object
+        def _get(attr):
+            if isinstance(outcome, dict):
+                return outcome.get(attr)
+            return getattr(outcome, attr, None)
+
         with sqlite3.connect(self.db_path) as db:
             db.execute(
                 """
-                INSERT INTO flow_pattern_outcome (
+                INSERT OR REPLACE INTO flow_pattern_outcome (
                     outcome_id, snapshot_id, symbol, timestamp, pattern_code, sequence_signature,
                     start_px, t1_px, t5_px, t12_px, r1_bps, r5_bps, r12_bps,
                     max_favorable_bps, max_adverse_bps, metadata_json
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
-                    outcome.outcome_id,
-                    outcome.snapshot_id,
-                    outcome.symbol,
-                    outcome.timestamp,
-                    outcome.pattern_code,
-                    outcome.sequence_signature,
-                    outcome.start_px,
-                    outcome.t1_px,
-                    outcome.t5_px,
-                    outcome.t12_px,
-                    outcome.r1_bps,
-                    outcome.r5_bps,
-                    outcome.r12_bps,
-                    outcome.max_favorable_bps,
-                    outcome.max_adverse_bps,
-                    json.dumps(outcome.metadata, ensure_ascii=False)
-                )
+                    _get("outcome_id"),
+                    _get("snapshot_id"),
+                    _get("symbol"),
+                    _get("timestamp"),
+                    _get("pattern_code"),
+                    _get("sequence_signature"),
+                    _get("start_px"),
+                    _get("t1_px"),
+                    _get("t5_px"),
+                    _get("t12_px"),
+                    _get("r1_bps"),
+                    _get("r5_bps"),
+                    _get("r12_bps"),
+                    _get("max_favorable_bps"),
+                    _get("max_adverse_bps"),
+                    json.dumps(_get("metadata"), ensure_ascii=False) if _get("metadata") else "{}"
+                ),
             )
             db.commit()
     async def get_pattern_scorecard(self) -> list[dict]:

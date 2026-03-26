@@ -27,12 +27,14 @@ def test_run_scan_persists_summary_and_thesis_log(tmp_path, capsys):
             f'  thesis_log: {tmp_path / "live_thesis.jsonl"}',
             'review:',
             f'  summary_path: {tmp_path / "summary.json"}',
+            f'  db_path: {tmp_path / "test_state.db"}',
         ]),
         encoding='utf-8',
     )
     context = build_context(profile_path)
 
-    exit_code = command_run_scan(context, events_path=Path('fixtures/replay/btcusdt_normalized.jsonl'), limit=None)
+    import asyncio
+    exit_code = asyncio.run(command_run_scan(context, events_path=Path('fixtures/replay/btcusdt_normalized.jsonl'), limit=None))
     captured = capsys.readouterr()
 
     assert exit_code == 0
@@ -50,7 +52,7 @@ def test_run_scan_persists_summary_and_thesis_log(tmp_path, capsys):
 
 
 def test_live_thesis_loop_generates_ranked_signals_from_trade_window():
-    loop = LiveThesisLoop(instrument_key='BINANCE:BTCUSDT:SPOT', trade_window_size=2)
+    loop = LiveThesisLoop(symbol='BTCUSDT')
     loop.apply_snapshot(bids=[(100.0, 10.0)], asks=[(100.1, 2.0)], seq_id=1)
     loop.ingest_depth(
         NormalizedDepthDiff(

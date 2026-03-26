@@ -6,18 +6,18 @@
   "fingerprint": "4de5da8c6d936375de102004e0f72c721864793d6d0fac4a7d5a4db2d9ce9a1c",
   "artifact_contract": {
     "mode": "scan",
-    "run_id": "2969728b853c45cb94e0eed3291a076b",
-    "generated_at": "2026-03-24T09:07:19.524667Z",
+    "run_id": "b96dce84cdfe404398fb213742de3807",
+    "generated_at": "2026-03-26T00:34:29.568562Z",
     "window_end_ts": 1700000005000,
     "source": "replay_scan"
   },
   "latest_tpfm": {
-    "snapshot_id": "71e8a88e-fab9-4865-bfe9-af2334bc0039",
+    "snapshot_id": "585c218c-f769-466e-85fa-bf7bbf37062e",
     "symbol": "BTCUSDT",
     "venue": "binance",
     "window_start_ts": 1700000001000,
     "window_end_ts": 1700000005000,
-    "run_id": "2969728b853c45cb94e0eed3291a076b",
+    "run_id": "b96dce84cdfe404398fb213742de3807",
     "microprice": 60000.666666666664,
     "open_px": 60000.5,
     "high_px": 60000.9,
@@ -154,7 +154,7 @@
     "persistence_state": "EARLY",
     "exhaustion_risk": 0.0,
     "history_depth": 0,
-    "sequence_id": "e9b86a61-fdc6-4bfc-b63a-a4fcc3cb138a",
+    "sequence_id": "ba197a64-97e3-4109-9385-8f4793dd4156",
     "sequence_signature": "POS_NEUTRALx1|STABLE|NONE|MIXED",
     "sequence_length": 1,
     "sequence_family": "LONG",
@@ -222,8 +222,8 @@
     "invalid_if": "Dòng tiền mua nguội đi hoặc thất bại giữ breakout.",
     "metadata": {
       "pattern_event": {
-        "pattern_id": "d2c8e31c-1688-4de6-bfbd-f2dbfb01f60b",
-        "snapshot_id": "71e8a88e-fab9-4865-bfe9-af2334bc0039",
+        "pattern_id": "682751fe-9875-4c67-bf7b-bbcefbe012a1",
+        "snapshot_id": "585c218c-f769-466e-85fa-bf7bbf37062e",
         "symbol": "BTCUSDT",
         "venue": "binance",
         "timestamp": 1700000005000,
@@ -231,7 +231,7 @@
         "pattern_alias_vi": "Đang nén bứt phá Mua",
         "pattern_family": "POS_INIT__NEUTRAL_INV",
         "pattern_phase": "FORMING",
-        "sequence_id": "e9b86a61-fdc6-4bfc-b63a-a4fcc3cb138a",
+        "sequence_id": "ba197a64-97e3-4109-9385-8f4793dd4156",
         "sequence_signature": "POS_NEUTRALx1|STABLE|NONE|MIXED",
         "sequence_length": 1,
         "tempo_state": "STABLE",
@@ -246,8 +246,8 @@
         }
       },
       "decision_view": {
-        "decision_id": "decision:71e8a88e-fab9-4865-bfe9-af2334bc0039",
-        "snapshot_id": "71e8a88e-fab9-4865-bfe9-af2334bc0039",
+        "decision_id": "decision:585c218c-f769-466e-85fa-bf7bbf37062e",
+        "snapshot_id": "585c218c-f769-466e-85fa-bf7bbf37062e",
         "symbol": "BTCUSDT",
         "venue": "binance",
         "timestamp": 1700000005000,
@@ -340,6 +340,8 @@
       "pattern_code": "BREAKOUT_FORMING_LONG",
       "pattern_phase": "FORMING",
       "sequence_signature": "POS_NEUTRALx1|STABLE|NONE|MIXED",
+      "created_at": "2023-11-14T22:13:21+00:00",
+      "updated_at": "2023-11-14T22:13:22+00:00",
       "metadata": {
         "matrix_cell_at_entry": "POS_INIT__NEUTRAL_INV",
         "flow_state_at_entry": "BUY_PRESSURE_BUILDUP",
@@ -393,6 +395,8 @@
       "pattern_code": "BREAKOUT_FORMING_LONG",
       "pattern_phase": "FORMING",
       "sequence_signature": "POS_NEUTRALx1|STABLE|NONE|MIXED",
+      "created_at": "2023-11-14T22:13:21+00:00",
+      "updated_at": "2023-11-14T22:13:23+00:00",
       "metadata": {
         "matrix_cell_at_entry": "POS_INIT__NEUTRAL_INV",
         "flow_state_at_entry": "BUY_PRESSURE_BUILDUP",
@@ -445,6 +449,8 @@
       "pattern_code": "BREAKOUT_FORMING_LONG",
       "pattern_phase": "FORMING",
       "sequence_signature": "POS_NEUTRALx1|STABLE|NONE|MIXED",
+      "created_at": "2023-11-14T22:13:21+00:00",
+      "updated_at": "2023-11-14T22:13:22+00:00",
       "metadata": {
         "matrix_cell_at_entry": "POS_INIT__NEUTRAL_INV",
         "flow_state_at_entry": "BUY_PRESSURE_BUILDUP",
@@ -495,6 +501,8 @@
       "pattern_code": "BREAKOUT_FORMING_LONG",
       "pattern_phase": "FORMING",
       "sequence_signature": "POS_NEUTRALx1|STABLE|NONE|MIXED",
+      "created_at": "2023-11-14T22:13:21+00:00",
+      "updated_at": "2023-11-14T22:13:22+00:00",
       "metadata": {
         "matrix_cell_at_entry": "POS_INIT__NEUTRAL_INV",
         "flow_state_at_entry": "BUY_PRESSURE_BUILDUP",

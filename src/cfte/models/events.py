@@ -126,6 +126,8 @@ class ThesisSignal:
     pattern_code: str = ""
     pattern_phase: str = ""
     sequence_signature: str = ""
+    created_at: str | None = None
+    updated_at: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
