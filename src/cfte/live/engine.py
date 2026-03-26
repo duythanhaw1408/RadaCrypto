@@ -1968,10 +1968,10 @@ class LiveThesisLoop:
 
                 self._tpfm_m5_buffer = []
 
-            # Reset window
-            self._tpfm_window_start_ts = trade.venue_ts
-            self._tpfm_trades = []
-            self._tpfm_snapshots = []
+                # Reset window (FIXED: Now inside the IF block)
+                self._tpfm_window_start_ts = trade.venue_ts
+                self._tpfm_trades = []
+                self._tpfm_snapshots = []
 
         # Phase 3: Update Outcome Realism
         await self.outcome_realism.update(snapshot)
