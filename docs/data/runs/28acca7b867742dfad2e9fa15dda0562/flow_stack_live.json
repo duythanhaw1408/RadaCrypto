@@ -1,0 +1,12 @@
+{
+  "artifact_contract": {
+    "schema_version": "v1",
+    "mode": "live",
+    "run_id": "28acca7b867742dfad2e9fa15dda0562",
+    "symbol": "BTCUSDT",
+    "generated_at_ts": 1774503892558,
+    "artifact_name": "flow_stack",
+    "count": 0
+  },
+  "items": []
+}

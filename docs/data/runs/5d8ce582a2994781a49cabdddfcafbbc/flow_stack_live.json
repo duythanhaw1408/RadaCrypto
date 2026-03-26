@@ -1,0 +1,49 @@
+{
+  "artifact_contract": {
+    "schema_version": "v1",
+    "mode": "live",
+    "run_id": "5d8ce582a2994781a49cabdddfcafbbc",
+    "symbol": "BTCUSDT",
+    "generated_at_ts": 1774502136693,
+    "artifact_name": "flow_stack",
+    "count": 1
+  },
+  "items": [
+    {
+      "run_id": "5d8ce582a2994781a49cabdddfcafbbc",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "stack_id": "d770a32f-dcf4-4ed0-b0a9-c602ef4c119d:stack",
+      "market_ts": 1774501717029,
+      "anchor": {
+        "frame": "M5",
+        "window_end_ts": 1774501717029
+      },
+      "stack_signature": "M5:NEG_INIT__NEG_INV",
+      "stack_alignment": "MICRO_LEAD",
+      "stack_conflict": "UNKNOWN",
+      "micro_vs_macro": "UNKNOWN",
+      "stack_pressure": 0.0,
+      "stack_quality": 1.0,
+      "macro_bias": "NEUTRAL",
+      "trigger_bias": "NEUTRAL",
+      "frames": {
+        "M5": {
+          "state_id": "d770a32f-dcf4-4ed0-b0a9-c602ef4c119d",
+          "window_end_ts": 1774501717029,
+          "matrix_cell": "NEG_INIT__NEG_INV",
+          "alias_vi": "Thuận pha bán",
+          "pattern_code": "UNCLASSIFIED",
+          "pattern_phase": "FORMING",
+          "tradability_grade": "B",
+          "flow_bias": "NEUTRAL"
+        },
+        "M30": {},
+        "H1": {},
+        "H4": {},
+        "H12": {},
+        "D1": {}
+      }
+    }
+  ]
+}

@@ -4,9 +4,9 @@
     "mode": "live",
     "run_id": "ddc211624bf6474c907bcde362e0f624",
     "symbol": "BTCUSDT",
-    "generated_at_ts": 1774500047403,
+    "generated_at_ts": 1774501710081,
     "artifact_name": "flow_timeline",
-    "count": 1
+    "count": 10
   },
   "items": [
     {
@@ -39,6 +39,303 @@
       },
       "refs": {
         "snapshot_id": "34ae369a-ac66-40fe-bf51-38ab0eb6b039",
+        "thesis_id": ""
+      }
+    },
+    {
+      "run_id": "ddc211624bf6474c907bcde362e0f624",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "event_id": "b18619e0-25af-4981-8638-4d927d1add79:state",
+      "market_ts": 1774500131874,
+      "frame": "M5",
+      "window": {
+        "start_ts": 1774499831698,
+        "end_ts": 1774500131874
+      },
+      "event_type": "STATE",
+      "signal_kind": "PATTERN",
+      "priority": 50,
+      "context": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "pattern_code": "TRAP_LONG",
+        "pattern_phase": "FORMING",
+        "decision_posture": "CONSERVATIVE",
+        "tradability_grade": "B"
+      },
+      "message": {
+        "action_label_vi": "CONSERVATIVE: Chỉ theo long khi vượt hấp thụ và có xác nhận thêm từ futures/venue lead.",
+        "why_now_vi": "Delta spot +225.66K | Nhịp 3.42/s | Inventory L1 -5%",
+        "invalid_if_vi": "Inventory tiếp tục âm hoặc giá không giữ được trên microprice.",
+        "summary_vi": "Chỉ theo long khi vượt hấp thụ và có xác nhận thêm từ futures/venue lead."
+      },
+      "refs": {
+        "snapshot_id": "b18619e0-25af-4981-8638-4d927d1add79",
+        "thesis_id": ""
+      }
+    },
+    {
+      "run_id": "ddc211624bf6474c907bcde362e0f624",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "event_id": "263303b9-f0dd-47ad-aed6-58e7b44365c9:state",
+      "market_ts": 1774500432522,
+      "frame": "M5",
+      "window": {
+        "start_ts": 1774500131874,
+        "end_ts": 1774500432522
+      },
+      "event_type": "STATE",
+      "signal_kind": "PATTERN",
+      "priority": 50,
+      "context": {
+        "matrix_cell": "NEG_INIT__NEG_INV",
+        "matrix_alias_vi": "Thuận pha bán",
+        "pattern_code": "UNCLASSIFIED",
+        "pattern_phase": "FORMING",
+        "decision_posture": "AGGRESSIVE",
+        "tradability_grade": "B"
+      },
+      "message": {
+        "action_label_vi": "AGGRESSIVE: Ưu tiên continuation short khi hồi yếu và ask vẫn ép xuống.",
+        "why_now_vi": "Delta spot -371.20K | Nhịp 3.97/s | Inventory L1 -11%",
+        "invalid_if_vi": "Initiative mất âm hoặc inventory không còn đè.",
+        "summary_vi": "Ưu tiên continuation short khi hồi yếu và ask vẫn ép xuống."
+      },
+      "refs": {
+        "snapshot_id": "263303b9-f0dd-47ad-aed6-58e7b44365c9",
+        "thesis_id": ""
+      }
+    },
+    {
+      "run_id": "ddc211624bf6474c907bcde362e0f624",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "event_id": "2a607b3b-cfc5-4806-91da-cb50b955f911:state",
+      "market_ts": 1774500732793,
+      "frame": "M5",
+      "window": {
+        "start_ts": 1774500432522,
+        "end_ts": 1774500732793
+      },
+      "event_type": "STATE",
+      "signal_kind": "PATTERN",
+      "priority": 50,
+      "context": {
+        "matrix_cell": "NEUTRAL_INIT__NEG_INV",
+        "matrix_alias_vi": "Đè thụ động",
+        "pattern_code": "PASSIVE_DISTRIBUTION",
+        "pattern_phase": "FORMING",
+        "decision_posture": "WAIT",
+        "tradability_grade": "C"
+      },
+      "message": {
+        "action_label_vi": "Chỉ theo dõi, chờ thêm xác nhận từ futures hoặc đa sàn trước khi hành động.",
+        "why_now_vi": "Delta spot +3.85K | Nhịp 2.09/s | Inventory L1 -34%",
+        "invalid_if_vi": "Ask không còn đè hoặc initiative chuyển dương.",
+        "summary_vi": "Chỉ theo dõi, chờ thêm xác nhận từ futures hoặc đa sàn trước khi hành động."
+      },
+      "refs": {
+        "snapshot_id": "2a607b3b-cfc5-4806-91da-cb50b955f911",
+        "thesis_id": ""
+      }
+    },
+    {
+      "run_id": "ddc211624bf6474c907bcde362e0f624",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "event_id": "2fe57b49-6087-4162-8ae7-011b407be4ec:state",
+      "market_ts": 1774501033326,
+      "frame": "M5",
+      "window": {
+        "start_ts": 1774500732793,
+        "end_ts": 1774501033326
+      },
+      "event_type": "STATE",
+      "signal_kind": "PATTERN",
+      "priority": 50,
+      "context": {
+        "matrix_cell": "POS_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Mua chủ động chưa có đỡ",
+        "pattern_code": "BREAKOUT_FORMING_LONG",
+        "pattern_phase": "FORMING",
+        "decision_posture": "WAIT",
+        "tradability_grade": "C"
+      },
+      "message": {
+        "action_label_vi": "Chỉ theo dõi, chờ thêm xác nhận từ futures hoặc đa sàn trước khi hành động.",
+        "why_now_vi": "Delta spot +2.81M | Nhịp 5.01/s | Inventory L1 -11%",
+        "invalid_if_vi": "Dòng tiền mua nguội đi hoặc thất bại giữ breakout.",
+        "summary_vi": "Chỉ theo dõi, chờ thêm xác nhận từ futures hoặc đa sàn trước khi hành động."
+      },
+      "refs": {
+        "snapshot_id": "2fe57b49-6087-4162-8ae7-011b407be4ec",
+        "thesis_id": ""
+      }
+    },
+    {
+      "run_id": "ddc211624bf6474c907bcde362e0f624",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "event_id": "83823fd1-7d47-4f41-a999-c8e424c5cf29:state",
+      "market_ts": 1774501334294,
+      "frame": "M5",
+      "window": {
+        "start_ts": 1774501033326,
+        "end_ts": 1774501334294
+      },
+      "event_type": "STATE",
+      "signal_kind": "PATTERN",
+      "priority": 50,
+      "context": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "pattern_code": "TRAP_SHORT",
+        "pattern_phase": "FORMING",
+        "decision_posture": "CONSERVATIVE",
+        "tradability_grade": "B"
+      },
+      "message": {
+        "action_label_vi": "CONSERVATIVE: Ưu tiên chờ failed breakdown hoặc hồi bán lại thay vì đuổi short.",
+        "why_now_vi": "Delta spot -583.86K | Nhịp 4.76/s | Inventory L1 +3%",
+        "invalid_if_vi": "Initiative chuyển dương hoặc bid tiếp tục hấp thụ bán.",
+        "summary_vi": "Ưu tiên chờ failed breakdown hoặc hồi bán lại thay vì đuổi short."
+      },
+      "refs": {
+        "snapshot_id": "83823fd1-7d47-4f41-a999-c8e424c5cf29",
+        "thesis_id": ""
+      }
+    },
+    {
+      "run_id": "ddc211624bf6474c907bcde362e0f624",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "event_id": "00f13206-a0b0-42da-9340-e262e8b7f733:state",
+      "market_ts": 1774501349049,
+      "frame": "M5",
+      "window": {
+        "start_ts": 1774501033326,
+        "end_ts": 1774501349049
+      },
+      "event_type": "STATE",
+      "signal_kind": "PATTERN",
+      "priority": 50,
+      "context": {
+        "matrix_cell": "NEG_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Bán chủ động chưa có đè",
+        "pattern_code": "BREAKDOWN_FORMING_SHORT",
+        "pattern_phase": "FORMING",
+        "decision_posture": "WAIT",
+        "tradability_grade": "C"
+      },
+      "message": {
+        "action_label_vi": "Chỉ theo dõi, chờ thêm xác nhận từ futures hoặc đa sàn trước khi hành động.",
+        "why_now_vi": "Delta spot -584.21K | Nhịp 4.54/s | Inventory L1 +3%",
+        "invalid_if_vi": "Dòng tiền bán nguội đi hoặc giá reclaim lại microprice.",
+        "summary_vi": "Chỉ theo dõi, chờ thêm xác nhận từ futures hoặc đa sàn trước khi hành động."
+      },
+      "refs": {
+        "snapshot_id": "00f13206-a0b0-42da-9340-e262e8b7f733",
+        "thesis_id": ""
+      }
+    },
+    {
+      "run_id": "ddc211624bf6474c907bcde362e0f624",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "event_id": "dd3a80dd-2e7f-4645-a847-2f5a4cd1f79e:state",
+      "market_ts": 1774501361895,
+      "frame": "M5",
+      "window": {
+        "start_ts": 1774501033326,
+        "end_ts": 1774501361895
+      },
+      "event_type": "STATE",
+      "signal_kind": "PATTERN",
+      "priority": 50,
+      "context": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "pattern_code": "TRAP_SHORT",
+        "pattern_phase": "FORMING",
+        "decision_posture": "WAIT",
+        "tradability_grade": "C"
+      },
+      "message": {
+        "action_label_vi": "Chỉ theo dõi, chờ thêm xác nhận từ futures hoặc đa sàn trước khi hành động.",
+        "why_now_vi": "Delta spot -584.20K | Nhịp 4.37/s | Inventory L1 +3%",
+        "invalid_if_vi": "Initiative chuyển dương hoặc bid tiếp tục hấp thụ bán.",
+        "summary_vi": "Chỉ theo dõi, chờ thêm xác nhận từ futures hoặc đa sàn trước khi hành động."
+      },
+      "refs": {
+        "snapshot_id": "dd3a80dd-2e7f-4645-a847-2f5a4cd1f79e",
+        "thesis_id": ""
+      }
+    },
+    {
+      "run_id": "ddc211624bf6474c907bcde362e0f624",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "event_id": "1355b7e2-350a-4252-aaf9-1b05b76f2dfb:state",
+      "market_ts": 1774501374814,
+      "frame": "M5",
+      "window": {
+        "start_ts": 1774501033326,
+        "end_ts": 1774501374814
+      },
+      "event_type": "STATE",
+      "signal_kind": "PATTERN",
+      "priority": 50,
+      "context": {
+        "matrix_cell": "NEG_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Bán chủ động chưa có đè",
+        "pattern_code": "BREAKDOWN_FORMING_SHORT",
+        "pattern_phase": "FORMING",
+        "decision_posture": "WAIT",
+        "tradability_grade": "C"
+      },
+      "message": {
+        "action_label_vi": "Chỉ theo dõi, chờ thêm xác nhận từ futures hoặc đa sàn trước khi hành động.",
+        "why_now_vi": "Delta spot -584.21K | Nhịp 4.21/s | Inventory L1 +3%",
+        "invalid_if_vi": "Dòng tiền bán nguội đi hoặc giá reclaim lại microprice.",
+        "summary_vi": "Chỉ theo dõi, chờ thêm xác nhận từ futures hoặc đa sàn trước khi hành động."
+      },
+      "refs": {
+        "snapshot_id": "1355b7e2-350a-4252-aaf9-1b05b76f2dfb",
+        "thesis_id": ""
+      }
+    },
+    {
+      "run_id": "ddc211624bf6474c907bcde362e0f624",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "event_id": "a49ab42d-2624-4c40-8f37-a81487de6166:state",
+      "market_ts": 1774501387495,
+      "frame": "M5",
+      "window": {
+        "start_ts": 1774501033326,
+        "end_ts": 1774501387495
+      },
+      "event_type": "STATE",
+      "signal_kind": "PATTERN",
+      "priority": 50,
+      "context": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "pattern_code": "TRAP_SHORT",
+        "pattern_phase": "FORMING",
+        "decision_posture": "WAIT",
+        "tradability_grade": "C"
+      },
+      "message": {
+        "action_label_vi": "Chỉ theo dõi, chờ thêm xác nhận từ futures hoặc đa sàn trước khi hành động.",
+        "why_now_vi": "Delta spot -584.20K | Nhịp 4.06/s | Inventory L1 +3%",
+        "invalid_if_vi": "Initiative chuyển dương hoặc bid tiếp tục hấp thụ bán.",
+        "summary_vi": "Chỉ theo dõi, chờ thêm xác nhận từ futures hoặc đa sàn trước khi hành động."
+      },
+      "refs": {
+        "snapshot_id": "a49ab42d-2624-4c40-8f37-a81487de6166",
         "thesis_id": ""
       }
     }

@@ -1,0 +1,4913 @@
+{
+  "artifact_contract": {
+    "schema_version": "v1",
+    "mode": "live",
+    "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+    "symbol": "BTCUSDT",
+    "generated_at_ts": 1774521489360,
+    "artifact_name": "flow_frames",
+    "count": 100
+  },
+  "items": [
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "1fb46412-ccbd-4cb8-b43d-552a2b07f341",
+      "frame": "M5",
+      "market_ts": 1774521478158,
+      "window": {
+        "start_ts": 1774521142997,
+        "end_ts": 1774521478158
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "1fb46412-ccbd-4cb8-b43d-552a2b07f341"
+      },
+      "prices": {
+        "open": 69629.07,
+        "high": 69642.64,
+        "low": 69598.11,
+        "close": 69623.74
+      },
+      "volume_quote": 1573084.6777403,
+      "flow": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "flow_state_code": "SHORT_TRAP_RISK",
+        "pattern_code": "TRAP_SHORT",
+        "pattern_phase": "MATURE",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_POSx4|STABLE|NONE|MIXED",
+        "sequence_length": 4,
+        "tempo_state": "STABLE",
+        "persistence_state": "PERSISTENT"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "733012cd-56cd-469f-ada1-1acd72540dbf",
+      "frame": "M5",
+      "market_ts": 1774521466002,
+      "window": {
+        "start_ts": 1774521142997,
+        "end_ts": 1774521466002
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "733012cd-56cd-469f-ada1-1acd72540dbf"
+      },
+      "prices": {
+        "open": 69629.07,
+        "high": 69642.64,
+        "low": 69598.11,
+        "close": 69633.72
+      },
+      "volume_quote": 1572901.5673041,
+      "flow": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "flow_state_code": "SHORT_TRAP_RISK",
+        "pattern_code": "TRAP_SHORT",
+        "pattern_phase": "CONFIRMED",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_POSx3|STABLE|NONE|MIXED",
+        "sequence_length": 3,
+        "tempo_state": "STABLE",
+        "persistence_state": "BUILDING"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "28f6b87a-0f14-4320-bf34-6f7f36dab01b",
+      "frame": "M5",
+      "market_ts": 1774521454296,
+      "window": {
+        "start_ts": 1774521142997,
+        "end_ts": 1774521454296
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "28f6b87a-0f14-4320-bf34-6f7f36dab01b"
+      },
+      "prices": {
+        "open": 69629.07,
+        "high": 69642.64,
+        "low": 69598.11,
+        "close": 69635.99
+      },
+      "volume_quote": 1572876.4991649,
+      "flow": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "flow_state_code": "SHORT_TRAP_RISK",
+        "pattern_code": "TRAP_SHORT",
+        "pattern_phase": "CONFIRMED",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_POSx2|STABLE|NONE|MIXED",
+        "sequence_length": 2,
+        "tempo_state": "STABLE",
+        "persistence_state": "BUILDING"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "96e1408a-afff-4f4b-a123-0fa025169388",
+      "frame": "M5",
+      "market_ts": 1774521443017,
+      "window": {
+        "start_ts": 1774521142997,
+        "end_ts": 1774521443017
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "96e1408a-afff-4f4b-a123-0fa025169388"
+      },
+      "prices": {
+        "open": 69629.07,
+        "high": 69642.64,
+        "low": 69598.11,
+        "close": 69636.0
+      },
+      "volume_quote": 1572758.8143418,
+      "flow": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "flow_state_code": "SHORT_TRAP_RISK",
+        "pattern_code": "TRAP_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_POSx1|DECELERATING|NONE|MIXED",
+        "sequence_length": 1,
+        "tempo_state": "DECELERATING",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "26eacf9f-d016-490c-9270-bcb5f4ca8adb",
+      "frame": "M5",
+      "market_ts": 1774521142997,
+      "window": {
+        "start_ts": 1774520842528,
+        "end_ts": 1774521142997
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "26eacf9f-d016-490c-9270-bcb5f4ca8adb"
+      },
+      "prices": {
+        "open": 69683.86,
+        "high": 69693.01,
+        "low": 69604.05,
+        "close": 69629.06
+      },
+      "volume_quote": 1576745.876779,
+      "flow": {
+        "matrix_cell": "NEG_INIT__NEG_INV",
+        "matrix_alias_vi": "Thuận pha bán",
+        "flow_state_code": "SHORT_CONTINUATION__TRAP",
+        "pattern_code": "UNCLASSIFIED",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_NEGx1|ACCELERATING|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "ACCELERATING",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "AGGRESSIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "61120fa4-6570-45f6-a0b5-5c138c880963",
+      "frame": "M5",
+      "market_ts": 1774520842528,
+      "window": {
+        "start_ts": 1774520542412,
+        "end_ts": 1774520842528
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "61120fa4-6570-45f6-a0b5-5c138c880963"
+      },
+      "prices": {
+        "open": 69688.99,
+        "high": 69719.81,
+        "low": 69672.3,
+        "close": 69683.86
+      },
+      "volume_quote": 1697235.6642485,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK",
+        "pattern_code": "TRAP_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx1|STABLE|NONE|MIXED",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "e56e20b2-7156-4d29-acde-3d87c1410d85",
+      "frame": "M5",
+      "market_ts": 1774520542412,
+      "window": {
+        "start_ts": 1774520242246,
+        "end_ts": 1774520542412
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "e56e20b2-7156-4d29-acde-3d87c1410d85"
+      },
+      "prices": {
+        "open": 69656.14,
+        "high": 69694.0,
+        "low": 69642.58,
+        "close": 69689.0
+      },
+      "volume_quote": 2125641.6080342,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Mua chủ động chưa có đỡ",
+        "flow_state_code": "BUY_PRESSURE_BUILDUP__FOLLOW_THROUGH",
+        "pattern_code": "BREAKOUT_FORMING_LONG",
+        "pattern_phase": "CONFIRMED",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEUTRALx2|STABLE|NONE|FOLLOW_THROUGH",
+        "sequence_length": 2,
+        "tempo_state": "STABLE",
+        "persistence_state": "BUILDING"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "b25e4674-da01-4101-8c15-1a389c18cd67",
+      "frame": "M5",
+      "market_ts": 1774520242246,
+      "window": {
+        "start_ts": 1774519941862,
+        "end_ts": 1774520242246
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "b25e4674-da01-4101-8c15-1a389c18cd67"
+      },
+      "prices": {
+        "open": 69580.0,
+        "high": 69661.6,
+        "low": 69561.86,
+        "close": 69656.13
+      },
+      "volume_quote": 1921140.1283067,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Mua chủ động chưa có đỡ",
+        "flow_state_code": "BUY_PRESSURE_BUILDUP",
+        "pattern_code": "BREAKOUT_FORMING_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEUTRALx1|STABLE|NONE|FOLLOW_THROUGH",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "8f6ddc03-d507-4c2d-aa30-e68956b3030c",
+      "frame": "M5",
+      "market_ts": 1774519941862,
+      "window": {
+        "start_ts": 1774519641705,
+        "end_ts": 1774519941862
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "8f6ddc03-d507-4c2d-aa30-e68956b3030c"
+      },
+      "prices": {
+        "open": 69612.84,
+        "high": 69612.84,
+        "low": 69509.23,
+        "close": 69579.99
+      },
+      "volume_quote": 5770004.4092903,
+      "flow": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "flow_state_code": "SHORT_TRAP_RISK__TRAP",
+        "pattern_code": "TRAP_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_POSx1|STABLE|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "38b5d0ce-b879-425e-8753-8c9cd9130fce",
+      "frame": "M5",
+      "market_ts": 1774519618005,
+      "window": {
+        "start_ts": 1774519271294,
+        "end_ts": 1774519618005
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "38b5d0ce-b879-425e-8753-8c9cd9130fce"
+      },
+      "prices": {
+        "open": 69563.7,
+        "high": 69634.0,
+        "low": 69503.98,
+        "close": 69612.86
+      },
+      "volume_quote": 3920767.1791747,
+      "flow": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "flow_state_code": "SHORT_TRAP_RISK",
+        "pattern_code": "ABSORB_LONG",
+        "pattern_phase": "MATURE",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_POSx5|STABLE|NONE|FOLLOW_THROUGH",
+        "sequence_length": 5,
+        "tempo_state": "STABLE",
+        "persistence_state": "PERSISTENT"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "a63f3b13-6bd6-441e-88d2-929a2c758053",
+      "frame": "M5",
+      "market_ts": 1774519606365,
+      "window": {
+        "start_ts": 1774519271294,
+        "end_ts": 1774519606365
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "a63f3b13-6bd6-441e-88d2-929a2c758053"
+      },
+      "prices": {
+        "open": 69563.7,
+        "high": 69634.0,
+        "low": 69503.98,
+        "close": 69634.0
+      },
+      "volume_quote": 3920760.2178887,
+      "flow": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "flow_state_code": "SHORT_TRAP_RISK",
+        "pattern_code": "ABSORB_LONG",
+        "pattern_phase": "MATURE",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_POSx4|STABLE|NONE|FOLLOW_THROUGH",
+        "sequence_length": 4,
+        "tempo_state": "STABLE",
+        "persistence_state": "PERSISTENT"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "25ec5338-74ba-4d7e-9e18-9df8269bd950",
+      "frame": "M5",
+      "market_ts": 1774519594179,
+      "window": {
+        "start_ts": 1774519271294,
+        "end_ts": 1774519594179
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "25ec5338-74ba-4d7e-9e18-9df8269bd950"
+      },
+      "prices": {
+        "open": 69563.7,
+        "high": 69594.14,
+        "low": 69503.98,
+        "close": 69594.14
+      },
+      "volume_quote": 3906050.0353887,
+      "flow": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "flow_state_code": "SHORT_TRAP_RISK",
+        "pattern_code": "TRAP_SHORT",
+        "pattern_phase": "CONFIRMED",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_POSx3|STABLE|NONE|MIXED",
+        "sequence_length": 3,
+        "tempo_state": "STABLE",
+        "persistence_state": "BUILDING"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "f48cce9d-2d76-4079-a2b1-2c3aaa79a0bc",
+      "frame": "M5",
+      "market_ts": 1774519582438,
+      "window": {
+        "start_ts": 1774519271294,
+        "end_ts": 1774519582438
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "f48cce9d-2d76-4079-a2b1-2c3aaa79a0bc"
+      },
+      "prices": {
+        "open": 69563.7,
+        "high": 69593.3,
+        "low": 69503.98,
+        "close": 69588.26
+      },
+      "volume_quote": 3876224.7707503,
+      "flow": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "flow_state_code": "SHORT_TRAP_RISK",
+        "pattern_code": "TRAP_SHORT",
+        "pattern_phase": "CONFIRMED",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_POSx2|STABLE|NONE|MIXED",
+        "sequence_length": 2,
+        "tempo_state": "STABLE",
+        "persistence_state": "BUILDING"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "3198fd65-00fb-4df0-9d54-55daa3ac2466",
+      "frame": "M5",
+      "market_ts": 1774519571306,
+      "window": {
+        "start_ts": 1774519271294,
+        "end_ts": 1774519571306
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "3198fd65-00fb-4df0-9d54-55daa3ac2466"
+      },
+      "prices": {
+        "open": 69563.7,
+        "high": 69593.3,
+        "low": 69503.98,
+        "close": 69583.55
+      },
+      "volume_quote": 3875900.4894587,
+      "flow": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "flow_state_code": "SHORT_TRAP_RISK",
+        "pattern_code": "TRAP_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_POSx1|STABLE|NONE|MIXED",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "49b5572c-727a-4858-b71a-8001acca2829",
+      "frame": "M5",
+      "market_ts": 1774519271294,
+      "window": {
+        "start_ts": 1774518971215,
+        "end_ts": 1774519271294
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "49b5572c-727a-4858-b71a-8001acca2829"
+      },
+      "prices": {
+        "open": 69583.28,
+        "high": 69621.02,
+        "low": 69556.55,
+        "close": 69563.69
+      },
+      "volume_quote": 5075871.435489,
+      "flow": {
+        "matrix_cell": "NEG_INIT__NEG_INV",
+        "matrix_alias_vi": "Thuận pha bán",
+        "flow_state_code": "SHORT_CONTINUATION__TRAP",
+        "pattern_code": "UNCLASSIFIED",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_NEGx1|STABLE|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "AGGRESSIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "e0e6a5c0-c158-4b2e-b195-73457b8a6ace",
+      "frame": "M5",
+      "market_ts": 1774518971215,
+      "window": {
+        "start_ts": 1774518670815,
+        "end_ts": 1774518971215
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "e0e6a5c0-c158-4b2e-b195-73457b8a6ace"
+      },
+      "prices": {
+        "open": 69506.36,
+        "high": 69600.0,
+        "low": 69506.36,
+        "close": 69583.29
+      },
+      "volume_quote": 4297324.7049522,
+      "flow": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "flow_state_code": "SHORT_TRAP_RISK",
+        "pattern_code": "ABSORB_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_POSx1|STABLE|NONE|FOLLOW_THROUGH",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "CONSERVATIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "92cad0a5-27e9-472d-8798-6bd8b116ed17",
+      "frame": "M5",
+      "market_ts": 1774518670815,
+      "window": {
+        "start_ts": 1774518370792,
+        "end_ts": 1774518670815
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "92cad0a5-27e9-472d-8798-6bd8b116ed17"
+      },
+      "prices": {
+        "open": 69489.22,
+        "high": 69510.17,
+        "low": 69409.67,
+        "close": 69506.35
+      },
+      "volume_quote": 2076532.7559239,
+      "flow": {
+        "matrix_cell": "NEG_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Bán chủ động chưa có đè",
+        "flow_state_code": "SELL_PRESSURE_BUILDUP",
+        "pattern_code": "BREAKDOWN_FORMING_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_NEUTRALx1|DECELERATING|NONE|MIXED",
+        "sequence_length": 1,
+        "tempo_state": "DECELERATING",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "8b529acd-1683-4bd7-bad6-a1f4c810a876",
+      "frame": "M5",
+      "market_ts": 1774518370792,
+      "window": {
+        "start_ts": 1774518070325,
+        "end_ts": 1774518370792
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "8b529acd-1683-4bd7-bad6-a1f4c810a876"
+      },
+      "prices": {
+        "open": 69506.86,
+        "high": 69527.0,
+        "low": 69468.16,
+        "close": 69489.21
+      },
+      "volume_quote": 3687968.1257126,
+      "flow": {
+        "matrix_cell": "NEG_INIT__NEG_INV",
+        "matrix_alias_vi": "Thuận pha bán",
+        "flow_state_code": "SHORT_CONTINUATION",
+        "pattern_code": "UNCLASSIFIED",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_NEGx1|ACCELERATING|NONE|MIXED",
+        "sequence_length": 1,
+        "tempo_state": "ACCELERATING",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "AGGRESSIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "e25b94a0-49bb-4a9b-ad5e-5d857150af43",
+      "frame": "M5",
+      "market_ts": 1774518070325,
+      "window": {
+        "start_ts": 1774517768883,
+        "end_ts": 1774518070325
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "e25b94a0-49bb-4a9b-ad5e-5d857150af43"
+      },
+      "prices": {
+        "open": 69552.37,
+        "high": 69596.0,
+        "low": 69426.38,
+        "close": 69506.87
+      },
+      "volume_quote": 11805818.229731001,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK__TRAP",
+        "pattern_code": "TRAP_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx1|STABLE|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "CONSERVATIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "62c85286-3440-45c7-8306-7da3d1d8ec58",
+      "frame": "M5",
+      "market_ts": 1774517672776,
+      "window": {
+        "start_ts": 1774517371836,
+        "end_ts": 1774517672776
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "62c85286-3440-45c7-8306-7da3d1d8ec58"
+      },
+      "prices": {
+        "open": 70037.14,
+        "high": 70040.08,
+        "low": 69463.85,
+        "close": 69463.85
+      },
+      "volume_quote": 9164289.322184,
+      "flow": {
+        "matrix_cell": "NEG_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Bán chủ động chưa có đè",
+        "flow_state_code": "SELL_PRESSURE_BUILDUP__TRAP",
+        "pattern_code": "BREAKDOWN_FORMING_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_NEUTRALx1|DECELERATING|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "DECELERATING",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "5b6648af-b1ce-411c-bafa-3f9d8d4c6e84",
+      "frame": "M5",
+      "market_ts": 1774517371836,
+      "window": {
+        "start_ts": 1774517071149,
+        "end_ts": 1774517371836
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "5b6648af-b1ce-411c-bafa-3f9d8d4c6e84"
+      },
+      "prices": {
+        "open": 69986.46,
+        "high": 70049.24,
+        "low": 69950.61,
+        "close": 70037.14
+      },
+      "volume_quote": 4227657.8617961,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK",
+        "pattern_code": "ABSORB_SHORT",
+        "pattern_phase": "CONFIRMED",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx2|STABLE|NONE|FOLLOW_THROUGH",
+        "sequence_length": 2,
+        "tempo_state": "STABLE",
+        "persistence_state": "BUILDING"
+      },
+      "decision": {
+        "posture": "CONSERVATIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "f82c6a4a-a974-47d2-a6bc-1be36e059262",
+      "frame": "M5",
+      "market_ts": 1774517071149,
+      "window": {
+        "start_ts": 1774516770449,
+        "end_ts": 1774517071149
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "f82c6a4a-a974-47d2-a6bc-1be36e059262"
+      },
+      "prices": {
+        "open": 69946.95,
+        "high": 70027.03,
+        "low": 69943.08,
+        "close": 69986.46
+      },
+      "volume_quote": 5436215.1184656,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK",
+        "pattern_code": "ABSORB_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx1|STABLE|NONE|FOLLOW_THROUGH",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "CONSERVATIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "c115764d-3375-4d0a-a719-179a7728f2cc",
+      "frame": "M5",
+      "market_ts": 1774516770449,
+      "window": {
+        "start_ts": 1774516469237,
+        "end_ts": 1774516770449
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "c115764d-3375-4d0a-a719-179a7728f2cc"
+      },
+      "prices": {
+        "open": 70056.6,
+        "high": 70056.6,
+        "low": 69883.39,
+        "close": 69946.95
+      },
+      "volume_quote": 2161299.4885947,
+      "flow": {
+        "matrix_cell": "NEG_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Bán chủ động chưa có đè",
+        "flow_state_code": "SELL_PRESSURE_BUILDUP__TRAP",
+        "pattern_code": "BREAKDOWN_FORMING_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_NEUTRALx1|STABLE|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "595557bb-4a74-4d3e-b28b-06692192acbe",
+      "frame": "M5",
+      "market_ts": 1774516444139,
+      "window": {
+        "start_ts": 1774516096302,
+        "end_ts": 1774516444139
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "595557bb-4a74-4d3e-b28b-06692192acbe"
+      },
+      "prices": {
+        "open": 70071.0,
+        "high": 70144.44,
+        "low": 70046.25,
+        "close": 70072.25
+      },
+      "volume_quote": 4532688.3883324005,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK",
+        "pattern_code": "TRAP_LONG",
+        "pattern_phase": "MATURE",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx5|STABLE|NONE|MIXED",
+        "sequence_length": 5,
+        "tempo_state": "STABLE",
+        "persistence_state": "PERSISTENT"
+      },
+      "decision": {
+        "posture": "CONSERVATIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "2840d59b-ad70-4283-b50f-de956501e510",
+      "frame": "M5",
+      "market_ts": 1774516432479,
+      "window": {
+        "start_ts": 1774516096302,
+        "end_ts": 1774516432479
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "2840d59b-ad70-4283-b50f-de956501e510"
+      },
+      "prices": {
+        "open": 70071.0,
+        "high": 70144.44,
+        "low": 70046.25,
+        "close": 70056.02
+      },
+      "volume_quote": 4527815.5640674,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK__TRAP",
+        "pattern_code": "TRAP_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx4|STABLE|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 4,
+        "tempo_state": "STABLE",
+        "persistence_state": "PERSISTENT"
+      },
+      "decision": {
+        "posture": "CONSERVATIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "8af7245b-bb99-4e97-a9c8-480d172f42e0",
+      "frame": "M5",
+      "market_ts": 1774516420705,
+      "window": {
+        "start_ts": 1774516096302,
+        "end_ts": 1774516420705
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "8af7245b-bb99-4e97-a9c8-480d172f42e0"
+      },
+      "prices": {
+        "open": 70071.0,
+        "high": 70144.44,
+        "low": 70046.25,
+        "close": 70046.25
+      },
+      "volume_quote": 4527391.7251464,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK__TRAP",
+        "pattern_code": "TRAP_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx3|STABLE|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 3,
+        "tempo_state": "STABLE",
+        "persistence_state": "BUILDING"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "d5cf26ad-4cb3-42fa-ab09-8c67b1571334",
+      "frame": "M5",
+      "market_ts": 1774516409110,
+      "window": {
+        "start_ts": 1774516096302,
+        "end_ts": 1774516409110
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "d5cf26ad-4cb3-42fa-ab09-8c67b1571334"
+      },
+      "prices": {
+        "open": 70071.0,
+        "high": 70144.44,
+        "low": 70050.02,
+        "close": 70050.02
+      },
+      "volume_quote": 4527380.5177464,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK__TRAP",
+        "pattern_code": "TRAP_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx2|DECELERATING|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 2,
+        "tempo_state": "DECELERATING",
+        "persistence_state": "BUILDING"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "5ea63b92-f535-48ce-a75c-8dff785c283d",
+      "frame": "M5",
+      "market_ts": 1774516397410,
+      "window": {
+        "start_ts": 1774516096302,
+        "end_ts": 1774516397410
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "5ea63b92-f535-48ce-a75c-8dff785c283d"
+      },
+      "prices": {
+        "open": 70071.0,
+        "high": 70144.44,
+        "low": 70050.61,
+        "close": 70052.67
+      },
+      "volume_quote": 4522561.0763704,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK__TRAP",
+        "pattern_code": "TRAP_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx1|DECELERATING|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "DECELERATING",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "CONSERVATIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "d5e90886-4ddd-4407-83e2-2dcb4a1037b7",
+      "frame": "M5",
+      "market_ts": 1774516096302,
+      "window": {
+        "start_ts": 1774515795881,
+        "end_ts": 1774516096302
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "d5e90886-4ddd-4407-83e2-2dcb4a1037b7"
+      },
+      "prices": {
+        "open": 69972.92,
+        "high": 70079.01,
+        "low": 69944.78,
+        "close": 70071.01
+      },
+      "volume_quote": 6774574.6458616,
+      "flow": {
+        "matrix_cell": "POS_INIT__POS_INV",
+        "matrix_alias_vi": "Thuận pha mua",
+        "flow_state_code": "LONG_CONTINUATION__FOLLOW_THROUGH",
+        "pattern_code": "UNCLASSIFIED",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_POSx1|ACCELERATING|NONE|FOLLOW_THROUGH",
+        "sequence_length": 1,
+        "tempo_state": "ACCELERATING",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "AGGRESSIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "2a7ed76e-ca68-48c5-9414-894dbae88344",
+      "frame": "M5",
+      "market_ts": 1774515795881,
+      "window": {
+        "start_ts": 1774515495606,
+        "end_ts": 1774515795881
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "2a7ed76e-ca68-48c5-9414-894dbae88344"
+      },
+      "prices": {
+        "open": 70019.01,
+        "high": 70032.18,
+        "low": 69930.7,
+        "close": 69972.93
+      },
+      "volume_quote": 898883.1886388,
+      "flow": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "flow_state_code": "SHORT_TRAP_RISK__TRAP",
+        "pattern_code": "TRAP_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_POSx1|DECELERATING|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "DECELERATING",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "4652c8eb-2432-4239-8683-6072bb28ff13",
+      "frame": "M5",
+      "market_ts": 1774515495606,
+      "window": {
+        "start_ts": 1774515195478,
+        "end_ts": 1774515495606
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "4652c8eb-2432-4239-8683-6072bb28ff13"
+      },
+      "prices": {
+        "open": 69963.21,
+        "high": 70041.73,
+        "low": 69929.57,
+        "close": 70019.0
+      },
+      "volume_quote": 1948118.8518611,
+      "flow": {
+        "matrix_cell": "POS_INIT__POS_INV",
+        "matrix_alias_vi": "Thuận pha mua",
+        "flow_state_code": "LONG_CONTINUATION__FOLLOW_THROUGH",
+        "pattern_code": "UNCLASSIFIED",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_POSx1|STABLE|NONE|FOLLOW_THROUGH",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "AGGRESSIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "86431af4-dfb9-4354-90f9-e37433a1cfbb",
+      "frame": "M5",
+      "market_ts": 1774515195478,
+      "window": {
+        "start_ts": 1774514894529,
+        "end_ts": 1774515195478
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "86431af4-dfb9-4354-90f9-e37433a1cfbb"
+      },
+      "prices": {
+        "open": 69990.26,
+        "high": 70022.3,
+        "low": 69942.25,
+        "close": 69963.21
+      },
+      "volume_quote": 1758544.7339184,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK__TRAP",
+        "pattern_code": "TRAP_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx2|DECELERATING|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 2,
+        "tempo_state": "DECELERATING",
+        "persistence_state": "BUILDING"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "23be6977-17e6-4079-9ecd-bc449a624536",
+      "frame": "M5",
+      "market_ts": 1774514894529,
+      "window": {
+        "start_ts": 1774514593438,
+        "end_ts": 1774514894529
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "23be6977-17e6-4079-9ecd-bc449a624536"
+      },
+      "prices": {
+        "open": 69894.82,
+        "high": 70047.63,
+        "low": 69876.68,
+        "close": 69990.26
+      },
+      "volume_quote": 4844764.3378234,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK",
+        "pattern_code": "ABSORB_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx1|STABLE|NONE|FOLLOW_THROUGH",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "CONSERVATIVE",
+        "tradability_grade": "A",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "34f7f25b-58f1-4a2e-86c0-67631f50a330",
+      "frame": "M5",
+      "market_ts": 1774514569604,
+      "window": {
+        "start_ts": 1774514223313,
+        "end_ts": 1774514569604
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "34f7f25b-58f1-4a2e-86c0-67631f50a330"
+      },
+      "prices": {
+        "open": 69881.83,
+        "high": 69914.25,
+        "low": 69820.17,
+        "close": 69883.18
+      },
+      "volume_quote": 1292590.9108833,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK",
+        "pattern_code": "TRAP_LONG",
+        "pattern_phase": "MATURE",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx5|STABLE|NONE|MIXED",
+        "sequence_length": 5,
+        "tempo_state": "STABLE",
+        "persistence_state": "PERSISTENT"
+      },
+      "decision": {
+        "posture": "CONSERVATIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "a5fbf035-b37e-4097-846d-f4771c57e142",
+      "frame": "M5",
+      "market_ts": 1774514557336,
+      "window": {
+        "start_ts": 1774514223313,
+        "end_ts": 1774514557336
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "a5fbf035-b37e-4097-846d-f4771c57e142"
+      },
+      "prices": {
+        "open": 69881.83,
+        "high": 69914.25,
+        "low": 69820.17,
+        "close": 69914.25
+      },
+      "volume_quote": 1292472.1094773,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK",
+        "pattern_code": "ABSORB_SHORT",
+        "pattern_phase": "MATURE",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx4|STABLE|NONE|FOLLOW_THROUGH",
+        "sequence_length": 4,
+        "tempo_state": "STABLE",
+        "persistence_state": "PERSISTENT"
+      },
+      "decision": {
+        "posture": "CONSERVATIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "82d06fb5-f0d2-4ee3-ad1b-be676707d2ff",
+      "frame": "M5",
+      "market_ts": 1774514545945,
+      "window": {
+        "start_ts": 1774514223313,
+        "end_ts": 1774514545945
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "82d06fb5-f0d2-4ee3-ad1b-be676707d2ff"
+      },
+      "prices": {
+        "open": 69881.83,
+        "high": 69898.9,
+        "low": 69820.17,
+        "close": 69820.17
+      },
+      "volume_quote": 1284017.3792248,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK__TRAP",
+        "pattern_code": "TRAP_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx3|STABLE|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 3,
+        "tempo_state": "STABLE",
+        "persistence_state": "BUILDING"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "a1ad27a5-2a87-4737-8933-e73f3eda5c7f",
+      "frame": "M5",
+      "market_ts": 1774514534533,
+      "window": {
+        "start_ts": 1774514223313,
+        "end_ts": 1774514534533
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "a1ad27a5-2a87-4737-8933-e73f3eda5c7f"
+      },
+      "prices": {
+        "open": 69881.83,
+        "high": 69898.9,
+        "low": 69838.0,
+        "close": 69840.81
+      },
+      "volume_quote": 1284008.3026027,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK__TRAP",
+        "pattern_code": "TRAP_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx2|STABLE|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 2,
+        "tempo_state": "STABLE",
+        "persistence_state": "BUILDING"
+      },
+      "decision": {
+        "posture": "CONSERVATIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "bbdab1bd-7662-4a2f-a1ce-9730250dc17b",
+      "frame": "M5",
+      "market_ts": 1774514523415,
+      "window": {
+        "start_ts": 1774514223313,
+        "end_ts": 1774514523415
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "bbdab1bd-7662-4a2f-a1ce-9730250dc17b"
+      },
+      "prices": {
+        "open": 69881.83,
+        "high": 69898.9,
+        "low": 69838.0,
+        "close": 69850.5
+      },
+      "volume_quote": 1283983.8583192,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK__TRAP",
+        "pattern_code": "TRAP_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx1|DECELERATING|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "DECELERATING",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "CONSERVATIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "608c946c-16bf-45c1-9575-3536118e7bf1",
+      "frame": "M5",
+      "market_ts": 1774514223313,
+      "window": {
+        "start_ts": 1774513923076,
+        "end_ts": 1774514223313
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "608c946c-16bf-45c1-9575-3536118e7bf1"
+      },
+      "prices": {
+        "open": 69846.0,
+        "high": 69920.52,
+        "low": 69845.99,
+        "close": 69881.82
+      },
+      "volume_quote": 2165733.5684489,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Mua chủ động chưa có đỡ",
+        "flow_state_code": "BUY_PRESSURE_BUILDUP",
+        "pattern_code": "BREAKOUT_FORMING_LONG",
+        "pattern_phase": "CONFIRMED",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEUTRALx2|STABLE|NONE|FOLLOW_THROUGH",
+        "sequence_length": 2,
+        "tempo_state": "STABLE",
+        "persistence_state": "BUILDING"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "9e8cd4bf-1872-4d24-8040-e5e830577e0c",
+      "frame": "M5",
+      "market_ts": 1774513923076,
+      "window": {
+        "start_ts": 1774513623011,
+        "end_ts": 1774513923076
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "9e8cd4bf-1872-4d24-8040-e5e830577e0c"
+      },
+      "prices": {
+        "open": 69847.99,
+        "high": 69868.24,
+        "low": 69806.39,
+        "close": 69846.0
+      },
+      "volume_quote": 2303242.0626323,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Mua chủ động chưa có đỡ",
+        "flow_state_code": "BUY_PRESSURE_BUILDUP",
+        "pattern_code": "BREAKOUT_FORMING_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEUTRALx1|STABLE|NONE|MIXED",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "95a29879-6b14-4252-9c6e-904dcdcef74b",
+      "frame": "M5",
+      "market_ts": 1774513623011,
+      "window": {
+        "start_ts": 1774513321617,
+        "end_ts": 1774513623011
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "95a29879-6b14-4252-9c6e-904dcdcef74b"
+      },
+      "prices": {
+        "open": 69872.37,
+        "high": 69889.89,
+        "low": 69821.47,
+        "close": 69848.0
+      },
+      "volume_quote": 2384842.8294752,
+      "flow": {
+        "matrix_cell": "NEG_INIT__NEG_INV",
+        "matrix_alias_vi": "Thuận pha bán",
+        "flow_state_code": "SHORT_CONTINUATION__TRAP",
+        "pattern_code": "UNCLASSIFIED",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_NEGx1|ACCELERATING|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "ACCELERATING",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "AGGRESSIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "366e0c3b-294a-4012-a902-6eac0c1f0bc7",
+      "frame": "M5",
+      "market_ts": 1774513321617,
+      "window": {
+        "start_ts": 1774513020418,
+        "end_ts": 1774513321617
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "366e0c3b-294a-4012-a902-6eac0c1f0bc7"
+      },
+      "prices": {
+        "open": 69982.52,
+        "high": 70011.09,
+        "low": 69865.0,
+        "close": 69872.36
+      },
+      "volume_quote": 1113574.5076400999,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK__TRAP",
+        "pattern_code": "TRAP_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx1|DECELERATING|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "DECELERATING",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "dc3240fb-caa4-4b72-866c-1f0003d46ed0",
+      "frame": "M5",
+      "market_ts": 1774513020418,
+      "window": {
+        "start_ts": 1774512720417,
+        "end_ts": 1774513020418
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "dc3240fb-caa4-4b72-866c-1f0003d46ed0"
+      },
+      "prices": {
+        "open": 69997.08,
+        "high": 69997.08,
+        "low": 69896.62,
+        "close": 69982.51
+      },
+      "volume_quote": 2054762.0033946,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Mua chủ động chưa có đỡ",
+        "flow_state_code": "BUY_PRESSURE_BUILDUP__TRAP",
+        "pattern_code": "BREAKOUT_FORMING_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEUTRALx1|STABLE|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "166c9e23-cd67-421a-bc3c-0ab742ff6884",
+      "frame": "M5",
+      "market_ts": 1774512694102,
+      "window": {
+        "start_ts": 1774512342806,
+        "end_ts": 1774512694102
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "166c9e23-cd67-421a-bc3c-0ab742ff6884"
+      },
+      "prices": {
+        "open": 70036.27,
+        "high": 70127.69,
+        "low": 69980.89,
+        "close": 69990.06
+      },
+      "volume_quote": 1771592.5316453,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Mua chủ động chưa có đỡ",
+        "flow_state_code": "BUY_PRESSURE_BUILDUP__TRAP",
+        "pattern_code": "BREAKOUT_FORMING_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEUTRALx6|STABLE|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 6,
+        "tempo_state": "STABLE",
+        "persistence_state": "PERSISTENT"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "fc35fe55-d13c-4b00-aec0-0e41f823a47b",
+      "frame": "M5",
+      "market_ts": 1774512681098,
+      "window": {
+        "start_ts": 1774512342806,
+        "end_ts": 1774512681098
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "fc35fe55-d13c-4b00-aec0-0e41f823a47b"
+      },
+      "prices": {
+        "open": 70036.27,
+        "high": 70127.69,
+        "low": 69980.89,
+        "close": 69990.06
+      },
+      "volume_quote": 1771582.7330369,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Mua chủ động chưa có đỡ",
+        "flow_state_code": "BUY_PRESSURE_BUILDUP__TRAP",
+        "pattern_code": "BREAKOUT_FORMING_LONG",
+        "pattern_phase": "EXHAUSTING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEUTRALx5|DECELERATING|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 5,
+        "tempo_state": "DECELERATING",
+        "persistence_state": "PERSISTENT"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "D",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "aa83ecc6-1a52-49ec-867e-84423a32ef6e",
+      "frame": "M5",
+      "market_ts": 1774512668625,
+      "window": {
+        "start_ts": 1774512342806,
+        "end_ts": 1774512668625
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "aa83ecc6-1a52-49ec-867e-84423a32ef6e"
+      },
+      "prices": {
+        "open": 70036.27,
+        "high": 70127.69,
+        "low": 69980.89,
+        "close": 69980.89
+      },
+      "volume_quote": 1771533.7399949,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Mua chủ động chưa có đỡ",
+        "flow_state_code": "BUY_PRESSURE_BUILDUP__TRAP",
+        "pattern_code": "BREAKOUT_FORMING_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEUTRALx4|STABLE|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 4,
+        "tempo_state": "STABLE",
+        "persistence_state": "PERSISTENT"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "2577f713-aac0-44eb-a1bb-f6915decabaf",
+      "frame": "M5",
+      "market_ts": 1774512655753,
+      "window": {
+        "start_ts": 1774512342806,
+        "end_ts": 1774512655753
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "2577f713-aac0-44eb-a1bb-f6915decabaf"
+      },
+      "prices": {
+        "open": 70036.27,
+        "high": 70127.69,
+        "low": 70011.1,
+        "close": 70019.73
+      },
+      "volume_quote": 1757621.5390629,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Mua chủ động chưa có đỡ",
+        "flow_state_code": "BUY_PRESSURE_BUILDUP__TRAP",
+        "pattern_code": "BREAKOUT_FORMING_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEUTRALx3|DECELERATING|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 3,
+        "tempo_state": "DECELERATING",
+        "persistence_state": "BUILDING"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "9e2bec47-c89c-4a03-92e8-156f66776cce",
+      "frame": "M5",
+      "market_ts": 1774512644591,
+      "window": {
+        "start_ts": 1774512342806,
+        "end_ts": 1774512644591
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "9e2bec47-c89c-4a03-92e8-156f66776cce"
+      },
+      "prices": {
+        "open": 70036.27,
+        "high": 70127.69,
+        "low": 70011.1,
+        "close": 70019.73
+      },
+      "volume_quote": 1757572.5252519,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Mua chủ động chưa có đỡ",
+        "flow_state_code": "BUY_PRESSURE_BUILDUP",
+        "pattern_code": "BREAKOUT_FORMING_LONG",
+        "pattern_phase": "CONFIRMED",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEUTRALx2|DECELERATING|NONE|MIXED",
+        "sequence_length": 2,
+        "tempo_state": "DECELERATING",
+        "persistence_state": "BUILDING"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "5210935d-e4bf-4a7a-a700-64d17e869dfc",
+      "frame": "M5",
+      "market_ts": 1774512342806,
+      "window": {
+        "start_ts": 1774512042149,
+        "end_ts": 1774512342806
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "5210935d-e4bf-4a7a-a700-64d17e869dfc"
+      },
+      "prices": {
+        "open": 70089.0,
+        "high": 70127.0,
+        "low": 70030.01,
+        "close": 70036.27
+      },
+      "volume_quote": 2655267.4081678,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Mua chủ động chưa có đỡ",
+        "flow_state_code": "BUY_PRESSURE_BUILDUP__TRAP",
+        "pattern_code": "BREAKOUT_FORMING_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEUTRALx1|DECELERATING|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "DECELERATING",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "ec63b963-2293-41cb-8d19-e7ade0a438ca",
+      "frame": "M5",
+      "market_ts": 1774512042149,
+      "window": {
+        "start_ts": 1774511742148,
+        "end_ts": 1774512042149
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "ec63b963-2293-41cb-8d19-e7ade0a438ca"
+      },
+      "prices": {
+        "open": 70145.42,
+        "high": 70145.42,
+        "low": 70064.84,
+        "close": 70089.0
+      },
+      "volume_quote": 3127701.2110043,
+      "flow": {
+        "matrix_cell": "NEG_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Bán chủ động chưa có đè",
+        "flow_state_code": "SELL_PRESSURE_BUILDUP__TRAP",
+        "pattern_code": "BREAKDOWN_FORMING_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_NEUTRALx1|DECELERATING|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "DECELERATING",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "84e7b436-7fcf-470f-a18d-22fb4551dd54",
+      "frame": "M5",
+      "market_ts": 1774511742148,
+      "window": {
+        "start_ts": 1774511442148,
+        "end_ts": 1774511742148
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "84e7b436-7fcf-470f-a18d-22fb4551dd54"
+      },
+      "prices": {
+        "open": 70102.14,
+        "high": 70163.84,
+        "low": 70087.64,
+        "close": 70145.42
+      },
+      "volume_quote": 1710051.2699042999,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Mua chủ động chưa có đỡ",
+        "flow_state_code": "BUY_PRESSURE_BUILDUP__FOLLOW_THROUGH",
+        "pattern_code": "BREAKOUT_FORMING_LONG",
+        "pattern_phase": "CONFIRMED",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEUTRALx2|STABLE|NONE|FOLLOW_THROUGH",
+        "sequence_length": 2,
+        "tempo_state": "STABLE",
+        "persistence_state": "BUILDING"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "237d64b9-a25b-4650-a83f-7301be503900",
+      "frame": "M5",
+      "market_ts": 1774511442148,
+      "window": {
+        "start_ts": 1774511142118,
+        "end_ts": 1774511442148
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "237d64b9-a25b-4650-a83f-7301be503900"
+      },
+      "prices": {
+        "open": 70093.49,
+        "high": 70102.15,
+        "low": 70050.51,
+        "close": 70102.15
+      },
+      "volume_quote": 2076583.895191,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Mua chủ động chưa có đỡ",
+        "flow_state_code": "BUY_PRESSURE_BUILDUP",
+        "pattern_code": "BREAKOUT_FORMING_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEUTRALx1|STABLE|NONE|MIXED",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "e3ddd356-032b-40dd-83bf-5050d00013f6",
+      "frame": "M5",
+      "market_ts": 1774511142118,
+      "window": {
+        "start_ts": 1774510841902,
+        "end_ts": 1774511142118
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "e3ddd356-032b-40dd-83bf-5050d00013f6"
+      },
+      "prices": {
+        "open": 70107.54,
+        "high": 70112.08,
+        "low": 70048.88,
+        "close": 70093.5
+      },
+      "volume_quote": 2320584.0961445,
+      "flow": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "flow_state_code": "SHORT_TRAP_RISK__TRAP",
+        "pattern_code": "TRAP_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_POSx1|STABLE|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "419eb1f0-2d28-422d-bd57-c3a5f7251ab4",
+      "frame": "M5",
+      "market_ts": 1774510817140,
+      "window": {
+        "start_ts": 1774510470413,
+        "end_ts": 1774510817140
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "419eb1f0-2d28-422d-bd57-c3a5f7251ab4"
+      },
+      "prices": {
+        "open": 69945.35,
+        "high": 70087.98,
+        "low": 69934.67,
+        "close": 70087.98
+      },
+      "volume_quote": 3333284.5665468,
+      "flow": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "flow_state_code": "SHORT_TRAP_RISK",
+        "pattern_code": "ABSORB_LONG",
+        "pattern_phase": "MATURE",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_POSx5|STABLE|NONE|FOLLOW_THROUGH",
+        "sequence_length": 5,
+        "tempo_state": "STABLE",
+        "persistence_state": "PERSISTENT"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "5d38e1c7-3696-48ee-9550-7ea7a0c4f5a9",
+      "frame": "M5",
+      "market_ts": 1774510805345,
+      "window": {
+        "start_ts": 1774510470413,
+        "end_ts": 1774510805345
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "5d38e1c7-3696-48ee-9550-7ea7a0c4f5a9"
+      },
+      "prices": {
+        "open": 69945.35,
+        "high": 70058.94,
+        "low": 69934.67,
+        "close": 70058.94
+      },
+      "volume_quote": 3333278.9595084,
+      "flow": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "flow_state_code": "SHORT_TRAP_RISK",
+        "pattern_code": "ABSORB_LONG",
+        "pattern_phase": "MATURE",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_POSx4|STABLE|NONE|FOLLOW_THROUGH",
+        "sequence_length": 4,
+        "tempo_state": "STABLE",
+        "persistence_state": "PERSISTENT"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "38d14a88-39b6-4395-bf7a-12dfd80b8e01",
+      "frame": "M5",
+      "market_ts": 1774510793622,
+      "window": {
+        "start_ts": 1774510470413,
+        "end_ts": 1774510793622
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "38d14a88-39b6-4395-bf7a-12dfd80b8e01"
+      },
+      "prices": {
+        "open": 69945.35,
+        "high": 70055.66,
+        "low": 69934.67,
+        "close": 70055.66
+      },
+      "volume_quote": 3333178.7752242,
+      "flow": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "flow_state_code": "SHORT_TRAP_RISK",
+        "pattern_code": "ABSORB_LONG",
+        "pattern_phase": "CONFIRMED",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_POSx3|STABLE|NONE|FOLLOW_THROUGH",
+        "sequence_length": 3,
+        "tempo_state": "STABLE",
+        "persistence_state": "BUILDING"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "2b3f00a0-66da-464a-a54e-c6bd47f197ef",
+      "frame": "M5",
+      "market_ts": 1774510781755,
+      "window": {
+        "start_ts": 1774510470413,
+        "end_ts": 1774510781755
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "2b3f00a0-66da-464a-a54e-c6bd47f197ef"
+      },
+      "prices": {
+        "open": 69945.35,
+        "high": 70052.59,
+        "low": 69934.67,
+        "close": 70052.59
+      },
+      "volume_quote": 3333159.860196,
+      "flow": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "flow_state_code": "SHORT_TRAP_RISK",
+        "pattern_code": "ABSORB_LONG",
+        "pattern_phase": "CONFIRMED",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_POSx2|STABLE|NONE|FOLLOW_THROUGH",
+        "sequence_length": 2,
+        "tempo_state": "STABLE",
+        "persistence_state": "BUILDING"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "9190fd86-ce99-4bdf-a69b-a02cc6e65a05",
+      "frame": "M5",
+      "market_ts": 1774510770498,
+      "window": {
+        "start_ts": 1774510470413,
+        "end_ts": 1774510770498
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "9190fd86-ce99-4bdf-a69b-a02cc6e65a05"
+      },
+      "prices": {
+        "open": 69945.35,
+        "high": 70049.58,
+        "low": 69934.67,
+        "close": 70042.0
+      },
+      "volume_quote": 3332803.2925128997,
+      "flow": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "flow_state_code": "SHORT_TRAP_RISK",
+        "pattern_code": "ABSORB_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_POSx1|STABLE|NONE|FOLLOW_THROUGH",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "54d3a0e2-3d14-4305-9699-40e12dc154e5",
+      "frame": "M5",
+      "market_ts": 1774510470413,
+      "window": {
+        "start_ts": 1774510170172,
+        "end_ts": 1774510470413
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "54d3a0e2-3d14-4305-9699-40e12dc154e5"
+      },
+      "prices": {
+        "open": 69956.35,
+        "high": 69969.87,
+        "low": 69808.53,
+        "close": 69945.35
+      },
+      "volume_quote": 4497385.0511872005,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK",
+        "pattern_code": "TRAP_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx1|STABLE|NONE|MIXED",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "CONSERVATIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "362fe176-1417-4084-899b-6ecd98b4bddc",
+      "frame": "M5",
+      "market_ts": 1774510170172,
+      "window": {
+        "start_ts": 1774509869961,
+        "end_ts": 1774510170172
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "362fe176-1417-4084-899b-6ecd98b4bddc"
+      },
+      "prices": {
+        "open": 70075.58,
+        "high": 70082.45,
+        "low": 69938.71,
+        "close": 69956.34
+      },
+      "volume_quote": 2102262.5905852,
+      "flow": {
+        "matrix_cell": "NEG_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Bán chủ động chưa có đè",
+        "flow_state_code": "SELL_PRESSURE_BUILDUP__TRAP",
+        "pattern_code": "BREAKDOWN_FORMING_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_NEUTRALx1|DECELERATING|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "DECELERATING",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "D",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "031031b5-8538-4d72-8245-af60fbeb05a1",
+      "frame": "M5",
+      "market_ts": 1774509869961,
+      "window": {
+        "start_ts": 1774509569947,
+        "end_ts": 1774509869961
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "031031b5-8538-4d72-8245-af60fbeb05a1"
+      },
+      "prices": {
+        "open": 70033.54,
+        "high": 70092.18,
+        "low": 69913.7,
+        "close": 70075.58
+      },
+      "volume_quote": 9458981.8399041,
+      "flow": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "flow_state_code": "SHORT_TRAP_RISK",
+        "pattern_code": "ABSORB_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_POSx1|STABLE|NONE|FOLLOW_THROUGH",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "0a8fab0b-a3c5-4ae4-90f6-d637ec55b2fe",
+      "frame": "M5",
+      "market_ts": 1774509569947,
+      "window": {
+        "start_ts": 1774509268527,
+        "end_ts": 1774509569947
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "0a8fab0b-a3c5-4ae4-90f6-d637ec55b2fe"
+      },
+      "prices": {
+        "open": 70030.75,
+        "high": 70070.65,
+        "low": 70027.19,
+        "close": 70033.54
+      },
+      "volume_quote": 813943.6603509,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK",
+        "pattern_code": "TRAP_LONG",
+        "pattern_phase": "CONFIRMED",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx2|STABLE|NONE|MIXED",
+        "sequence_length": 2,
+        "tempo_state": "STABLE",
+        "persistence_state": "BUILDING"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "7a053630-dd91-448c-a37b-e2abbe684cdf",
+      "frame": "M5",
+      "market_ts": 1774509268527,
+      "window": {
+        "start_ts": 1774508968288,
+        "end_ts": 1774509268527
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "7a053630-dd91-448c-a37b-e2abbe684cdf"
+      },
+      "prices": {
+        "open": 70052.7,
+        "high": 70097.3,
+        "low": 70030.74,
+        "close": 70030.74
+      },
+      "volume_quote": 1550808.5543218,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK__TRAP",
+        "pattern_code": "TRAP_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx1|STABLE|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "ddaea784-a1bb-4460-ad1c-dd755cd4ade3",
+      "frame": "M5",
+      "market_ts": 1774508941689,
+      "window": {
+        "start_ts": 1774508590365,
+        "end_ts": 1774508941689
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "ddaea784-a1bb-4460-ad1c-dd755cd4ade3"
+      },
+      "prices": {
+        "open": 70099.81,
+        "high": 70167.59,
+        "low": 70015.91,
+        "close": 70057.99
+      },
+      "volume_quote": 5026131.2885148,
+      "flow": {
+        "matrix_cell": "NEG_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Bán chủ động chưa có đè",
+        "flow_state_code": "SELL_PRESSURE_BUILDUP__TRAP",
+        "pattern_code": "BREAKDOWN_FORMING_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_NEUTRALx1|STABLE|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "7a66e669-6079-4b13-a9a8-9bab67941885",
+      "frame": "M5",
+      "market_ts": 1774508929146,
+      "window": {
+        "start_ts": 1774508590365,
+        "end_ts": 1774508929146
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "7a66e669-6079-4b13-a9a8-9bab67941885"
+      },
+      "prices": {
+        "open": 70099.81,
+        "high": 70167.59,
+        "low": 70015.91,
+        "close": 70029.99
+      },
+      "volume_quote": 5024449.8967548,
+      "flow": {
+        "matrix_cell": "NEG_INIT__NEG_INV",
+        "matrix_alias_vi": "Thuận pha bán",
+        "flow_state_code": "SHORT_CONTINUATION__TRAP",
+        "pattern_code": "CONTI_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_NEGx4|STABLE|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 4,
+        "tempo_state": "STABLE",
+        "persistence_state": "PERSISTENT"
+      },
+      "decision": {
+        "posture": "AGGRESSIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "4896fff8-f2f8-45da-abf3-1929bac2c4d6",
+      "frame": "M5",
+      "market_ts": 1774508915271,
+      "window": {
+        "start_ts": 1774508590365,
+        "end_ts": 1774508915271
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "4896fff8-f2f8-45da-abf3-1929bac2c4d6"
+      },
+      "prices": {
+        "open": 70099.81,
+        "high": 70167.59,
+        "low": 70015.91,
+        "close": 70026.39
+      },
+      "volume_quote": 5022158.515482,
+      "flow": {
+        "matrix_cell": "NEG_INIT__NEG_INV",
+        "matrix_alias_vi": "Thuận pha bán",
+        "flow_state_code": "SHORT_CONTINUATION__TRAP",
+        "pattern_code": "CONTI_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_NEGx3|ACCELERATING|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 3,
+        "tempo_state": "ACCELERATING",
+        "persistence_state": "BUILDING"
+      },
+      "decision": {
+        "posture": "AGGRESSIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "df2e5acb-48d6-4db9-963a-6183bdf86bdb",
+      "frame": "M5",
+      "market_ts": 1774508902506,
+      "window": {
+        "start_ts": 1774508590365,
+        "end_ts": 1774508902506
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "df2e5acb-48d6-4db9-963a-6183bdf86bdb"
+      },
+      "prices": {
+        "open": 70099.81,
+        "high": 70167.59,
+        "low": 70015.91,
+        "close": 70037.95
+      },
+      "volume_quote": 5022059.0780082,
+      "flow": {
+        "matrix_cell": "NEG_INIT__NEG_INV",
+        "matrix_alias_vi": "Thuận pha bán",
+        "flow_state_code": "SHORT_CONTINUATION__TRAP",
+        "pattern_code": "CONTI_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_NEGx2|ACCELERATING|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 2,
+        "tempo_state": "ACCELERATING",
+        "persistence_state": "BUILDING"
+      },
+      "decision": {
+        "posture": "AGGRESSIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "10920bcc-6e12-40c7-bd02-96167f3c5b87",
+      "frame": "M5",
+      "market_ts": 1774508890405,
+      "window": {
+        "start_ts": 1774508590365,
+        "end_ts": 1774508890405
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "10920bcc-6e12-40c7-bd02-96167f3c5b87"
+      },
+      "prices": {
+        "open": 70099.81,
+        "high": 70167.59,
+        "low": 70015.91,
+        "close": 70037.0
+      },
+      "volume_quote": 5021937.9123547,
+      "flow": {
+        "matrix_cell": "NEG_INIT__NEG_INV",
+        "matrix_alias_vi": "Thuận pha bán",
+        "flow_state_code": "SHORT_CONTINUATION__TRAP",
+        "pattern_code": "UNCLASSIFIED",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_NEGx1|ACCELERATING|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "ACCELERATING",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "AGGRESSIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "3604d089-61a1-4edb-8ca3-2cfe22e1b607",
+      "frame": "M5",
+      "market_ts": 1774508590365,
+      "window": {
+        "start_ts": 1774508290129,
+        "end_ts": 1774508590365
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "3604d089-61a1-4edb-8ca3-2cfe22e1b607"
+      },
+      "prices": {
+        "open": 70115.35,
+        "high": 70126.14,
+        "low": 70024.17,
+        "close": 70099.82
+      },
+      "volume_quote": 9298177.2942879,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK__TRAP",
+        "pattern_code": "TRAP_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx2|STABLE|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 2,
+        "tempo_state": "STABLE",
+        "persistence_state": "BUILDING"
+      },
+      "decision": {
+        "posture": "CONSERVATIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "412defbe-09a8-4685-a05f-282f88be1007",
+      "frame": "M5",
+      "market_ts": 1774508290129,
+      "window": {
+        "start_ts": 1774507988868,
+        "end_ts": 1774508290129
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "412defbe-09a8-4685-a05f-282f88be1007"
+      },
+      "prices": {
+        "open": 70092.33,
+        "high": 70152.32,
+        "low": 70089.0,
+        "close": 70115.35
+      },
+      "volume_quote": 3282341.6292033,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK",
+        "pattern_code": "TRAP_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx1|STABLE|NONE|MIXED",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "CONSERVATIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "b8ebfeb4-44d6-4138-ac58-3ca6a895362d",
+      "frame": "M5",
+      "market_ts": 1774507988868,
+      "window": {
+        "start_ts": 1774507688675,
+        "end_ts": 1774507988868
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "b8ebfeb4-44d6-4138-ac58-3ca6a895362d"
+      },
+      "prices": {
+        "open": 70022.4,
+        "high": 70116.0,
+        "low": 70022.4,
+        "close": 70092.33
+      },
+      "volume_quote": 2454975.0486298,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Mua chủ động chưa có đỡ",
+        "flow_state_code": "BUY_PRESSURE_BUILDUP__FOLLOW_THROUGH",
+        "pattern_code": "BREAKOUT_FORMING_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEUTRALx1|STABLE|NONE|FOLLOW_THROUGH",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "9301df81-fb06-4079-aefe-08bddc592949",
+      "frame": "M5",
+      "market_ts": 1774507688675,
+      "window": {
+        "start_ts": 1774507388140,
+        "end_ts": 1774507688675
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "9301df81-fb06-4079-aefe-08bddc592949"
+      },
+      "prices": {
+        "open": 69992.3,
+        "high": 70032.13,
+        "low": 69986.18,
+        "close": 70022.39
+      },
+      "volume_quote": 1686248.1964992,
+      "flow": {
+        "matrix_cell": "POS_INIT__POS_INV",
+        "matrix_alias_vi": "Thuận pha mua",
+        "flow_state_code": "LONG_CONTINUATION",
+        "pattern_code": "UNCLASSIFIED",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_POSx1|STABLE|NONE|MIXED",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "AGGRESSIVE",
+        "tradability_grade": "A",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "c7f153d3-616f-4775-b90f-6bc6ba4d4c6d",
+      "frame": "M5",
+      "market_ts": 1774507388140,
+      "window": {
+        "start_ts": 1774507088102,
+        "end_ts": 1774507388140
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "c7f153d3-616f-4775-b90f-6bc6ba4d4c6d"
+      },
+      "prices": {
+        "open": 70030.43,
+        "high": 70056.28,
+        "low": 69989.0,
+        "close": 69992.31
+      },
+      "volume_quote": 9947385.8421053,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK__TRAP",
+        "pattern_code": "TRAP_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx1|STABLE|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "CONSERVATIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "09e729ce-dc34-4227-95d8-618983a9fbfb",
+      "frame": "M5",
+      "market_ts": 1774507061135,
+      "window": {
+        "start_ts": 1774506709619,
+        "end_ts": 1774507061135
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "09e729ce-dc34-4227-95d8-618983a9fbfb"
+      },
+      "prices": {
+        "open": 70064.17,
+        "high": 70098.94,
+        "low": 69988.5,
+        "close": 70032.75
+      },
+      "volume_quote": 1973520.6396522,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Mua chủ động chưa có đỡ",
+        "flow_state_code": "BUY_PRESSURE_BUILDUP__TRAP",
+        "pattern_code": "BREAKOUT_FORMING_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEUTRALx1|STABLE|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "2e5ea0e7-000d-4a3a-a83b-0d3dbf97e8ce",
+      "frame": "M5",
+      "market_ts": 1774507048525,
+      "window": {
+        "start_ts": 1774506709619,
+        "end_ts": 1774507048525
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "2e5ea0e7-000d-4a3a-a83b-0d3dbf97e8ce"
+      },
+      "prices": {
+        "open": 70064.17,
+        "high": 70098.94,
+        "low": 69988.5,
+        "close": 70018.24
+      },
+      "volume_quote": 1973498.9294997,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK__TRAP",
+        "pattern_code": "TRAP_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx4|STABLE|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 4,
+        "tempo_state": "STABLE",
+        "persistence_state": "PERSISTENT"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "3acd50ee-92aa-4ca1-ae7b-eddae94e5a7e",
+      "frame": "M5",
+      "market_ts": 1774507036321,
+      "window": {
+        "start_ts": 1774506709619,
+        "end_ts": 1774507036321
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "3acd50ee-92aa-4ca1-ae7b-eddae94e5a7e"
+      },
+      "prices": {
+        "open": 70064.17,
+        "high": 70098.94,
+        "low": 69988.5,
+        "close": 69994.02
+      },
+      "volume_quote": 1973366.5950261,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK__TRAP",
+        "pattern_code": "TRAP_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx3|STABLE|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 3,
+        "tempo_state": "STABLE",
+        "persistence_state": "BUILDING"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "D",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "84aec6ca-63e7-480f-b2de-471b4ca9db2a",
+      "frame": "M5",
+      "market_ts": 1774507022534,
+      "window": {
+        "start_ts": 1774506709619,
+        "end_ts": 1774507022534
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "84aec6ca-63e7-480f-b2de-471b4ca9db2a"
+      },
+      "prices": {
+        "open": 70064.17,
+        "high": 70098.94,
+        "low": 69988.5,
+        "close": 69988.5
+      },
+      "volume_quote": 1972168.9973439,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK__TRAP",
+        "pattern_code": "TRAP_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx2|DECELERATING|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 2,
+        "tempo_state": "DECELERATING",
+        "persistence_state": "BUILDING"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "a2f86fe4-2892-4b79-bb39-1537916ddbe0",
+      "frame": "M5",
+      "market_ts": 1774507009733,
+      "window": {
+        "start_ts": 1774506709619,
+        "end_ts": 1774507009733
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "a2f86fe4-2892-4b79-bb39-1537916ddbe0"
+      },
+      "prices": {
+        "open": 70064.17,
+        "high": 70098.94,
+        "low": 69996.07,
+        "close": 69996.31
+      },
+      "volume_quote": 1954963.0245039,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEG_INV",
+        "matrix_alias_vi": "Mua gặp hấp thụ bán",
+        "flow_state_code": "LONG_TRAP_RISK__TRAP",
+        "pattern_code": "TRAP_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEGx1|DECELERATING|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "DECELERATING",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "CONSERVATIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "94c0ade7-c04d-43e1-ab75-dc3d75928cb3",
+      "frame": "M5",
+      "market_ts": 1774506709619,
+      "window": {
+        "start_ts": 1774506409381,
+        "end_ts": 1774506709619
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "94c0ade7-c04d-43e1-ab75-dc3d75928cb3"
+      },
+      "prices": {
+        "open": 69947.79,
+        "high": 70083.03,
+        "low": 69940.89,
+        "close": 70064.17
+      },
+      "volume_quote": 2437137.4311398,
+      "flow": {
+        "matrix_cell": "POS_INIT__POS_INV",
+        "matrix_alias_vi": "Thuận pha mua",
+        "flow_state_code": "LONG_CONTINUATION__FOLLOW_THROUGH",
+        "pattern_code": "UNCLASSIFIED",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_POSx1|ACCELERATING|NONE|FOLLOW_THROUGH",
+        "sequence_length": 1,
+        "tempo_state": "ACCELERATING",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "AGGRESSIVE",
+        "tradability_grade": "A",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "fb5e6cc1-7e41-4b35-9fcb-fed36a6cb103",
+      "frame": "M5",
+      "market_ts": 1774506409381,
+      "window": {
+        "start_ts": 1774506109065,
+        "end_ts": 1774506409381
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "fb5e6cc1-7e41-4b35-9fcb-fed36a6cb103"
+      },
+      "prices": {
+        "open": 70064.84,
+        "high": 70081.88,
+        "low": 69905.61,
+        "close": 69947.78
+      },
+      "volume_quote": 3529041.0037442,
+      "flow": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "flow_state_code": "SHORT_TRAP_RISK__TRAP",
+        "pattern_code": "TRAP_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_POSx1|DECELERATING|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "DECELERATING",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "70bda44a-e895-44af-879e-181cfbda9432",
+      "frame": "M5",
+      "market_ts": 1774506109065,
+      "window": {
+        "start_ts": 1774505808811,
+        "end_ts": 1774506109065
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "70bda44a-e895-44af-879e-181cfbda9432"
+      },
+      "prices": {
+        "open": 70066.46,
+        "high": 70137.33,
+        "low": 70040.85,
+        "close": 70064.84
+      },
+      "volume_quote": 3652095.3199373,
+      "flow": {
+        "matrix_cell": "NEG_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Bán chủ động chưa có đè",
+        "flow_state_code": "SELL_PRESSURE_BUILDUP",
+        "pattern_code": "BREAKDOWN_FORMING_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_NEUTRALx1|DECELERATING|NONE|MIXED",
+        "sequence_length": 1,
+        "tempo_state": "DECELERATING",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "fc5362b0-b721-4df8-98d2-043c0928d9f5",
+      "frame": "M5",
+      "market_ts": 1774505808811,
+      "window": {
+        "start_ts": 1774505508763,
+        "end_ts": 1774505808811
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "fc5362b0-b721-4df8-98d2-043c0928d9f5"
+      },
+      "prices": {
+        "open": 70062.11,
+        "high": 70080.77,
+        "low": 69980.0,
+        "close": 70066.46
+      },
+      "volume_quote": 3166214.1092775,
+      "flow": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "flow_state_code": "SHORT_TRAP_RISK",
+        "pattern_code": "TRAP_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_POSx1|DECELERATING|NONE|MIXED",
+        "sequence_length": 1,
+        "tempo_state": "DECELERATING",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "ad628b67-a121-4194-938e-12d00f3958c9",
+      "frame": "M5",
+      "market_ts": 1774505508763,
+      "window": {
+        "start_ts": 1774505208420,
+        "end_ts": 1774505508763
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "ad628b67-a121-4194-938e-12d00f3958c9"
+      },
+      "prices": {
+        "open": 69959.22,
+        "high": 70100.0,
+        "low": 69959.22,
+        "close": 70062.11
+      },
+      "volume_quote": 2347152.5457163,
+      "flow": {
+        "matrix_cell": "POS_INIT__POS_INV",
+        "matrix_alias_vi": "Thuận pha mua",
+        "flow_state_code": "LONG_CONTINUATION__FOLLOW_THROUGH",
+        "pattern_code": "UNCLASSIFIED",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_POSx1|STABLE|NONE|FOLLOW_THROUGH",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "AGGRESSIVE",
+        "tradability_grade": "A",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "175e4768-86e2-48a3-a096-6c52aeb6aa30",
+      "frame": "M5",
+      "market_ts": 1774504412451,
+      "window": {
+        "start_ts": 1774504112127,
+        "end_ts": 1774504412451
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "175e4768-86e2-48a3-a096-6c52aeb6aa30"
+      },
+      "prices": {
+        "open": 70351.67,
+        "high": 70357.0,
+        "low": 70144.36,
+        "close": 70162.25
+      },
+      "volume_quote": 3650603.2734356998,
+      "flow": {
+        "matrix_cell": "NEG_INIT__NEG_INV",
+        "matrix_alias_vi": "Thuận pha bán",
+        "flow_state_code": "SHORT_CONTINUATION__TRAP",
+        "pattern_code": "UNCLASSIFIED",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_NEGx1|STABLE|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "AGGRESSIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "ce37c785-8695-43f8-ab22-49d7f3fc4f0a",
+      "frame": "M5",
+      "market_ts": 1774504031564,
+      "window": {
+        "start_ts": 1774503730943,
+        "end_ts": 1774504031564
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "ce37c785-8695-43f8-ab22-49d7f3fc4f0a"
+      },
+      "prices": {
+        "open": 70537.56,
+        "high": 70537.57,
+        "low": 70200.0,
+        "close": 70359.34
+      },
+      "volume_quote": 6120653.2021168005,
+      "flow": {
+        "matrix_cell": "NEG_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Bán chủ động chưa có đè",
+        "flow_state_code": "SELL_PRESSURE_BUILDUP__TRAP",
+        "pattern_code": "BREAKDOWN_FORMING_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_NEUTRALx1|STABLE|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "dcc632c2-5769-421b-8ed7-6b7c5d6dcc3a",
+      "frame": "M5",
+      "market_ts": 1774503702675,
+      "window": {
+        "start_ts": 1774503352505,
+        "end_ts": 1774503702675
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "dcc632c2-5769-421b-8ed7-6b7c5d6dcc3a"
+      },
+      "prices": {
+        "open": 70612.0,
+        "high": 70624.0,
+        "low": 70496.8,
+        "close": 70521.71
+      },
+      "volume_quote": 3428927.070243,
+      "flow": {
+        "matrix_cell": "NEG_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Bán chủ động chưa có đè",
+        "flow_state_code": "SELL_PRESSURE_BUILDUP__TRAP",
+        "pattern_code": "BREAKDOWN_FORMING_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_NEUTRALx5|STABLE|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 5,
+        "tempo_state": "STABLE",
+        "persistence_state": "PERSISTENT"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "cecf17cb-a5c8-4718-b991-ed88945dc503",
+      "frame": "M5",
+      "market_ts": 1774503689662,
+      "window": {
+        "start_ts": 1774503352505,
+        "end_ts": 1774503689662
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "cecf17cb-a5c8-4718-b991-ed88945dc503"
+      },
+      "prices": {
+        "open": 70612.0,
+        "high": 70624.0,
+        "low": 70496.8,
+        "close": 70496.8
+      },
+      "volume_quote": 3428093.5036308,
+      "flow": {
+        "matrix_cell": "NEG_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Bán chủ động chưa có đè",
+        "flow_state_code": "SELL_PRESSURE_BUILDUP__TRAP",
+        "pattern_code": "BREAKDOWN_FORMING_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_NEUTRALx4|STABLE|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 4,
+        "tempo_state": "STABLE",
+        "persistence_state": "PERSISTENT"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "89053948-cf39-4d4b-a239-eefa78b80ab7",
+      "frame": "M5",
+      "market_ts": 1774503677117,
+      "window": {
+        "start_ts": 1774503352505,
+        "end_ts": 1774503677117
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "89053948-cf39-4d4b-a239-eefa78b80ab7"
+      },
+      "prices": {
+        "open": 70612.0,
+        "high": 70624.0,
+        "low": 70496.81,
+        "close": 70496.81
+      },
+      "volume_quote": 3428086.4539508,
+      "flow": {
+        "matrix_cell": "NEG_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Bán chủ động chưa có đè",
+        "flow_state_code": "SELL_PRESSURE_BUILDUP__TRAP",
+        "pattern_code": "BREAKDOWN_FORMING_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_NEUTRALx3|STABLE|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 3,
+        "tempo_state": "STABLE",
+        "persistence_state": "BUILDING"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "d2442344-d467-4139-8738-21269c6102b2",
+      "frame": "M5",
+      "market_ts": 1774503664891,
+      "window": {
+        "start_ts": 1774503352505,
+        "end_ts": 1774503664891
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "d2442344-d467-4139-8738-21269c6102b2"
+      },
+      "prices": {
+        "open": 70612.0,
+        "high": 70624.0,
+        "low": 70508.77,
+        "close": 70508.77
+      },
+      "volume_quote": 3428043.4508967,
+      "flow": {
+        "matrix_cell": "NEG_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Bán chủ động chưa có đè",
+        "flow_state_code": "SELL_PRESSURE_BUILDUP__TRAP",
+        "pattern_code": "BREAKDOWN_FORMING_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_NEUTRALx2|DECELERATING|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 2,
+        "tempo_state": "DECELERATING",
+        "persistence_state": "BUILDING"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "e681c4f6-0f11-43f8-829d-96b71fe74fd2",
+      "frame": "M5",
+      "market_ts": 1774503652611,
+      "window": {
+        "start_ts": 1774503352505,
+        "end_ts": 1774503652611
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "e681c4f6-0f11-43f8-829d-96b71fe74fd2"
+      },
+      "prices": {
+        "open": 70612.0,
+        "high": 70624.0,
+        "low": 70513.5,
+        "close": 70513.5
+      },
+      "volume_quote": 3427987.0438807,
+      "flow": {
+        "matrix_cell": "NEG_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Bán chủ động chưa có đè",
+        "flow_state_code": "SELL_PRESSURE_BUILDUP__TRAP",
+        "pattern_code": "BREAKDOWN_FORMING_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_NEUTRALx1|DECELERATING|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "DECELERATING",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "a6e9c689-55b0-46fc-9d8a-054e72d9e387",
+      "frame": "M5",
+      "market_ts": 1774503352505,
+      "window": {
+        "start_ts": 1774503052287,
+        "end_ts": 1774503352505
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "a6e9c689-55b0-46fc-9d8a-054e72d9e387"
+      },
+      "prices": {
+        "open": 70563.2,
+        "high": 70612.0,
+        "low": 70513.16,
+        "close": 70612.0
+      },
+      "volume_quote": 1419933.5382575,
+      "flow": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "flow_state_code": "SHORT_TRAP_RISK",
+        "pattern_code": "ABSORB_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_POSx1|STABLE|NONE|FOLLOW_THROUGH",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "ad50ec15-a882-4f02-a50c-4264b9a61025",
+      "frame": "M5",
+      "market_ts": 1774503052287,
+      "window": {
+        "start_ts": 1774502751471,
+        "end_ts": 1774503052287
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "ad50ec15-a882-4f02-a50c-4264b9a61025"
+      },
+      "prices": {
+        "open": 70561.06,
+        "high": 70604.34,
+        "low": 70510.54,
+        "close": 70563.21
+      },
+      "volume_quote": 1844344.1036017,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Mua chủ động chưa có đỡ",
+        "flow_state_code": "BUY_PRESSURE_BUILDUP",
+        "pattern_code": "BREAKOUT_FORMING_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEUTRALx1|DECELERATING|NONE|MIXED",
+        "sequence_length": 1,
+        "tempo_state": "DECELERATING",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "7351e835-9f90-4b33-a001-c4160e81c957",
+      "frame": "M5",
+      "market_ts": 1774502751471,
+      "window": {
+        "start_ts": 1774502450767,
+        "end_ts": 1774502751471
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "7351e835-9f90-4b33-a001-c4160e81c957"
+      },
+      "prices": {
+        "open": 70621.94,
+        "high": 70627.99,
+        "low": 70561.06,
+        "close": 70561.06
+      },
+      "volume_quote": 941606.4133082,
+      "flow": {
+        "matrix_cell": "NEG_INIT__NEG_INV",
+        "matrix_alias_vi": "Thuận pha bán",
+        "flow_state_code": "SHORT_CONTINUATION__TRAP",
+        "pattern_code": "UNCLASSIFIED",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_NEGx1|ACCELERATING|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "ACCELERATING",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "AGGRESSIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "DEGRADED_INPUT"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "f4c639d7-1e20-4a07-b646-7502e1b4b603",
+      "frame": "M5",
+      "market_ts": 1774502450767,
+      "window": {
+        "start_ts": 1774502150729,
+        "end_ts": 1774502450767
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "f4c639d7-1e20-4a07-b646-7502e1b4b603"
+      },
+      "prices": {
+        "open": 70571.82,
+        "high": 70636.56,
+        "low": 70542.36,
+        "close": 70621.95
+      },
+      "volume_quote": 1435536.6734926,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Mua chủ động chưa có đỡ",
+        "flow_state_code": "BUY_PRESSURE_BUILDUP__FOLLOW_THROUGH",
+        "pattern_code": "BREAKOUT_FORMING_LONG",
+        "pattern_phase": "CONFIRMED",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEUTRALx2|STABLE|NONE|FOLLOW_THROUGH",
+        "sequence_length": 2,
+        "tempo_state": "STABLE",
+        "persistence_state": "BUILDING"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "d5252137-208d-4547-975b-90c88e4f867b",
+      "frame": "M5",
+      "market_ts": 1774502150729,
+      "window": {
+        "start_ts": 1774501849987,
+        "end_ts": 1774502150729
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "d5252137-208d-4547-975b-90c88e4f867b"
+      },
+      "prices": {
+        "open": 70577.11,
+        "high": 70588.85,
+        "low": 70500.01,
+        "close": 70571.82
+      },
+      "volume_quote": 8032780.1953182,
+      "flow": {
+        "matrix_cell": "POS_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Mua chủ động chưa có đỡ",
+        "flow_state_code": "BUY_PRESSURE_BUILDUP",
+        "pattern_code": "BREAKOUT_FORMING_LONG",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "POS_NEUTRALx1|STABLE|NONE|MIXED",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "d770a32f-dcf4-4ed0-b0a9-c602ef4c119d",
+      "frame": "M5",
+      "market_ts": 1774501717029,
+      "window": {
+        "start_ts": 1774501416754,
+        "end_ts": 1774501717029
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "d770a32f-dcf4-4ed0-b0a9-c602ef4c119d"
+      },
+      "prices": {
+        "open": 70754.88,
+        "high": 70782.01,
+        "low": 70510.0,
+        "close": 70569.83
+      },
+      "volume_quote": 9932869.3494936,
+      "flow": {
+        "matrix_cell": "NEG_INIT__NEG_INV",
+        "matrix_alias_vi": "Thuận pha bán",
+        "flow_state_code": "SHORT_CONTINUATION__TRAP",
+        "pattern_code": "UNCLASSIFIED",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_NEGx1|STABLE|NONE|ABSORBED_OR_TRAP",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "AGGRESSIVE",
+        "tradability_grade": "B",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "a49ab42d-2624-4c40-8f37-a81487de6166",
+      "frame": "M5",
+      "market_ts": 1774501387495,
+      "window": {
+        "start_ts": 1774501033326,
+        "end_ts": 1774501387495
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "a49ab42d-2624-4c40-8f37-a81487de6166"
+      },
+      "prices": {
+        "open": 70785.73,
+        "high": 70803.85,
+        "low": 70742.15,
+        "close": 70771.56
+      },
+      "volume_quote": 1614521.2455481,
+      "flow": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "flow_state_code": "SHORT_TRAP_RISK",
+        "pattern_code": "TRAP_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_POSx1|STABLE|NONE|MIXED",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "1355b7e2-350a-4252-aaf9-1b05b76f2dfb",
+      "frame": "M5",
+      "market_ts": 1774501374814,
+      "window": {
+        "start_ts": 1774501033326,
+        "end_ts": 1774501374814
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "1355b7e2-350a-4252-aaf9-1b05b76f2dfb"
+      },
+      "prices": {
+        "open": 70785.73,
+        "high": 70803.85,
+        "low": 70742.15,
+        "close": 70773.98
+      },
+      "volume_quote": 1614516.2915389,
+      "flow": {
+        "matrix_cell": "NEG_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Bán chủ động chưa có đè",
+        "flow_state_code": "SELL_PRESSURE_BUILDUP",
+        "pattern_code": "BREAKDOWN_FORMING_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_NEUTRALx1|STABLE|NONE|MIXED",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "dd3a80dd-2e7f-4645-a847-2f5a4cd1f79e",
+      "frame": "M5",
+      "market_ts": 1774501361895,
+      "window": {
+        "start_ts": 1774501033326,
+        "end_ts": 1774501361895
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "dd3a80dd-2e7f-4645-a847-2f5a4cd1f79e"
+      },
+      "prices": {
+        "open": 70785.73,
+        "high": 70803.85,
+        "low": 70742.15,
+        "close": 70773.99
+      },
+      "volume_quote": 1614510.6296205,
+      "flow": {
+        "matrix_cell": "NEG_INIT__POS_INV",
+        "matrix_alias_vi": "Bán gặp hấp thụ mua",
+        "flow_state_code": "SHORT_TRAP_RISK",
+        "pattern_code": "TRAP_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_POSx1|STABLE|NONE|MIXED",
+        "sequence_length": 1,
+        "tempo_state": "STABLE",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    },
+    {
+      "run_id": "b1a6ff6ffe8b4f759a8160e2bbea25d0",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "frame_state_id": "00f13206-a0b0-42da-9340-e262e8b7f733",
+      "frame": "M5",
+      "market_ts": 1774501349049,
+      "window": {
+        "start_ts": 1774501033326,
+        "end_ts": 1774501349049
+      },
+      "source": {
+        "kind": "tpfm_m5_snapshot",
+        "ref_id": "00f13206-a0b0-42da-9340-e262e8b7f733"
+      },
+      "prices": {
+        "open": 70785.73,
+        "high": 70803.85,
+        "low": 70742.15,
+        "close": 70793.41
+      },
+      "volume_quote": 1614505.6754412,
+      "flow": {
+        "matrix_cell": "NEG_INIT__NEUTRAL_INV",
+        "matrix_alias_vi": "Bán chủ động chưa có đè",
+        "flow_state_code": "SELL_PRESSURE_BUILDUP",
+        "pattern_code": "BREAKDOWN_FORMING_SHORT",
+        "pattern_phase": "FORMING",
+        "flow_bias": "NEUTRAL",
+        "sequence_signature": "NEG_NEUTRALx1|DECELERATING|NONE|MIXED",
+        "sequence_length": 1,
+        "tempo_state": "DECELERATING",
+        "persistence_state": "EARLY"
+      },
+      "decision": {
+        "posture": "WAIT",
+        "tradability_grade": "C",
+        "stack_alignment": "UNKNOWN",
+        "stack_quality": 0.0,
+        "action_label_vi": "",
+        "invalid_if_vi": ""
+      },
+      "parents": {
+        "m30_end_ts": null,
+        "h1_end_ts": null,
+        "h4_end_ts": null
+      },
+      "health_state": "HEALTHY"
+    }
+  ]
+}

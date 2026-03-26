@@ -4,11 +4,335 @@
     "mode": "live",
     "run_id": "ddc211624bf6474c907bcde362e0f624",
     "symbol": "BTCUSDT",
-    "generated_at_ts": 1774500047403,
+    "generated_at_ts": 1774501710081,
     "artifact_name": "flow_stack",
-    "count": 1
+    "count": 10
   },
   "items": [
+    {
+      "run_id": "ddc211624bf6474c907bcde362e0f624",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "stack_id": "a49ab42d-2624-4c40-8f37-a81487de6166:stack",
+      "market_ts": 1774501387495,
+      "anchor": {
+        "frame": "M5",
+        "window_end_ts": 1774501387495
+      },
+      "stack_signature": "M5:NEG_INIT__POS_INV",
+      "stack_alignment": "MICRO_LEAD",
+      "stack_conflict": "UNKNOWN",
+      "micro_vs_macro": "UNKNOWN",
+      "stack_pressure": 0.0,
+      "stack_quality": 1.0,
+      "macro_bias": "NEUTRAL",
+      "trigger_bias": "NEUTRAL",
+      "frames": {
+        "M5": {
+          "state_id": "a49ab42d-2624-4c40-8f37-a81487de6166",
+          "window_end_ts": 1774501387495,
+          "matrix_cell": "NEG_INIT__POS_INV",
+          "alias_vi": "Bán gặp hấp thụ mua",
+          "pattern_code": "TRAP_SHORT",
+          "pattern_phase": "FORMING",
+          "tradability_grade": "C",
+          "flow_bias": "NEUTRAL"
+        },
+        "M30": {},
+        "H1": {},
+        "H4": {},
+        "H12": {},
+        "D1": {}
+      }
+    },
+    {
+      "run_id": "ddc211624bf6474c907bcde362e0f624",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "stack_id": "1355b7e2-350a-4252-aaf9-1b05b76f2dfb:stack",
+      "market_ts": 1774501374814,
+      "anchor": {
+        "frame": "M5",
+        "window_end_ts": 1774501374814
+      },
+      "stack_signature": "M5:NEG_INIT__NEUTRAL_INV",
+      "stack_alignment": "MICRO_LEAD",
+      "stack_conflict": "UNKNOWN",
+      "micro_vs_macro": "UNKNOWN",
+      "stack_pressure": 0.0,
+      "stack_quality": 1.0,
+      "macro_bias": "NEUTRAL",
+      "trigger_bias": "NEUTRAL",
+      "frames": {
+        "M5": {
+          "state_id": "1355b7e2-350a-4252-aaf9-1b05b76f2dfb",
+          "window_end_ts": 1774501374814,
+          "matrix_cell": "NEG_INIT__NEUTRAL_INV",
+          "alias_vi": "Bán chủ động chưa có đè",
+          "pattern_code": "BREAKDOWN_FORMING_SHORT",
+          "pattern_phase": "FORMING",
+          "tradability_grade": "C",
+          "flow_bias": "NEUTRAL"
+        },
+        "M30": {},
+        "H1": {},
+        "H4": {},
+        "H12": {},
+        "D1": {}
+      }
+    },
+    {
+      "run_id": "ddc211624bf6474c907bcde362e0f624",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "stack_id": "dd3a80dd-2e7f-4645-a847-2f5a4cd1f79e:stack",
+      "market_ts": 1774501361895,
+      "anchor": {
+        "frame": "M5",
+        "window_end_ts": 1774501361895
+      },
+      "stack_signature": "M5:NEG_INIT__POS_INV",
+      "stack_alignment": "MICRO_LEAD",
+      "stack_conflict": "UNKNOWN",
+      "micro_vs_macro": "UNKNOWN",
+      "stack_pressure": 0.0,
+      "stack_quality": 1.0,
+      "macro_bias": "NEUTRAL",
+      "trigger_bias": "NEUTRAL",
+      "frames": {
+        "M5": {
+          "state_id": "dd3a80dd-2e7f-4645-a847-2f5a4cd1f79e",
+          "window_end_ts": 1774501361895,
+          "matrix_cell": "NEG_INIT__POS_INV",
+          "alias_vi": "Bán gặp hấp thụ mua",
+          "pattern_code": "TRAP_SHORT",
+          "pattern_phase": "FORMING",
+          "tradability_grade": "C",
+          "flow_bias": "NEUTRAL"
+        },
+        "M30": {},
+        "H1": {},
+        "H4": {},
+        "H12": {},
+        "D1": {}
+      }
+    },
+    {
+      "run_id": "ddc211624bf6474c907bcde362e0f624",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "stack_id": "00f13206-a0b0-42da-9340-e262e8b7f733:stack",
+      "market_ts": 1774501349049,
+      "anchor": {
+        "frame": "M5",
+        "window_end_ts": 1774501349049
+      },
+      "stack_signature": "M5:NEG_INIT__NEUTRAL_INV",
+      "stack_alignment": "MICRO_LEAD",
+      "stack_conflict": "UNKNOWN",
+      "micro_vs_macro": "UNKNOWN",
+      "stack_pressure": 0.0,
+      "stack_quality": 1.0,
+      "macro_bias": "NEUTRAL",
+      "trigger_bias": "NEUTRAL",
+      "frames": {
+        "M5": {
+          "state_id": "00f13206-a0b0-42da-9340-e262e8b7f733",
+          "window_end_ts": 1774501349049,
+          "matrix_cell": "NEG_INIT__NEUTRAL_INV",
+          "alias_vi": "Bán chủ động chưa có đè",
+          "pattern_code": "BREAKDOWN_FORMING_SHORT",
+          "pattern_phase": "FORMING",
+          "tradability_grade": "C",
+          "flow_bias": "NEUTRAL"
+        },
+        "M30": {},
+        "H1": {},
+        "H4": {},
+        "H12": {},
+        "D1": {}
+      }
+    },
+    {
+      "run_id": "ddc211624bf6474c907bcde362e0f624",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "stack_id": "83823fd1-7d47-4f41-a999-c8e424c5cf29:stack",
+      "market_ts": 1774501334294,
+      "anchor": {
+        "frame": "M5",
+        "window_end_ts": 1774501334294
+      },
+      "stack_signature": "M5:NEG_INIT__POS_INV",
+      "stack_alignment": "MICRO_LEAD",
+      "stack_conflict": "UNKNOWN",
+      "micro_vs_macro": "UNKNOWN",
+      "stack_pressure": 0.0,
+      "stack_quality": 1.0,
+      "macro_bias": "NEUTRAL",
+      "trigger_bias": "NEUTRAL",
+      "frames": {
+        "M5": {
+          "state_id": "83823fd1-7d47-4f41-a999-c8e424c5cf29",
+          "window_end_ts": 1774501334294,
+          "matrix_cell": "NEG_INIT__POS_INV",
+          "alias_vi": "Bán gặp hấp thụ mua",
+          "pattern_code": "TRAP_SHORT",
+          "pattern_phase": "FORMING",
+          "tradability_grade": "B",
+          "flow_bias": "NEUTRAL"
+        },
+        "M30": {},
+        "H1": {},
+        "H4": {},
+        "H12": {},
+        "D1": {}
+      }
+    },
+    {
+      "run_id": "ddc211624bf6474c907bcde362e0f624",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "stack_id": "2fe57b49-6087-4162-8ae7-011b407be4ec:stack",
+      "market_ts": 1774501033326,
+      "anchor": {
+        "frame": "M5",
+        "window_end_ts": 1774501033326
+      },
+      "stack_signature": "M5:POS_INIT__NEUTRAL_INV",
+      "stack_alignment": "MICRO_LEAD",
+      "stack_conflict": "UNKNOWN",
+      "micro_vs_macro": "UNKNOWN",
+      "stack_pressure": 0.0,
+      "stack_quality": 1.0,
+      "macro_bias": "NEUTRAL",
+      "trigger_bias": "NEUTRAL",
+      "frames": {
+        "M5": {
+          "state_id": "2fe57b49-6087-4162-8ae7-011b407be4ec",
+          "window_end_ts": 1774501033326,
+          "matrix_cell": "POS_INIT__NEUTRAL_INV",
+          "alias_vi": "Mua chủ động chưa có đỡ",
+          "pattern_code": "BREAKOUT_FORMING_LONG",
+          "pattern_phase": "FORMING",
+          "tradability_grade": "C",
+          "flow_bias": "NEUTRAL"
+        },
+        "M30": {},
+        "H1": {},
+        "H4": {},
+        "H12": {},
+        "D1": {}
+      }
+    },
+    {
+      "run_id": "ddc211624bf6474c907bcde362e0f624",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "stack_id": "2a607b3b-cfc5-4806-91da-cb50b955f911:stack",
+      "market_ts": 1774500732793,
+      "anchor": {
+        "frame": "M5",
+        "window_end_ts": 1774500732793
+      },
+      "stack_signature": "M5:NEUTRAL_INIT__NEG_INV",
+      "stack_alignment": "MICRO_LEAD",
+      "stack_conflict": "UNKNOWN",
+      "micro_vs_macro": "UNKNOWN",
+      "stack_pressure": 0.0,
+      "stack_quality": 1.0,
+      "macro_bias": "NEUTRAL",
+      "trigger_bias": "NEUTRAL",
+      "frames": {
+        "M5": {
+          "state_id": "2a607b3b-cfc5-4806-91da-cb50b955f911",
+          "window_end_ts": 1774500732793,
+          "matrix_cell": "NEUTRAL_INIT__NEG_INV",
+          "alias_vi": "Đè thụ động",
+          "pattern_code": "PASSIVE_DISTRIBUTION",
+          "pattern_phase": "FORMING",
+          "tradability_grade": "C",
+          "flow_bias": "NEUTRAL"
+        },
+        "M30": {},
+        "H1": {},
+        "H4": {},
+        "H12": {},
+        "D1": {}
+      }
+    },
+    {
+      "run_id": "ddc211624bf6474c907bcde362e0f624",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "stack_id": "263303b9-f0dd-47ad-aed6-58e7b44365c9:stack",
+      "market_ts": 1774500432522,
+      "anchor": {
+        "frame": "M5",
+        "window_end_ts": 1774500432522
+      },
+      "stack_signature": "M5:NEG_INIT__NEG_INV",
+      "stack_alignment": "MICRO_LEAD",
+      "stack_conflict": "UNKNOWN",
+      "micro_vs_macro": "UNKNOWN",
+      "stack_pressure": 0.0,
+      "stack_quality": 1.0,
+      "macro_bias": "NEUTRAL",
+      "trigger_bias": "NEUTRAL",
+      "frames": {
+        "M5": {
+          "state_id": "263303b9-f0dd-47ad-aed6-58e7b44365c9",
+          "window_end_ts": 1774500432522,
+          "matrix_cell": "NEG_INIT__NEG_INV",
+          "alias_vi": "Thuận pha bán",
+          "pattern_code": "UNCLASSIFIED",
+          "pattern_phase": "FORMING",
+          "tradability_grade": "B",
+          "flow_bias": "NEUTRAL"
+        },
+        "M30": {},
+        "H1": {},
+        "H4": {},
+        "H12": {},
+        "D1": {}
+      }
+    },
+    {
+      "run_id": "ddc211624bf6474c907bcde362e0f624",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "stack_id": "b18619e0-25af-4981-8638-4d927d1add79:stack",
+      "market_ts": 1774500131874,
+      "anchor": {
+        "frame": "M5",
+        "window_end_ts": 1774500131874
+      },
+      "stack_signature": "M5:POS_INIT__NEG_INV",
+      "stack_alignment": "MICRO_LEAD",
+      "stack_conflict": "UNKNOWN",
+      "micro_vs_macro": "UNKNOWN",
+      "stack_pressure": 0.0,
+      "stack_quality": 1.0,
+      "macro_bias": "NEUTRAL",
+      "trigger_bias": "NEUTRAL",
+      "frames": {
+        "M5": {
+          "state_id": "b18619e0-25af-4981-8638-4d927d1add79",
+          "window_end_ts": 1774500131874,
+          "matrix_cell": "POS_INIT__NEG_INV",
+          "alias_vi": "Mua gặp hấp thụ bán",
+          "pattern_code": "TRAP_LONG",
+          "pattern_phase": "FORMING",
+          "tradability_grade": "B",
+          "flow_bias": "NEUTRAL"
+        },
+        "M30": {},
+        "H1": {},
+        "H4": {},
+        "H12": {},
+        "D1": {}
+      }
+    },
     {
       "run_id": "ddc211624bf6474c907bcde362e0f624",
       "mode": "live",

@@ -734,50 +734,63 @@ class ThesisSQLiteStore:
             db.commit()
 
     def load_flow_frames(
-        self, run_id: str, mode: str, symbol: str, limit: int = 100, frame: str | None = None
+        self, run_id: str | None, mode: str, symbol: str, limit: int = 100, frame: str | None = None
     ) -> list[dict]:
         """Load flow_frame_history rows sorted by market_ts DESC."""
         with sqlite3.connect(self.db_path) as db:
             db.row_factory = sqlite3.Row
+            query_parts = ["SELECT * FROM flow_frame_history WHERE mode=? AND symbol=? AND is_final=1"]
+            params = [mode, symbol]
+            
+            if run_id:
+                query_parts.append("AND run_id=?")
+                params.append(run_id)
             if frame:
-                rows = db.execute(
-                    "SELECT * FROM flow_frame_history WHERE run_id=? AND mode=? AND symbol=? AND frame=? AND is_final=1 ORDER BY market_ts DESC LIMIT ?",
-                    (run_id, mode, symbol, frame, limit),
-                ).fetchall()
-            else:
-                rows = db.execute(
-                    "SELECT * FROM flow_frame_history WHERE run_id=? AND mode=? AND symbol=? AND is_final=1 ORDER BY market_ts DESC LIMIT ?",
-                    (run_id, mode, symbol, limit),
-                ).fetchall()
+                query_parts.append("AND frame=?")
+                params.append(frame)
+                
+            query = " ".join(query_parts) + " ORDER BY market_ts DESC LIMIT ?"
+            params.append(limit)
+            
+            rows = db.execute(query, tuple(params)).fetchall()
             return [dict(r) for r in rows]
 
     def load_flow_timeline(
-        self, run_id: str, mode: str, symbol: str, limit: int = 50, min_priority: int = 0
+        self, run_id: str | None, mode: str, symbol: str, limit: int = 50, min_priority: int = 0
     ) -> list[dict]:
         """Load flow_timeline_event rows sorted by market_ts ASC, record_seq ASC."""
         with sqlite3.connect(self.db_path) as db:
             db.row_factory = sqlite3.Row
-            rows = db.execute(
-                """
-                SELECT * FROM flow_timeline_event
-                WHERE run_id=? AND mode=? AND symbol=? AND priority>=?
-                ORDER BY market_ts ASC, record_seq ASC
-                LIMIT ?
-                """,
-                (run_id, mode, symbol, min_priority, limit),
-            ).fetchall()
+            query_parts = ["SELECT * FROM flow_timeline_event WHERE mode=? AND symbol=? AND priority>=?"]
+            params = [mode, symbol, min_priority]
+            
+            if run_id:
+                query_parts.append("AND run_id=?")
+                params.append(run_id)
+                
+            query = " ".join(query_parts) + " ORDER BY market_ts ASC, record_seq ASC LIMIT ?"
+            params.append(limit)
+            
+            rows = db.execute(query, tuple(params)).fetchall()
             return [dict(r) for r in rows]
 
     def load_flow_stack(
-        self, run_id: str, mode: str, symbol: str, limit: int = 20
+        self, run_id: str | None, mode: str, symbol: str, limit: int = 20
     ) -> list[dict]:
         """Load flow_stack_history rows sorted by anchor_window_end_ts DESC."""
         with sqlite3.connect(self.db_path) as db:
             db.row_factory = sqlite3.Row
-            rows = db.execute(
-                "SELECT * FROM flow_stack_history WHERE run_id=? AND mode=? AND symbol=? AND is_final=1 ORDER BY anchor_window_end_ts DESC LIMIT ?",
-                (run_id, mode, symbol, limit),
-            ).fetchall()
+            query_parts = ["SELECT * FROM flow_stack_history WHERE mode=? AND symbol=? AND is_final=1"]
+            params = [mode, symbol]
+            
+            if run_id:
+                query_parts.append("AND run_id=?")
+                params.append(run_id)
+                
+            query = " ".join(query_parts) + " ORDER BY anchor_window_end_ts DESC LIMIT ?"
+            params.append(limit)
+            
+            rows = db.execute(query, tuple(params)).fetchall()
             return [dict(r) for r in rows]
 
     # ──────────────────────────────────────────────────────────────────────────

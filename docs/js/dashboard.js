@@ -122,12 +122,12 @@ class RadaDashboard {
 
     this.data = {
       status: status || {}, 
-      m5: (Array.isArray(m5) ? m5 : []).filter(filterRun),
+      m5: Array.isArray(m5) ? m5 : [],
       m30: Array.isArray(m30) ? m30 : [], 
       h4: Array.isArray(h4) ? h4 : [],
-      flowFrames: rawFrames.filter(filterRun),
-      flowTimeline: rawTimeline.filter(filterRun),
-      flowStack: rawStack.filter(filterRun),
+      flowFrames: rawFrames,
+      flowTimeline: rawTimeline,
+      flowStack: rawStack,
       summary: summary || {}, 
       daily: daily || {}, 
       health: health || {},
@@ -571,22 +571,23 @@ class RadaDashboard {
     const container = document.getElementById("mtf-strip");
     if (!container) return;
 
-    // Phase 24: Use flowStack for tiered MTF data
-    const latestStack = this.data.flowStack?.[0] || {};
-    const frames = latestStack.frames || this.primarySnap().frames || {};
+    // Phase 24: Use tiered data sources for MTF
+    const summaryFrames = this.data.summary?.latest_frames || {};
+    const flowFrames = this.data.flowFrames || [];
     
     // Ordered timeframes for the strip
     const tfs = ["M5", "M30", "H1", "H4", "H12", "D1"];
     
     container.innerHTML = tfs.map(tf => {
-      // Find frame data. Priority: exact match in latest stack -> fallback for M5
-      const fd = frames[tf] || (tf === "M5" ? this.primarySnap() : null);
+      // Priority 1: Summary latest_frames (Direct from backend cache)
+      // Priority 2: Searching flowFrames array (Direct from DB history)
+      // Priority 3: M5 fallback
+      const fd = summaryFrames[tf] || flowFrames.find(f => f.frame === tf) || (tf === "M5" ? this.primarySnap() : null);
       
       const bias = (fd?.flow_bias || "NEUTRAL").toLowerCase();
       const grade = fd?.tradability_grade || "--";
-      const alias = fd?.alias_vi || (tf === "M5" ? fd?.matrix_alias_vi : "") || "Chưa có dữ liệu";
+      const alias = fd?.matrix_alias_vi || fd?.alias_vi || (tf === "M5" ? fd?.matrix_alias_vi : "") || "Chưa có dữ liệu";
       
-      // Sync with CSS classes: .mtf-card, .mtf-tf, .mtf-alias, .mtf-grade
       return `
         <div class="mtf-card mtf-${bias}" id="mtf-${tf.toLowerCase()}">
           <div class="mtf-tf">${tf}</div>

@@ -1,13 +1,13 @@
 {
-  "last_run": "2026-03-26T04:40:47.440704+00:00",
-  "last_scan_time": "2026-03-26T04:40:47.440704+00:00",
+  "last_run": "2026-03-26T05:08:30.149208+00:00",
+  "last_scan_time": "2026-03-26T05:08:30.149208+00:00",
   "data_mode": "live",
   "live_enabled": true,
   "is_replay": false,
   "artifact_run_id": "ddc211624bf6474c907bcde362e0f624",
-  "artifact_window_end_ts": 1774500047440,
-  "artifact_generated_at": "2026-03-26T04:40:47.440704+00:00",
-  "latest_flow_grade": "C",
+  "artifact_window_end_ts": 1774501710149,
+  "artifact_generated_at": "2026-03-26T05:08:30.149208+00:00",
+  "latest_flow_grade": "D",
   "latest_transition": {},
   "top_signal": {}
 }

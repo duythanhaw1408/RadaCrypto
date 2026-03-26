@@ -1,0 +1,46 @@
+{
+  "artifact_contract": {
+    "schema_version": "v1",
+    "mode": "live",
+    "run_id": "5d8ce582a2994781a49cabdddfcafbbc",
+    "symbol": "BTCUSDT",
+    "generated_at_ts": 1774502136693,
+    "artifact_name": "flow_timeline",
+    "count": 1
+  },
+  "items": [
+    {
+      "run_id": "5d8ce582a2994781a49cabdddfcafbbc",
+      "mode": "live",
+      "symbol": "BTCUSDT",
+      "event_id": "d770a32f-dcf4-4ed0-b0a9-c602ef4c119d:state",
+      "market_ts": 1774501717029,
+      "frame": "M5",
+      "window": {
+        "start_ts": 1774501416754,
+        "end_ts": 1774501717029
+      },
+      "event_type": "STATE",
+      "signal_kind": "PATTERN",
+      "priority": 50,
+      "context": {
+        "matrix_cell": "NEG_INIT__NEG_INV",
+        "matrix_alias_vi": "Thuận pha bán",
+        "pattern_code": "UNCLASSIFIED",
+        "pattern_phase": "FORMING",
+        "decision_posture": "AGGRESSIVE",
+        "tradability_grade": "B"
+      },
+      "message": {
+        "action_label_vi": "AGGRESSIVE: Ưu tiên continuation short khi hồi yếu và ask vẫn ép xuống.",
+        "why_now_vi": "Delta spot -855.73K | Nhịp 12.57/s | Inventory L1 -45%",
+        "invalid_if_vi": "Initiative mất âm hoặc inventory không còn đè.",
+        "summary_vi": "Ưu tiên continuation short khi hồi yếu và ask vẫn ép xuống."
+      },
+      "refs": {
+        "snapshot_id": "d770a32f-dcf4-4ed0-b0a9-c602ef4c119d",
+        "thesis_id": ""
+      }
+    }
+  ]
+}

@@ -139,7 +139,8 @@ class LiveThesisLoop:
         
         # Load existing history if available
         try:
-            m5_path = Path("data/review/tpfm_m5.json")
+            sfx = "_live" if self.mode == "live" else "_scan"
+            m5_path = Path(f"data/review/tpfm_m5{sfx}.json")
             if m5_path.exists():
                 old_snapshots = json.loads(m5_path.read_text(encoding="utf-8"))
                 if isinstance(old_snapshots, list):
@@ -168,6 +169,33 @@ class LiveThesisLoop:
                 print(f"📊 [INIT] Loaded {len(self._dashboard_m5_history)} snapshots from history.")
         except Exception as e:
             print(f"⚠️ [INIT] Failed to load M5 history: {e}")
+        
+        # Phase 20-E: Bootstrap HTF Cache from Database
+        try:
+            for tf in ["M30", "H1", "H4", "H12", "D1"]:
+                rows = self.store.load_flow_frames(None, mode, self.symbol, 1, frame=tf)
+                if rows:
+                    row = rows[0]
+                    self._latest_frame_meta[tf] = row
+                    self._latest_frame_ids[tf] = row["frame_state_id"]
+                    if tf == "M30":
+                        self._latest_m30_id = row["frame_state_id"]
+                        self._latest_m30_end_ts = row["window_end_ts"]
+                    elif tf == "H1":
+                        self._latest_h1_id = row["frame_state_id"]
+                        self._latest_h1_end_ts = row["window_end_ts"]
+                    elif tf == "H4":
+                        self._latest_h4_id = row["frame_state_id"]
+                        self._latest_h4_end_ts = row["window_end_ts"]
+                    elif tf == "H12":
+                        self._latest_h12_id = row["frame_state_id"]
+                        self._latest_h12_end_ts = row["window_end_ts"]
+                    elif tf == "D1":
+                        self._latest_d1_id = row["frame_state_id"]
+                        self._latest_d1_end_ts = row["window_end_ts"]
+            print(f"🏛️ [INIT] Bootstrapped {len(self._latest_frame_meta)} higher timeframes from DB.")
+        except Exception as e:
+            print(f"⚠️ [INIT] HTF Bootstrapping failed: {e}")
         
         # TPFM State
         self.tpfm = TPFMStateEngine(symbol=self.symbol)
@@ -314,7 +342,7 @@ class LiveThesisLoop:
             if isinstance(telemetry_payload, list):
                 self._write_json_atomic(
                     (run_dir / telemetry_name).absolute(),
-                    self._filter_records_for_run(telemetry_payload, published_run_id),
+                    telemetry_payload,
                 )
             else:
                 self._write_json_atomic((run_dir / telemetry_name).absolute(), [])
@@ -550,11 +578,11 @@ class LiveThesisLoop:
             # 4. Sync Telemetry Files
             mode_suffix = f"_{self.mode}"
             telemetry_map = {
-                f"data/review/tpfm_m5.json": f"tpfm_m5{mode_suffix}.json",
+                f"data/review/tpfm_m5{mode_suffix}.json": f"tpfm_m5{mode_suffix}.json",
                 "data/review/daily_summary.json": "daily_summary.json",
                 "data/review/health_status.json": "health_status.json",
-                f"data/review/tpfm_m30.json": f"tpfm_m30{mode_suffix}.json",
-                f"data/review/tpfm_4h.json": f"tpfm_4h{mode_suffix}.json",
+                f"data/review/tpfm_m30{mode_suffix}.json": f"tpfm_m30{mode_suffix}.json",
+                f"data/review/tpfm_4h{mode_suffix}.json": f"tpfm_4h{mode_suffix}.json",
             }
 
             for src_rel, target_name in telemetry_map.items():
@@ -663,8 +691,9 @@ class LiveThesisLoop:
                     "source": "live_engine"
                 },
                 "latest_tpfm": latest_tpfm,
+                "latest_frames": self._latest_frame_meta,
                 "top_signals": [consolidated] if consolidated else [],
-                "m5_signal_history": self._m5_signal_history[-20:],  # Last 20 M5 consolidated entries
+                "m5_signal_history": self._m5_signal_history[-100:],  # Last 100 M5 consolidated entries
             }
             
             with target_path.open("w", encoding="utf-8") as f:
@@ -1039,11 +1068,11 @@ class LiveThesisLoop:
                     "frames": frames,
                 }
 
-            def _load_rows(target_run_id: str) -> tuple[list[dict], list[dict], list[dict]]:
+            def _load_rows(target_run_id: str | None) -> tuple[list[dict], list[dict], list[dict]]:
                 return (
-                    self.store.load_flow_frames(target_run_id, self.mode, self.symbol, 100),
-                    self.store.load_flow_timeline(target_run_id, self.mode, self.symbol, 50),
-                    self.store.load_flow_stack(target_run_id, self.mode, self.symbol, 20),
+                    self.store.load_flow_frames(None, self.mode, self.symbol, 100),
+                    self.store.load_flow_timeline(None, self.mode, self.symbol, 50),
+                    self.store.load_flow_stack(None, self.mode, self.symbol, 20),
                 )
 
             # Load from store and export using engine's current mode
@@ -1229,6 +1258,23 @@ class LiveThesisLoop:
             "tradability_score": summary["tradability_score"],
             "market_quality_score": summary["market_quality_score"],
             "stack_quality": summary.get("persistence_score", 0.0),
+            "snapshot_id": "",
+            "pattern_id": "",
+            "stack_id": "",
+            "sequence_id": "",
+            "sequence_signature": "UNKNOWN",
+            "tempo_state": "STABLE",
+            "persistence_state": "STABLE",
+            "sequence_length": 1,
+            "context_quality_score": 0.0,
+            "stack_signature": "",
+            "stack_alignment": "NEUTRAL",
+            "parent_m30_end_ts": None,
+            "parent_h1_end_ts": None,
+            "parent_h4_end_ts": None,
+            "parent_h12_end_ts": None,
+            "parent_d1_end_ts": None,
+            "health_state": "HEALTHY",
             "metadata_json": json.dumps({
                 "persistence": summary.get("persistence_score"),
                 "m5_count": summary.get("m5_count")
@@ -1245,7 +1291,7 @@ class LiveThesisLoop:
             # M30 Aggregation: Every 30m or 6 M5
             if ts % 1800000 < 300000:
                 if len(m5_list) >= 6:
-                    m30_sum = self.tpfm.calculate_m30_summary(m5_list[-6:])
+                    m30_sum = self.tpfm.calculate_higher_frame_summary("M30", m5_list[-6:])
                     row = self._map_sum_to_db_row(m30_sum)
                     self.store.save_flow_frame_state(row)
                     self._latest_frame_ids["M30"] = row["frame_state_id"]
@@ -1825,9 +1871,9 @@ class LiveThesisLoop:
             if winner:
                 consolidated = self._build_m5_consolidated_entry(winner)
                 self._m5_signal_history.append(consolidated)
-                # Keep only last 50
-                if len(self._m5_signal_history) > 50:
-                    self._m5_signal_history = self._m5_signal_history[-50:]
+                # Keep only last 100
+                if len(self._m5_signal_history) > 100:
+                    self._m5_signal_history = self._m5_signal_history[-100:]
                 # Update prev for next window's delta
                 self._prev_m5_winning_signal = winner
             

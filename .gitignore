@@ -4,7 +4,9 @@ __pycache__/
 .pytest_cache/
 /data/
 /dashboard/data/
-!docs/data/
+docs/data/*.json
+docs/data/manifest.json
+*.log
 .env
 .DS_Store
 *.parquet
